@@ -343,7 +343,7 @@ class HotelBookingDetail extends ObjectModel
                             SELECT hri.`id` AS id_room
                             FROM `'._DB_PREFIX_.'htl_room_information` AS hri
                             INNER JOIN `'._DB_PREFIX_.'htl_room_disable_dates` AS hrdd ON (hrdd.`id_room_type` = hri.`id_product` AND hrdd.`id_room` = hri.`id`)
-                            WHERE hri.`id_hotel`='.(int)$hotel_id.' AND hri.`id_product` ='.(int)$room_type['id_product'].' AND hri.`id_status` = 3 AND (hrdd.`date_from` <= \''.pSql($date_to).'\' AND hrdd.`date_to` >= \''.pSql($date_from).'\')';
+                            WHERE hri.`id_hotel`='.(int)$hotel_id.' AND hri.`id_product` ='.(int)$room_type['id_product'].' AND hri.`id_status` = 3 AND (hrdd.`date_from` < \''.pSql($date_to).'\' AND hrdd.`date_to` > \''.pSql($date_from).'\')';
 
                         $sql = 'SELECT ri.`id` AS `id_room`, ri.`id_product`, ri.`id_hotel`, ri.`room_num`, ri.`comment` AS `room_comment`
                                 FROM `'._DB_PREFIX_.'htl_room_information` AS ri
