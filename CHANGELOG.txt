@@ -13,6 +13,7 @@
 [+] CO : `customer_template`, `admin_template` columns are added in the 'order_return_state_lang' table.
 [+] CO : `id_htl_booking` column is added in the 'order_slip_detail' table.
 [+] CO : Refund emails will be sent to the customer as per return state setting
+
 [+] CO : All images link are now generated dynamically
 
 [+] FO : Room type refund policies in the policies tab is shown in the room type details page.
