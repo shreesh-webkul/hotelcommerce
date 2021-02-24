@@ -3391,31 +3391,34 @@ exit;
         }
 
         $post_data = http_build_query(array(
-            'version' => isset($params['version']) ? $params['version'] : _PS_VERSION_,
+            // 'version' => isset($params['version']) ? $params['version'] : _PS_VERSION_,
+            'version' => isset($params['version']) ? $params['version'] : _QLOAPPS_VERSION_,
             'iso_lang' => Tools::strtolower(isset($params['iso_lang']) ? $params['iso_lang'] : Context::getContext()->language->iso_code),
             'iso_code' => Tools::strtolower(isset($params['iso_country']) ? $params['iso_country'] : Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'))),
             'shop_url' => isset($params['shop_url']) ? $params['shop_url'] : Tools::getShopDomain(),
             'mail' => isset($params['email']) ? $params['email'] : Configuration::get('PS_SHOP_EMAIL')
         ));
 
-        $protocols = array('https');
-        $end_point = 'api.addons.prestashop.com';
+        // @todo change protocol to https
+        $protocols = array('http');
+        // $end_point = 'api.addons.prestashop.com';
+        $end_point = 'localhost/qlo_resource/';
 
         switch ($request) {
             case 'native':
-                $protocols[] = 'http';
+                // $protocols[] = 'http';
                 $post_data .= '&method=listing&action=native';
                 break;
             case 'native_all':
-                $protocols[] = 'http';
+                // $protocols[] = 'http';
                 $post_data .= '&method=listing&action=native&iso_code=all';
                 break;
             case 'must-have':
-                $protocols[] = 'http';
+                // $protocols[] = 'http';
                 $post_data .= '&method=listing&action=must-have';
                 break;
             case 'must-have-themes':
-                $protocols[] = 'http';
+                // $protocols[] = 'http';
                 $post_data .= '&method=listing&action=must-have-themes';
                 break;
             case 'customer':
@@ -3433,11 +3436,12 @@ exit;
                 $post_data .= '&method=check&module_name='.urlencode($params['module_name']).'&module_key='.urlencode($params['module_key']);
                 break;
             case 'module':
-                $post_data .= '&method=module&id_module='.urlencode($params['id_module']);
+                // $post_data .= '&method=module&id_module='.urlencode($params['id_module']);
+                $post_data .= '&method=module&module_name='.urlencode($params['module_name']);
                 if (isset($params['username_addons']) && isset($params['password_addons'])) {
                     $post_data .= '&username='.urlencode($params['username_addons']).'&password='.urlencode($params['password_addons']);
                 } else {
-                    $protocols[] = 'http';
+                    // $protocols[] = 'http';
                 }
                 break;
             case 'hosted_module':
@@ -3448,7 +3452,7 @@ exit;
                 $protocols[] = 'https';
                 break;
             case 'install-modules':
-                $protocols[] = 'http';
+                // $protocols[] = 'http';
                 $post_data .= '&method=listing&action=install-modules';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
@@ -3461,7 +3465,7 @@ exit;
                 'method'  => 'POST',
                 'content' => $post_data,
                 'header'  => 'Content-type: application/x-www-form-urlencoded',
-                'timeout' => 5,
+                'timeout' => 10,
             )
         ));
 

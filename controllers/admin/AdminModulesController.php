@@ -60,7 +60,8 @@ class AdminModulesControllerCore extends AdminController
     protected $iso_default_country;
     protected $filter_configuration = array();
 
-    protected $xml_modules_list = _PS_API_MODULES_LIST_16_;
+    // protected $xml_modules_list = _PS_API_MODULES_LIST_16_;
+    protected $xml_modules_list = _QLO_API_MODULES_LIST_150_;
 
     /**
      * Admin Modules Controller Constructor
@@ -95,7 +96,7 @@ class AdminModulesControllerCore extends AdminController
         $this->list_modules_categories['payment_security']['name'] = $this->l('Site certification & Fraud prevention');
         $this->list_modules_categories['pricing_promotion']['name'] = $this->l('Pricing and Promotion');
         $this->list_modules_categories['quick_bulk_update']['name'] = $this->l('Quick / Bulk update');
-/* 		$this->list_modules_categories['search_filter']['name'] = $this->l('Search and Filter'); */
+ 		/* $this->list_modules_categories['search_filter']['name'] = $this->l('Search and Filter'); */
         $this->list_modules_categories['seo']['name'] = $this->l('SEO');
         $this->list_modules_categories['shipping_logistics']['name'] = $this->l('Shipping and Logistics');
         $this->list_modules_categories['slideshows']['name'] = $this->l('Slideshows');
@@ -203,17 +204,17 @@ class AdminModulesControllerCore extends AdminController
         }
 
         // If logged to Addons Webservices, refresh customer modules list every 5 minutes
-        if ($this->logged_on_addons && $this->status != 'error') {
-            if (!$this->isFresh(Module::CACHE_FILE_CUSTOMER_MODULES_LIST, 300) || $force_reload_cache) {
-                if (file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_CUSTOMER_MODULES_LIST, Tools::addonsRequest('customer'))) {
-                    $this->status = 'refresh';
-                } else {
-                    $this->status = 'error';
-                }
-            } else {
-                $this->status = 'cache';
-            }
-        }
+        // if ($this->logged_on_addons && $this->status != 'error') {
+        //     if (!$this->isFresh(Module::CACHE_FILE_CUSTOMER_MODULES_LIST, 300) || $force_reload_cache) {
+        //         if (file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_CUSTOMER_MODULES_LIST, Tools::addonsRequest('customer'))) {
+        //             $this->status = 'refresh';
+        //         } else {
+        //             $this->status = 'error';
+        //         }
+        //     } else {
+        //         $this->status = 'cache';
+        //     }
+        // }
     }
 
     public function displayAjaxRefreshModuleList()
@@ -768,8 +769,8 @@ class AdminModulesControllerCore extends AdminController
                     if (!file_exists(_PS_MODULE_DIR_.$name.'/'.$name.'.php') || $key == 'update' || $key == 'updateAll') {
                         $files_list = array(
                             array('type' => 'addonsNative', 'file' => Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 'loggedOnAddons' => 0),
-                            array('type' => 'addonsBought', 'file' => Module::CACHE_FILE_CUSTOMER_MODULES_LIST, 'loggedOnAddons' => 1),
-                            array('type' => 'addonsMustHave', 'file' => Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 1),
+                            // array('type' => 'addonsBought', 'file' => Module::CACHE_FILE_CUSTOMER_MODULES_LIST, 'loggedOnAddons' => 1),
+                            // array('type' => 'addonsMustHave', 'file' => Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 1),
                         );
 
                         foreach ($files_list as $f) {
@@ -779,7 +780,8 @@ class AdminModulesControllerCore extends AdminController
                                 if ($xml = @simplexml_load_string($content, null, LIBXML_NOCDATA)) {
                                     foreach ($xml->module as $modaddons) {
                                         if (Tools::strtolower($name) == Tools::strtolower($modaddons->name)) {
-                                            $module_to_update[$name]['id'] = $modaddons->id;
+                                            // $module_to_update[$name]['id'] = $modaddons->id;
+                                            $module_to_update[$name]['name'] = $modaddons->name;
                                             $module_to_update[$name]['displayName'] = $modaddons->displayName;
                                             $module_to_update[$name]['need_loggedOnAddons'] = $f['loggedOnAddons'];
                                         }
@@ -791,11 +793,14 @@ class AdminModulesControllerCore extends AdminController
                         foreach ($module_to_update as $name => $attr) {
                             if ((is_null($attr) && $this->logged_on_addons == 0) || ($attr['need_loggedOnAddons'] == 1 && $this->logged_on_addons == 0)) {
                                 $this->errors[] = sprintf(Tools::displayError('You need to be logged in to your PrestaShop Addons account in order to update the %s module. %s'), '<strong>'.$name.'</strong>', '<a href="#" class="addons_connect" data-toggle="modal" data-target="#modal_addons_connect" title="Addons">'.$this->l('Click here to log in.').'</a>');
-                            } elseif (!is_null($attr['id'])) {
+                            // } elseif (!is_null($attr['id'])) {
+                            } elseif (!is_null($attr['name'])) {
                                 $download_ok = false;
-                                if ($attr['need_loggedOnAddons'] == 0 && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('id_module' => pSQL($attr['id']))))) {
+                                // if ($attr['need_loggedOnAddons'] == 0 && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('id_module' => pSQL($attr['id']))))) {
+                                if ($attr['need_loggedOnAddons'] == 0 && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('module_name' => pSQL($attr['name']))))) {
                                     $download_ok = true;
-                                } elseif ($attr['need_loggedOnAddons'] == 1 && $this->logged_on_addons && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('id_module' => pSQL($attr['id']), 'username_addons' => pSQL(trim($this->context->cookie->username_addons)), 'password_addons' => pSQL(trim($this->context->cookie->password_addons)))))) {
+                                // } elseif ($attr['need_loggedOnAddons'] == 1 && $this->logged_on_addons && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('id_module' => pSQL($attr['id']), 'username_addons' => pSQL(trim($this->context->cookie->username_addons)), 'password_addons' => pSQL(trim($this->context->cookie->password_addons)))))) {
+                                } elseif ($attr['need_loggedOnAddons'] == 1 && $this->logged_on_addons && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('module_name' => pSQL($attr['name']), 'username_addons' => pSQL(trim($this->context->cookie->username_addons)), 'password_addons' => pSQL(trim($this->context->cookie->password_addons)))))) {
                                     $download_ok = true;
                                 }
 
