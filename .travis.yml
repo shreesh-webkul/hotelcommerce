@@ -20,6 +20,11 @@ before_script:
   - sudo cp -Rf . /var/www/qloapps.unit.test
   - sudo chmod 777 -R /var/www/
   - sudo service apache2 restart
+  - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 script:
   - cd /var/www/qloapps.unit.test/tests && bash getcomposer.sh && php composer.phar install && php vendor/bin/phpunit -c .
@@ -34,7 +39,5 @@ after_failure:
   - sudo cat /var/log/php-fpm.log
   - sudo ls -l /var/log/apache2
   - sudo cat /var/log/apache2/other_vhosts_access.log
-  
-- name: Release Changelog Builder
-  uses: mikepenz/release-changelog-builder-action@v1.7.1
+ 
 
