@@ -35,5 +35,6 @@ after_failure:
   - sudo ls -l /var/log/apache2
   - sudo cat /var/log/apache2/other_vhosts_access.log
   
-- name: Auto-generate CHANGELOG
-  uses: BobAnkh/auto-generate-changelog@v1.0.2
+- name: Release Changelog Builder
+  uses: mikepenz/release-changelog-builder-action@v1.7.1
+
