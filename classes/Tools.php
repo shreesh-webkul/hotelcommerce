@@ -877,6 +877,11 @@ class ToolsCore
         }
     }
 
+    public static function removeHtmlComments($html)
+    {
+        return preg_replace('/<!--(.|\s)*?-->/', '', $html);
+    }
+
     /**
     * Delete directory and subdirectories
     *
