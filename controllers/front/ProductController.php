@@ -277,10 +277,6 @@ class ProductControllerCore extends FrontController
                 $hotel_policies = $hotel_info_by_id['policies'];
                 $hotel_name = $hotel_info_by_id['hotel_name'];
 
-                $country = Country::getNameById($this->context->language->id, $hotel_info_by_id['country_id']);
-                $state = State::getNameById($hotel_info_by_id['state_id']);
-                $hotel_location = $hotel_info_by_id['city'].', '.$state.', '.$country;
-
                 $obj_hotel_feaures_ids = $obj_hotel_branch->getFeaturesOfHotelByHotelId($hotel_id);
 
                 if (isset($obj_hotel_feaures_ids) && $obj_hotel_feaures_ids) {
@@ -290,6 +286,11 @@ class ProductControllerCore extends FrontController
                         $htl_features[] = $htl_info['name'];
                     }
                 }
+
+                $addressInfo = $obj_hotel_branch->getAddress($room_info_by_product_id['id_hotel']);
+                $hotel_location = $addressInfo['city'].
+                    ($addressInfo['id_state']?', '.$addressInfo['state']:'').', '.$addressInfo['country'];
+
                 $date_from = Tools::getValue('date_from');
                 $date_to = Tools::getValue('date_to');
 

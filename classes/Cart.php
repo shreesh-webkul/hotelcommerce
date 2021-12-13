@@ -644,11 +644,8 @@ class CartCore extends ObjectModel
                 $row['weight'] = (float)$row['weight_attribute'];
             }
 
-            if (Configuration::get('PS_TAX_ADDRESS_TYPE') == 'id_address_invoice') {
-                $address_id = (int)$this->id_address_invoice;
-            } else {
-                $address_id = (int)$row['id_address_delivery'];
-            }
+            // hotel address for tax calculation
+            $address_id = HotelRoomType::getHotelIdAddressByIdProduct($row['id_product']);
             if (!Address::addressExists($address_id)) {
                 $address_id = null;
             }
@@ -673,7 +670,7 @@ class CartCore extends ObjectModel
                 false,
                 (int)$this->id_customer ? (int)$this->id_customer : null,
                 (int)$this->id,
-                $address_id,
+                null,
                 $specific_price_output,
                 true,
                 true,
@@ -692,7 +689,7 @@ class CartCore extends ObjectModel
                 false,
                 (int)$this->id_customer ? (int)$this->id_customer : null,
                 (int)$this->id,
-                $address_id,
+                null,
                 $specific_price_output,
                 true,
                 true,
@@ -711,7 +708,7 @@ class CartCore extends ObjectModel
                 false,
                 (int)$this->id_customer ? (int)$this->id_customer : null,
                 (int)$this->id,
-                $address_id,
+                null,
                 $specific_price_output,
                 true,
                 true,
@@ -1587,11 +1584,8 @@ class CartCore extends ObjectModel
                 $virtual_context->shop = new Shop((int)$product['id_shop']);
             }
 
-            if ($ps_tax_address_type == 'id_address_invoice') {
-                $id_address = (int)$this->id_address_invoice;
-            } else {
-                $id_address = (int)$product['id_address_delivery'];
-            } // Get delivery address of the product from the cart
+            // hotel address for tax calculation
+            $id_address = HotelRoomType::getHotelIdAddressByIdProduct($product['id_product']);
             if (!$address_factory->addressExists($id_address)) {
                 $id_address = null;
             }

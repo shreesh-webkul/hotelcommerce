@@ -488,11 +488,9 @@ class ProductCore extends ObjectModel
             $this->manufacturer_name = Manufacturer::getNameById((int)$this->id_manufacturer);
             $this->supplier_name = Supplier::getNameById((int)$this->id_supplier);
             $address = null;
-            if (is_object($context->cart) && $context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')} != null) {
-                $address = $context->cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
-            }
 
-            $this->tax_rate = $this->getTaxesRate(new Address($address));
+            $id_address = HotelRoomType::getHotelIdAddressByIdProduct($this->id);
+            $this->tax_rate = $this->getTaxesRate(new Address($id_address));
 
             $this->new = $this->isNew();
 
@@ -2844,21 +2842,15 @@ class ProductCore extends ObjectModel
         $id_state = 0;
         $zipcode = 0;
 
-        if (!$id_address && Validate::isLoadedObject($cur_cart)) {
-            $id_address = $cur_cart->{Configuration::get('PS_TAX_ADDRESS_TYPE')};
-        }
-
         if ($id_address) {
             $address_infos = Address::getCountryAndState($id_address);
-            if ($address_infos['id_country']) {
-                $id_country = (int)$address_infos['id_country'];
-                $id_state = (int)$address_infos['id_state'];
-                $zipcode = $address_infos['postcode'];
-            }
-        } elseif (isset($context->customer->geoloc_id_country)) {
-            $id_country = (int)$context->customer->geoloc_id_country;
-            $id_state = (int)$context->customer->id_state;
-            $zipcode = $context->customer->postcode;
+        } else {
+            $address_infos = Address::getCountryAndState(HotelRoomType::getHotelIdAddressByIdProduct($id_product));
+        }
+        if ($address_infos['id_country']) {
+            $id_country = (int)$address_infos['id_country'];
+            $id_state = (int)$address_infos['id_state'];
+            $zipcode = $address_infos['postcode'];
         }
 
         if (Tax::excludeTaxeOption()) {

@@ -1945,7 +1945,7 @@ class AdminOrdersControllerCore extends AdminController
             false,
             $order->id_customer,
             $cart->id,
-            $order->{Configuration::get('PS_TAX_ADDRESS_TYPE', null, null, $order->id_shop)}
+            null
         );
 
         // Creating specific price if needed
