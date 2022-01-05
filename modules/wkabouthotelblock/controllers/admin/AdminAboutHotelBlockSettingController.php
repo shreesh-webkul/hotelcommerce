@@ -154,13 +154,19 @@ class AdminAboutHotelBlockSettingController extends ModuleAdminController
 
     public function getInteriorImage($imgName)
     {
-        // by webkul to get media link.
-        $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotel_interior/'.$imgName.'.jpg');
-        if (Tools::file_get_contents($imgUrl)) {
-            return '<img src="'.$imgUrl.'" class="img-thumbnail htlInteriorImg">';
-        } else {
-            return '--';
+        $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotel_interior/'.$imgName.'.jpg';
+        if ($imageUrl = ImageManager::thumbnail(
+            $image,
+            $this->table.'_'.$imgName.'.'.$this->imageType,
+            45,
+            $this->imageType,
+            true,
+            true
+        )) {
+            return $imageUrl;
         }
+
+        return '--';
     }
 
     public function renderForm()
@@ -172,23 +178,15 @@ class AdminAboutHotelBlockSettingController extends ModuleAdminController
             $objHtlInteriorImg = new WkHotelInteriorImage($idHtlInterior);
             $imgName = $objHtlInteriorImg->name;
 
-            // by webkul to get media link.
-            // $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotel_interior/'.$imgName.'.jpg';
-            // $imageUrl = ImageManager::thumbnail(
-            //     $image,
-            //     $this->table.'_'.(int)$idHtlInterior.'.'.$this->imageType,
-            //     350,
-            //     $this->imageType,
-            //     true,
-            //     true
-            // );
-            // $imageSize = file_exists($image) ? filesize($image) / 1000 : false;
-
-            $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotel_interior/'.$imgName.'.jpg');
-            if ($imgExist = (bool)Tools::file_get_contents($imgUrl)) {
-                $image = "<img class='img-thumbnail img-responsive' style='max-width:250px' src='".$imgUrl."'>";
-            }
-
+            $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotel_interior/'.$imgName.'.jpg';
+            $imageUrl = ImageManager::thumbnail(
+                $image,
+                $this->table.'_'.$imgName.'.'.$this->imageType,
+                100,
+                $this->imageType,
+                true,
+                true
+            );
         }
         $this->fields_form = array(
             'legend' => array(
@@ -208,7 +206,7 @@ class AdminAboutHotelBlockSettingController extends ModuleAdminController
                     'name' => 'interior_img',
                     'required' => true,
                     'display_image' => true,
-                    'image' => $imgExist ? $image : false, // to get media link
+                    'image' => $imageUrl ? $imageUrl : false, // to get media link
                     // 'size' => $imageSize,
                     // 'col' => 6,
                     'hint' => sprintf(
@@ -398,6 +396,5 @@ class AdminAboutHotelBlockSettingController extends ModuleAdminController
             )
         );
         $this->addJS(_MODULE_DIR_.$this->module->name.'/views/js/WkAboutHotelBlockAdmin.js');
-        $this->addCSS(_MODULE_DIR_.'wkabouthotelblock/views/css/WkAboutHotelBlockAdmin.css');
     }
 }

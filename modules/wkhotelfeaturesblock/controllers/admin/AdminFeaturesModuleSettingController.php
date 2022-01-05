@@ -129,21 +129,24 @@ class AdminFeaturesModuleSettingController extends ModuleAdminController
         );
     }
 
-    public function getAmenityImage($echo, $row)
+    public function getAmenityImage($date, $row)
     {
-        $image = '';
-        if ($echo) {
-            $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotels_features_img/'.$row['id_features_block'].'.jpg');
-            if ((bool)Tools::file_get_contents($imgUrl)) {
-                $image = "<img class='img-thumbnail img-responsive' style='max-width:70px' src='".$imgUrl."'>";
-            }
-        }
-        if ($image == '') {
-            $image = "--";
-        }
-        return $image;
-    }
 
+        $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotels_features_img/'.$row['id_features_block'].'.jpg';
+        if ($imageUrl = ImageManager::thumbnail(
+            $image,
+            $this->table.'_'.(int)$row['id_features_block'].'.'.$this->imageType,
+            45,
+            $this->imageType,
+            true,
+            true
+        )) {
+            return $imageUrl;
+        }
+
+        return '--';
+    }
+    
     public function initContent()
     {
         parent::initContent();
@@ -170,9 +173,17 @@ class AdminFeaturesModuleSettingController extends ModuleAdminController
             return;
         }
 
-        $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotels_features_img/'.$obj->id.'.jpg');
-        if ($imgExist = (bool)Tools::file_get_contents($imgUrl)) {
-            $image = "<img class='img-thumbnail img-responsive' style='max-width:250px' src='".$imgUrl."'>";
+        $imageUrl = false;
+        if ($this->display == 'edit') {
+            $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotels_features_img/'.$obj->id.'.jpg';
+            $imageUrl = ImageManager::thumbnail(
+                $image,
+                $this->table.'_'.(int)$obj->id.'.'.$this->imageType,
+                100,
+                $this->imageType,
+                true,
+                true
+            );
         }
 
         $this->fields_form = array(
@@ -204,7 +215,7 @@ class AdminFeaturesModuleSettingController extends ModuleAdminController
                     'name' => 'feature_image',
                     'required' => true,
                     'display_image' => true,
-                    'image' => $imgExist ? $image : false,
+                    'image' => $imageUrl ? $imageUrl : false,
                     'hint' => sprintf(
                         $this->l('Maximum image size: %1s'),
                         Tools::formatBytes(Tools::getMaxUploadSize())

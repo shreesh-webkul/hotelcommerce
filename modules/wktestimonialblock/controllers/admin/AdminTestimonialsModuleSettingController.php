@@ -122,18 +122,19 @@ class AdminTestimonialsModuleSettingController extends ModuleAdminController
 
     public function getTestimonialImage($echo, $row)
     {
-        $image = '';
-        if ($echo) {
-            $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotels_testimonials_img/'.$row['id_testimonial_block'].'.jpg');
-            if ((bool)Tools::file_get_contents($imgUrl)) {
-                $image = "<img class='img-thumbnail img-responsive' style='max-width:70px' src='".$imgUrl."'>";
-            }
+        $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotels_testimonials_img/'.$row['id_testimonial_block'].'.jpg';
+        if ($imageUrl = ImageManager::thumbnail(
+            $image,
+            $this->table.'_'.(int)$row['id_testimonial_block'].'.'.$this->imageType,
+            45,
+            $this->imageType,
+            true,
+            true
+        )) {
+            return $imageUrl;
         }
-        if ($image == '') {
-            $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/default-user.jpg');
-            $image = "<img class='img-thumbnail img-responsive' style='max-width:70px' src='".$imgUrl."'>";
-        }
-        return $image;
+
+        return '--';
     }
 
     public function initContent()
@@ -152,9 +153,17 @@ class AdminTestimonialsModuleSettingController extends ModuleAdminController
         if (!($obj = $this->loadObject(true))) {
             return;
         }
-        $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/hotels_testimonials_img/'.$obj->id.'.jpg');
-        if ($imgExist = (bool)Tools::file_get_contents($imgUrl)) {
-            $image = "<img class='img-thumbnail img-responsive' style='max-width:100px' src='".$imgUrl."'>";
+        $imageUrl = false;
+        if ($this->display == 'edit') {
+            $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/hotels_testimonials_img/'.$obj->id.'.jpg';
+            $imageUrl = ImageManager::thumbnail(
+                $image,
+                $this->table.'_'.(int)$obj->id.'.'.$this->imageType,
+                100,
+                $this->imageType,
+                true,
+                true
+            );
         }
 
         $this->fields_form = array(
@@ -191,7 +200,7 @@ class AdminTestimonialsModuleSettingController extends ModuleAdminController
                     'label' => $this->l('Person image'),
                     'name' => 'testimonial_image',
                     'display_image' => true,
-                    'image' => $imgExist ? $image : false,
+                    'image' => $imageUrl ? $imageUrl : false,
                     'hint' => $this->l('Upload an image of the person to whom this testimonial belongs.'),
                 ),
                 array(

@@ -123,19 +123,19 @@ class AdminHotelRoomModuleSettingController extends ModuleAdminController
     {
         $objProduct = new Product($idProduct, false, Configuration::get('PS_LANG_DEFAULT'));
         if ($coverImageId = Product::getCover($objProduct->id)) {
-            $prodImg = $this->context->link->getImageLink(
-                $objProduct->link_rewrite,
-                $objProduct->id.'-'.$coverImageId['id_image'],
-                ImageType::getFormatedName('home')
-            );
-        } else {
-            $prodImg = $this->context->link->getImageLink(
-                $objProduct->link_rewrite,
-                $this->context->language->iso_code."-default",
-                ImageType::getFormatedName('home')
-            );
+            $path_to_image = _PS_IMG_DIR_.'p'.'/'.Image::getImgFolderStatic($coverImageId['id_image']).(int)$coverImageId['id_image'].'.'.$this->imageType;
+            if ($imageUrl = ImageManager::thumbnail(
+                $path_to_image,
+                $this->table.'_'.(int)$coverImageId['id_image'].'.'.$this->imageType,
+                45,
+                $this->imageType,
+                true,
+                true
+            )) {
+                return $imageUrl;
+            }
         }
-        return '<img src="'.$prodImg.'" class="img-thumbnail htlRoomImg">';
+        return '--';
     }
 
     public function initContent()

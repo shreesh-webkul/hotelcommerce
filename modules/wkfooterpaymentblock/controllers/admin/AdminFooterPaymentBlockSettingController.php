@@ -83,14 +83,20 @@ class AdminFooterPaymentBlockSettingController extends ModuleAdminController
 
     public function getPaymentImage($echo, $row)
     {
-        $image = '';
-        if ($row['id_payment_block']) {
-            $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/payment_img/'.$row['id_payment_block'].'.jpg');
-            if ($imgExist = (bool)Tools::file_get_contents($imgUrl)) {
-                $image = "<img class='img-thumbnail img-responsive' style='max-width:70px' src='".$imgUrl."'>";
-            }
+
+        $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/payment_img/'.$row['id_payment_block'].'.jpg';
+        if ($imageUrl = ImageManager::thumbnail(
+            $image,
+            $this->table.'_'.(int)$row['id_payment_block'].'.'.$this->imageType,
+            30,
+            $this->imageType,
+            true,
+            true
+        )) {
+            return $imageUrl;
         }
-        return $image;
+
+        return '--';
     }
 
     public function renderList()
@@ -108,12 +114,21 @@ class AdminFooterPaymentBlockSettingController extends ModuleAdminController
 
     public function renderForm()
     {
-        if (!($object = $this->loadObject(true))) {
+        if (!($obj = $this->loadObject(true))) {
             return;
         }
-        $imgUrl = $this->context->link->getMediaLink(_MODULE_DIR_.$this->module->name.'/views/img/payment_img/'.$object->id.'.jpg');
-        if ($imgExist = (bool)Tools::file_get_contents($imgUrl)) {
-            $image = "<img class='img-thumbnail img-responsive' style='max-width:100px' src='".$imgUrl."'>";
+
+        $imageUrl = false;
+        if ($this->display == 'edit') {
+            $image = _PS_MODULE_DIR_.$this->module->name.'/views/img/payment_img/'.$obj->id.'.jpg';
+            $imageUrl = ImageManager::thumbnail(
+                $image,
+                $this->table.'_'.(int)$obj->id.'.'.$this->imageType,
+                100,
+                $this->imageType,
+                true,
+                true
+            );
         }
 
         $this->fields_form = array(
@@ -151,7 +166,7 @@ class AdminFooterPaymentBlockSettingController extends ModuleAdminController
                     'label' => $this->l('Payment image'),
                     'name' => 'payment_image',
                     'display_image' => true,
-                    'image' => $imgExist ? $image : false,
+                    'image' => $imageUrl ? $imageUrl : false,
                     'hint' => $this->l(
                         'Upload an image of the payment method to show on payment block at footer of the page.'
                     ),
