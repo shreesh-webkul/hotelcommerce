@@ -23,6 +23,7 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+require_once (_PS_TOOL_DIR_.'defuse/php-encryption/defuse-crypto.phar');
 
 class InstallModelInstall extends InstallAbstractModel
 {
@@ -69,6 +70,7 @@ class InstallModelInstall extends InstallAbstractModel
             $this->setError($this->language->l('%s folder is not writable (check permissions)', dirname(self::SETTINGS_FILE)));
             return false;
         }
+        $key = \Defuse\Crypto\Key::createNewRandomKey();
 
         // Generate settings content and write file
         $settings_constants = array(
@@ -82,6 +84,7 @@ class InstallModelInstall extends InstallAbstractModel
             '_PS_CACHE_ENABLED_' => '0',
             '_COOKIE_KEY_' => Tools::passwdGen(56),
             '_COOKIE_IV_' => Tools::passwdGen(8),
+            '_NEW_COOKIE_KEY_' => $key->saveToAsciiSafeString(),
             '_PS_CREATION_DATE_' => date('Y-m-d'),
             '_PS_VERSION_' => _PS_INSTALL_VERSION_,
             '_QLOAPPS_VERSION_' => _QLO_INSTALL_VERSION_,
