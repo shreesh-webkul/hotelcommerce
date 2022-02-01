@@ -60,7 +60,7 @@ class AdminModulesControllerCore extends AdminController
     protected $iso_default_country;
     protected $filter_configuration = array();
 
-    protected $xml_modules_list = _QLO_NATIVE_MODULES_LIST_;
+    protected $xml_modules_list = _QLO_API_DOMAIN_.'/xml/'.str_replace('.', '', _QLOAPPS_VERSION_).'.xml';
 
     /**
      * Admin Modules Controller Constructor
