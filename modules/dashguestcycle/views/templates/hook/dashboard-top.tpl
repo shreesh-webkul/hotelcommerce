@@ -68,7 +68,7 @@
 					</div>
 				</div>
 				<div class="badge-wrapper">
-					<div class="badge-item label-tooltip" data-toggle="tooltip" data-original-title="Total number of checkout that turns away/refused.">
+					<div class="badge-item label-tooltip" data-toggle="tooltip" data-original-title="Total number of checkout that turned away/refused.">
 						<div class="badge-strip" style="background-color: #FFC148;"></div>
 						<div class="badge-content-wrapper">
 							<div class="title-wrapper">
