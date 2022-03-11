@@ -67,11 +67,6 @@
 												<!-- <span class="quantity-formated"><span class="quantity">{$cart_booking_data[$data_k]['total_num_rooms']}</span>&nbsp;x&nbsp;</span> -->
 												<a class="cart_block_product_name" href="{$link->getProductLink($product, $product.link_rewrite, $product.category, null, null, $product.id_shop, $product.id_product_attribute)|escape:'html':'UTF-8'}" title="{$product.name|escape:'html':'UTF-8'}">{$product.name|truncate:30:'...':true|escape:'html':'UTF-8'}</a>
 											</div>
-											<!-- extra fields added by webkul to show on the cart  -->
-											<div class="room-capacity cart-info-sec">
-												<span class="product_info_label">{l s='Capacity' mod='blockcart'}:</span>
-												<span class="product_info_data">&nbsp;{$cart_booking_data[$data_k]['adult']}&nbsp;{l s='Adults' mod='blockcart'}&nbsp;&&nbsp;{$cart_booking_data[$data_k]['children']}&nbsp;{l s='Children' mod='blockcart'}</span>
-											</div>
 
 											{if isset($product.attributes_small)}
 												<div class="product-atributes">

@@ -46,10 +46,10 @@ class ProductControllerCore extends FrontController
             $this->addCSS(_THEME_CSS_DIR_.'product.css');
             $this->addCSS(_THEME_CSS_DIR_.'print.css', 'print');
             $this->addJqueryPlugin(array('fancybox', 'idTabs', 'scrollTo', 'serialScroll', 'bxslider'));
-            $this->addCSS(_THEME_CSS_DIR_.'datepicker.css');
+
             $this->addJS(array(
                 _THEME_JS_DIR_.'tools.js',  // retro compat themes 1.5
-                _THEME_JS_DIR_.'product.js'
+                _THEME_JS_DIR_.'product.js',
             ));
         } else {
             $this->addJqueryPlugin(array('scrollTo', 'serialScroll'));
@@ -303,10 +303,19 @@ class ProductControllerCore extends FrontController
                 if (!($date_to = Tools::getValue('date_to'))) {
                     $date_to = date('Y-m-d', strtotime('+1 day', strtotime($date_from)));
                 }
+                $occupancy = Tools::getValue('occupancy');
 
                 $obj_booking_dtl = new HotelBookingDetail();
-                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($date_from, $date_to, $hotel_id, $this->product->id, 1);
+                $booking_params = array(
+                    'date_from' => $date_from,
+                    'date_to' => $date_to,
+                    'hotel_id' => $hotel_id,
+                    'occupancy' => $occupancy,
+                    'id_room_type' => $this->product->id,
+                    'only_search_data' => 1
+                );
 
+                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
                 if ($hotel_room_data) {
                     $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                 }
@@ -336,8 +345,22 @@ class ProductControllerCore extends FrontController
                     );
                 }
 
+                // send occupancy information searched by the user
+                if ($occupancy && is_array($occupancy)) {
+                    $this->context->smarty->assign(
+                        array(
+                            'occupancy_adults' => array_sum(array_column($occupancy, 'adult')),
+                            'occupancy_children' => array_sum(array_column($occupancy, 'children')),
+                            'occupancy_child_ages' => array_sum(array_column($occupancy, 'child_ages'))
+                        )
+                    );
+                }
+
                 $this->context->smarty->assign(
                     array(
+                        // send occupancy information searched by the user
+                        'room_type_info' => $room_info_by_product_id,
+                        'occupancies' => $occupancy,
                         'isHotelRefundable' => $hotel_branch_obj->isRefundable(),
                         'max_order_date' => $max_order_date,
                         'warning_num' => Configuration::get('WK_ROOM_LEFT_WARNING_NUMBER'),
@@ -396,6 +419,7 @@ class ProductControllerCore extends FrontController
 
             $this->context->smarty->assign(
                 array(
+                    // occupancy fields
                     'room_type_demands' => $roomTypeDemands,
                     'WK_PRICE_CALC_METHOD_EACH_DAY' => HotelRoomTypeGlobalDemand::WK_PRICE_CALC_METHOD_EACH_DAY,
                     'product_id_hotel' => $hotel_id,
@@ -1072,23 +1096,25 @@ class ProductControllerCore extends FrontController
             if ($roomTypeInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
                 $dateFrom = Tools::getValue('date_from');
                 $dateTo = Tools::getValue('date_to');
-                $quantity = Tools::getValue('qty');
+                // occupancy is created for sending to the search function
+                $occupancy = Tools::getValue('occupancy');
+                $occupancy = json_decode($occupancy, true);
+                // @todo for now we are sending the num of rooms for current algo,
+                // @todo Send occupancy in the dataForFrontSearch function
+                $quantity = count($occupancy);
                 if ($idHotel = $roomTypeInfo['id_hotel']) {
                     $objBookingDetail = new HotelBookingDetail();
-                    if ($hotelRoomData = $objBookingDetail->DataForFrontSearch(
-                        $dateFrom,
-                        $dateTo,
-                        $idHotel,
-                        $idProduct,
-                        1,
-                        0,
-                        0,
-                        -1,
-                        0,
-                        0,
-                        $this->context->cart->id,
-                        $this->context->cart->id_guest
-                    )) {
+                    $booking_params = array(
+                        'date_from' => $dateFrom,
+                        'date_to' => $dateTo,
+                        'hotel_id' => $idHotel,
+                        'id_room_type' => $idProduct,
+                        'only_search_data' => 1,
+                        'id_cart' => $this->context->cart->id,
+                        'id_guest' => $this->context->cart->id_guest
+                    );
+
+                    if ($hotelRoomData = $objBookingDetail->dataForFrontSearch($booking_params)) {
                         $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                         if ($totalAvailRooms >= $quantity) {
                             $totalPrice = 0;
@@ -1113,7 +1139,8 @@ class ProductControllerCore extends FrontController
                             $featurePriceDiff = (float)($productPriceWithoutReduction - $featurePrice);
 
                             //$price_tax_incl = Product::getPriceStatic($idProduct, $price_tax);
-                            $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
+                            // $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
+                            $totalRoomPrice = $roomTypeDateRangePrice;
                             $totalPrice += $totalRoomPrice;
                             $demandsPrice = 0;
                             if ($roomDemand = Tools::getValue('room_demands')) {

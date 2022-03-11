@@ -300,6 +300,63 @@
 			</div>
 		</div>
 
+		{* extra occupancy price rules fileds *}
+		<div class="form-group">
+			<label class="control-label col-lg-3">
+				<span class="label-tooltip" data-toggle="tooltip" data-html="true" title="" data-original-title="{l s='Enable, if you want this price to be applied on extra occupancy on rooms of selected room type.' mod='hotelreservationsystem'}">{l s='Feature Price Rule for extra occupancy' mod='hotelreservationsystem'}</span>
+			</label>
+			<div class="col-lg-9 ">
+				<span class="switch prestashop-switch fixed-width-lg">
+					<input type="radio" value="1" id="active_for_occupancy_on" name="active_for_occupancy" {if isset($smarty.post.active_for_occupancy)} {if $smarty.post.active_for_occupancy}checked="checked"{/if}{elseif isset($objFeaturePrice->active_for_occupancy) && $objFeaturePrice->active_for_occupancy} checked="checked"{/if}>
+					<label for="active_for_occupancy_on">{l s='Yes' mod='hotelreservationsystem'}</label>
+					<input type="radio" value="0" id="active_for_occupancy_off" name="active_for_occupancy" {if isset($smarty.post.active_for_occupancy)}{if !$smarty.post.active_for_occupancy}checked="checked"{/if}{elseif !isset($objFeaturePrice->active_for_occupancy)}checked="checked"
+					{elseif isset($objFeaturePrice->active_for_occupancy) && !$objFeaturePrice->active_for_occupancy}checked="checked"{/if}>
+					<label for="active_for_occupancy_off">{l s='No' mod='hotelreservationsystem'}</label>
+					<a class="slide-button btn"></a>
+				</span>
+			</div>
+		</div>
+
+		<div class="occupancy_rule_block" {if isset($smarty.post.active_for_occupancy)}{if !$smarty.post.active_for_occupancy}style="display:none;"{/if}{elseif !isset($objFeaturePrice->active_for_occupancy) || !$objFeaturePrice->active_for_occupancy}style="display:none;"{/if}>
+			<div class="form-group">
+				<label class="col-sm-3 control-label required" for="adult_impact_value" >
+					<span class="label-tooltip" data-toggle="tooltip" data-html="true" title="" data-original-title="{l s='Enter the impact value for the extra adult occupancy.' mod='hotelreservationsystem'}">{l s='Impact value for extra adult' mod='hotelreservationsystem'} ({l s='tax excl.' mod='hotelreservationsystem'})</span>
+				</label>
+				<div class="col-lg-3">
+					<div class="input-group">
+						<span class="input-group-addon payment_type_icon">{if isset($edit)} {if $objFeaturePrice->impact_type==2}{$defaultcurrency_sign}{else}%{/if}{else}%{/if}</span>
+						<input type="text" id="adult_impact_value" name="adult_impact_value"
+						value="{if isset($smarty.post.adult_impact_value) && $smarty.post.adult_impact_value}{$smarty.post.adult_impact_value}{elseif isset($objFeaturePrice->adult_impact_value)}{$objFeaturePrice->adult_impact_value}{/if}"/>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label required" for="child_impact_value" >
+					<span class="label-tooltip" data-toggle="tooltip" data-html="true" title="" data-original-title="{l s='Enter the impact value for the extra child occupancy.' mod='hotelreservationsystem'}">{l s='Impact value for extra child' mod='hotelreservationsystem'} ({l s='tax excl.' mod='hotelreservationsystem'})</span>
+				</label>
+				<div class="col-lg-3">
+					<div class="input-group">
+						<span class="input-group-addon payment_type_icon">{if isset($edit)} {if $objFeaturePrice->impact_type==2}{$defaultcurrency_sign}{else}%{/if}{else}%{/if}</span>
+						<input type="text" id="child_impact_value" name="child_impact_value"
+						value="{if isset($smarty.post.child_impact_value) && $smarty.post.child_impact_value}{$smarty.post.child_impact_value}{elseif isset($objFeaturePrice->child_impact_value)}{$objFeaturePrice->child_impact_value}{/if}"/>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label required" for="infant_impact_value" >
+					<span class="label-tooltip" data-toggle="tooltip" data-html="true" title="" data-original-title="{l s='Enter the impact value for the extra infant occupancy.' mod='hotelreservationsystem'}">{l s='Impact value for extra infant' mod='hotelreservationsystem'} ({l s='tax excl.' mod='hotelreservationsystem'})</span>
+				</label>
+				<div class="col-lg-3">
+					<div class="input-group">
+						<span class="input-group-addon payment_type_icon">{if isset($edit)} {if $objFeaturePrice->impact_type==2}{$defaultcurrency_sign}{else}%{/if}{else}%{/if}</span>
+						<input type="text" id="infant_impact_value" name="infant_impact_value"
+						value="{if isset($smarty.post.infant_impact_value) && $smarty.post.infant_impact_value}{$smarty.post.infant_impact_value}{elseif isset($objFeaturePrice->infant_impact_value)}{$objFeaturePrice->infant_impact_value}{/if}"/>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
 		<div class="panel-footer">
 			<a href="{$link->getAdminLink('AdminHotelFeaturePricesSettings')|escape:'html':'UTF-8'}" class="btn btn-default">
 				<i class="process-icon-cancel"></i>{l s='Cancel' mod='hotelreservationsystem'}

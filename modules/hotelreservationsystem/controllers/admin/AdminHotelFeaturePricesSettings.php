@@ -365,6 +365,36 @@ class AdminHotelFeaturePricesSettingsController extends ModuleAdminController
                     $this->errors[] = $this->l('Invalid value of impact value.');
                 }
             }
+
+            // validate extra occupancy price rules
+            $activeOccupancyRule = Tools::getValue('active_for_occupancy');
+            if ($activeOccupancyRule) {
+                $adultImpactValue = Tools::getValue('adult_impact_value');
+                $childImpactValue = Tools::getValue('child_impact_value');
+                $infantImpactValue = Tools::getValue('infant_impact_value');
+                if (!$adultImpactValue) {
+                    $this->errors[] = $this->l('Please enter a valid impact value for extra adult occupancy.');
+                } else {
+                    if (!Validate::isPrice($adultImpactValue)) {
+                        $this->errors[] = $this->l('Invalid value of impact value extra adult occupancy.');
+                    }
+                }
+                if (!$childImpactValue) {
+                    $this->errors[] = $this->l('Please enter a valid impact value for extra child occupancy.');
+                } else {
+                    if (!Validate::isPrice($childImpactValue)) {
+                        $this->errors[] = $this->l('Invalid value of impact value extra child occupancy.');
+                    }
+                }
+                if (!$infantImpactValue) {
+                    $this->errors[] = $this->l('Please enter a valid impact value for extra infant occupancy.');
+                } else {
+                    if (!Validate::isPrice($infantImpactValue)) {
+                        $this->errors[] = $this->l('Invalid value of impact value extra infant occupancy.');
+                    }
+                }
+            }
+
             if (!count($this->errors)) {
                 if ($idFeaturePrice) {
                     $objFeaturePricing = new HotelRoomTypeFeaturePricing($idFeaturePrice);
@@ -400,6 +430,18 @@ class AdminHotelFeaturePricesSettingsController extends ModuleAdminController
 
                 // set the values of the groups for this feature price
                 $objFeaturePricing->groupBox = Tools::getValue('groupBox');
+
+                // save extra occupancy price rules
+                $objFeaturePricing->active_for_occupancy = (int)$activeOccupancyRule;
+                if ($activeOccupancyRule) {
+                    $objFeaturePricing->adult_impact_value = $adultImpactValue;
+                    $objFeaturePricing->child_impact_value = $childImpactValue;
+                    $objFeaturePricing->infant_impact_value = $infantImpactValue;
+                } else {
+                    $objFeaturePricing->adult_impact_value = 0;
+                    $objFeaturePricing->child_impact_value = 0;
+                    $objFeaturePricing->infant_impact_value = 0;
+                }
 
                 if ($objFeaturePricing->save()) {
                     if (Tools::isSubmit('submitAdd'.$this->table.'AndStay')) {

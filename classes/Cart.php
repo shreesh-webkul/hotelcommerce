@@ -4416,20 +4416,16 @@ class CartCore extends ObjectModel
                             $prodQty = $prodQty * (int) $numDays;
                             $reqRooms = 1;
 
-                            if ($hotelRoomData = $objBookingDtl->DataForFrontSearch(
-                                $dateFrom,
-                                $dateTo,
-                                $idHotel,
-                                $idProduct,
-                                1,
-                                0,
-                                0,
-                                -1,
-                                0,
-                                0,
-                                $idCart,
-                                $idGuest
-                            )) {
+                            $booking_params = array(
+                                'date_from' => $dateFrom,
+                                'date_to' => $dateTo,
+                                'hotel_id' => $idHotel,
+                                'id_room_type' => $idProduct,
+                                'only_search_data' => 1,
+                                'id_cart' => $idCart,
+                                'id_guest' => $idGuest,
+                            );
+                            if ($hotelRoomData = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
                                 if (isset($hotelRoomData['stats']['num_avail'])) {
                                     $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                                     if ($totalAvailRooms < $reqRooms) {
@@ -4470,7 +4466,7 @@ class CartCore extends ObjectModel
                 if (!$hasErrors) {
                     $update_quantity = $objCart->updateQty($prodQty, $idProduct, 0, 0, Tools::getValue('op', 'up'), $this->id_address_delivery);
                     $chkQty = 0;
-                    if ($hotelAvailRomms = $hotelRoomData['rm_data'][0]['data']['available']) {
+                    if ($hotelAvailRomms = $hotelRoomData['rm_data'][$idProduct]['data']['available']) {
                         foreach ($hotelAvailRomms as $key_hotel_room_info => $val_hotel_room_info) {
                             if ($chkQty < $reqRooms) {
                                 $objCartBooking = new HotelCartBookingData();

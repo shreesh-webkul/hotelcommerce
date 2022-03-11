@@ -3441,6 +3441,7 @@ class AdminProductsControllerCore extends AdminController
         } else {
             $this->displayWarning($this->l('You must save this room type before managing occupancy.'));
         }
+        $smartyVars['currency'] = $this->context->currency;
         $data->assign($smartyVars);
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
@@ -3457,16 +3458,46 @@ class AdminProductsControllerCore extends AdminController
                 if (Validate::isLoadedObject($objRoomType = new HotelRoomType($idHtlRoomType))) {
                     $baseAdults = Tools::getValue('base_adults');
                     $baseChildren = Tools::getValue('base_children');
+                    $maxAdults = Tools::getValue('max_adults');
+                    $maxChildren = Tools::getValue('max_children');
+                    $maxGuests = Tools::getValue('max_guests');
 
                     if (!$baseAdults || !Validate::isUnsignedInt($baseAdults)) {
-                        $this->errors[] = Tools::displayError('Invalid base adults');
+                        $this->errors[] = Tools::displayError('Invalid base adult');
                     }
-                    if (!Validate::isUnsignedInt($baseChildren)) {
+                    if ($baseChildren == '' || !Validate::isUnsignedInt($baseChildren)) {
                         $this->errors[] = Tools::displayError('Invalid base children');
+                    } else if (Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM')) {
+                        if ($baseChildren > Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM')) {
+                            $this->errors[] = sprintf(Tools::displayError('Base children cannot be greater than max childern allowed on your website (Max: %s)'), Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'));
+                        }
                     }
+                    if (!$maxAdults || !Validate::isUnsignedInt($maxAdults)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of adult');
+                    } elseif ($maxAdults < $baseAdults) {
+                        $this->errors[] = Tools::displayError('Maximum number of adult cannot be less than base adult');
+                    }
+                    if ($maxChildren == '' || !Validate::isUnsignedInt($maxChildren)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of children');
+                    } else if (Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM')) {
+                        if ($maxChildren > Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM')) {
+                            $this->errors[] = sprintf(Tools::displayError('Maximum number of children cannot be greater than max childern allowed on your website (Max: %s)'), Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'));
+                        }
+                    } elseif ($maxChildren < $baseChildren) {
+                        $this->errors[] = Tools::displayError('Maximum number of children cannot be less than base children');
+                    }
+                    if (!$maxGuests || !Validate::isUnsignedInt($maxGuests)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of guests');
+                    } elseif ($maxGuests < ($baseAdults + $baseChildren)) {
+                        $this->errors[] = Tools::displayError('Maximum number of guests cannot be less than base occupancy of adult and children');
+                    }
+
                     if (!count($this->errors)) {
                         $objRoomType->adult = $baseAdults;
                         $objRoomType->children = $baseChildren;
+                        $objRoomType->max_adults = $maxAdults;
+                        $objRoomType->max_children = $maxChildren;
+                        $objRoomType->max_guests = $maxGuests;
                         $objRoomType->save();
                     }
                 } else {
@@ -3785,7 +3816,7 @@ class AdminProductsControllerCore extends AdminController
                     $bookingParams['date_from'] = $date_from;
                     $bookingParams['date_to'] = $date_to;
                     $bookingParams['hotel_id'] = $rm_info['id_hotel'];
-                    $bookingParams['room_type'] = $obj->id;
+                    $bookingParams['id_room_type'] = $obj->id;
                     $bookingParams['adult'] = $rm_info['adult'];
                     $bookingParams['children'] = $rm_info['children'];
                     $bookingParams['num_rooms'] = 0;
@@ -3794,7 +3825,6 @@ class AdminProductsControllerCore extends AdminController
 
                     $booking_data = $obj_booking_dtl->getBookingData($bookingParams);
 
-                    $bookingParams['for_calendar'] = 1;
                     while ($start_date <= $last_date) {
                         $cal_date_from = $start_date;
                         $cal_date_to = date('Y-m-d', strtotime('+1 day', strtotime($cal_date_from)));
@@ -3875,7 +3905,7 @@ class AdminProductsControllerCore extends AdminController
         $start_date = date('Y-m-01', strtotime($query_date)); // hard-coded '01' for first day
         $last_day_this_month = date('Y-m-t', strtotime($query_date));
         $hotel_id = Tools::getValue('id_hotel');
-        $room_type = Tools::getValue('id_product');
+        $id_room_type = Tools::getValue('id_product');
         $adult = Tools::getValue('num_adults');
         $children = Tools::getValue('num_children');
         $num_rooms = 1;
@@ -3883,11 +3913,10 @@ class AdminProductsControllerCore extends AdminController
         $obj_booking_dtl = new HotelBookingDetail();
         $bookingParams = array();
         $bookingParams['hotel_id'] = $hotel_id;
-        $bookingParams['room_type'] = $room_type;
+        $bookingParams['id_room_type'] = $id_room_type;
         $bookingParams['adult'] = $adult;
         $bookingParams['children'] = $children;
         $bookingParams['num_rooms'] = $num_rooms;
-        $bookingParams['for_calendar'] = 1;
         while ($start_date <= $last_day_this_month) {
             $cal_date_from = $start_date;
             $cal_date_to = date('Y-m-d', strtotime($cal_date_from) + 86400);
