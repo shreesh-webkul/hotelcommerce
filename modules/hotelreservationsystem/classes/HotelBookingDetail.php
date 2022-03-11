@@ -196,6 +196,36 @@ class HotelBookingDetail extends ObjectModel
         if (!isset($params['only_active_hotel'])) {
             $params['only_active_hotel'] = 1;
         }
+
+        if (!isset($params['for_room_type'])) {
+            $params['for_room_type'] = 0;
+        }
+        if (!isset($params['adult'])) {
+            $params['adult'] = 0;
+        }
+        if (!isset($params['children'])) {
+            $params['children'] = 0;
+        }
+        if (!isset($params['ratting'])) {
+            $params['ratting'] = -1;
+        }
+        if (!isset($params['amenities'])) {
+            $params['amenities'] = 0;
+        }
+        if (!isset($params['price'])) {
+            $params['price'] = 0;
+        }
+
+        if (!isset($params['page'])) {
+            $params['page'] = 1;
+        }
+        if (!isset($params['num_results'])) {
+            $params['num_results'] = 0;
+        }
+        if (!isset($params['get_total_rooms'])) {
+            $params['get_total_rooms'] = 0;
+        }
+
         return $params;
     }
 
@@ -227,6 +257,7 @@ class HotelBookingDetail extends ObjectModel
     {
         // extract all keys and values of the array [$params] into variables and values
         extract($this->getBookingDataParams($params));
+
         if ($date_from && $date_to && $hotel_id) {
             $date_from = date('Y-m-d H:i:s', strtotime($date_from));
             $date_to = date('Y-m-d H:i:s', strtotime($date_to));
@@ -815,15 +846,10 @@ class HotelBookingDetail extends ObjectModel
      *
      * @return [array] [Returns true if successfully updated else returns false]
      *                 Note:: $for_room_type is used for product page and category page for block cart
+     * @deprecated 1.6.0 use getRoomsAvailable
      */
     public function DataForFrontSearch($date_from, $date_to, $id_hotel, $id_product = 0, $for_room_type = 0, $adult = 0, $children = 0, $ratting = -1, $amenities = 0, $price = 0, $id_cart = 0, $id_guest = 0)
     {
-        if (Module::isInstalled('productcomments')) {
-            require_once _PS_MODULE_DIR_.'productcomments/ProductComment.php';
-        }
-
-        $this->context = Context::getContext();
-
         $bookingParams = array();
         $bookingParams['date_from'] = $date_from;
         $bookingParams['date_to'] = $date_to;
@@ -839,9 +865,29 @@ class HotelBookingDetail extends ObjectModel
         $bookingParams['search_unavai'] = 0;
         $bookingParams['id_cart'] = $id_cart;
         $bookingParams['id_guest'] = $id_guest;
+        $bookingParams['for_room_type'] = $for_room_type;
+        $bookingParams['ratting'] = $ratting;
+        $bookingParams['amenities'] = $amenities;
+        $bookingParams['price'] = $price;
 
+        return $this->getRoomsAvailable($bookingParams);
+    }
+
+    public function getRoomsAvailable($bookingParams)
+    {
+        $bookingParams['num_rooms'] = 0;
+        $bookingParams['search_partial'] = 0;
+        $bookingParams['search_booked'] = 0;
+        $bookingParams['search_unavai'] = 0;
         $booking_data = $this->getBookingData($bookingParams);
 
+        extract($this->getBookingDataParams($bookingParams));
+
+        if (Module::isInstalled('productcomments')) {
+            require_once _PS_MODULE_DIR_.'productcomments/ProductComment.php';
+        }
+
+        $this->context = Context::getContext();
         if (!$for_room_type) {
             if (!empty($booking_data)) {
                 $obj_rm_type = new HotelRoomType();
@@ -1043,7 +1089,7 @@ class HotelBookingDetail extends ObjectModel
                         'date_from' => $date_from,
                         'date_to' => $date_to,
                     )
-                );            
+                );
                 return true;
             }
             return false;
@@ -1107,7 +1153,7 @@ class HotelBookingDetail extends ObjectModel
                         'date_from' => $date_from,
                         'date_to' => $date_to,
                     )
-                );            
+                );
                 return true;
             }
             return false;
