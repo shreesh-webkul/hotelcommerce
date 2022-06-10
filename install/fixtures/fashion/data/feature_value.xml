@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity_feature_value>
+  <fields id="value" class="FeatureValue">
+    <field name="id_feature"/>
+    <field name="custom"/>
+  </fields>
+  <entities>
+    <feature_value id="Gym" id_feature="1" custom="0"/>
+    <feature_value id="NewsPaper" id_feature="2" custom="0"/>
+    <feature_value id="PowerBackUp" id_feature="3" custom="0"/>
+    <feature_value id="Refrigerator" id_feature="4" custom="0"/>
+    <feature_value id="Restaurant" id_feature="5" custom="0"/>
+    <feature_value id="RoomService" id_feature="6" custom="0"/>
+    <feature_value id="WiFi" id_feature="7" custom="0"/>
+
+  </entities>
+</entity_feature_value>

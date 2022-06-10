@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity_feature>
+  <fields id="name" class="Feature" image="rf">
+    <field name="position"/>
+  </fields>
+  <entities>
+    <feature id="Gym" position="0"/>
+    <feature id="NewsPaper" position="1"/>
+    <feature id="PowerBackUp" position="2"/>
+    <feature id="Refrigerator" position="3"/>
+    <feature id="Restaurant" position="4"/>
+    <feature id="RoomService" position="5"/>
+    <feature id="WiFi" position="6"/>
+  </entities>
+</entity_feature>

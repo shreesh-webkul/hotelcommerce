@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<entity_feature>
+  <feature id="Gym">
+    <value>1.jpg</value>
+  </feature>
+  <feature id="NewsPaper">
+    <value>2.jpg</value>
+  </feature>
+  <feature id="PowerBackUp">
+    <value>3.jpg</value>
+  </feature>
+  <feature id="Refrigerator">
+    <value>4.jpg</value>
+  </feature>
+  <feature id="Restaurant">
+    <value>5.jpg</value>
+  </feature>
+  <feature id="RoomService">
+    <value>6.jpg</value>
+  </feature>
+  <feature id="WiFi">
+    <value>1.jpg</value>
+  </feature>
+</entity_feature>
