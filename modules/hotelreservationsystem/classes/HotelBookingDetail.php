@@ -1043,7 +1043,7 @@ class HotelBookingDetail extends ObjectModel
                         'date_from' => $date_from,
                         'date_to' => $date_to,
                     )
-                );            
+                );
                 return true;
             }
             return false;
@@ -1107,7 +1107,7 @@ class HotelBookingDetail extends ObjectModel
                         'date_from' => $date_from,
                         'date_to' => $date_to,
                     )
-                );            
+                );
                 return true;
             }
             return false;
@@ -1312,10 +1312,9 @@ class HotelBookingDetail extends ObjectModel
                     $order_detail_data[$key]['refund_info'] = reset($refundInfo);
                 }
             }
-            return $order_detail_data;
         }
 
-        return false;
+        return $order_detail_data;
     }
 
     /**
