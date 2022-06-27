@@ -201,6 +201,8 @@ class AdminAddHotelController extends ModuleAdminController
         $longitude = Tools::getValue('loclongitude');
         $map_formated_address = Tools::getValue('locformatedAddr');
         $map_input_text = Tools::getValue('googleInputField');
+        $infantMaxAge = trim(Tools::getValue('infant_max_age'));
+
         // check if field is atleast in default language. Not available in default prestashop
         $defaultLangId = Configuration::get('PS_LANG_DEFAULT');
         $objDefaultLanguage = Language::getLanguage((int) $defaultLangId);
@@ -291,6 +293,13 @@ class AdminAddHotelController extends ModuleAdminController
             $this->errors[] = $this->l('Enter a Valid City Name.');
         }
 
+        // max age of infant after which guest will considered as child // below 18
+        if (!$infantMaxAge) {
+            $this->errors[] = $this->l('Infant maximum age is required field.');
+        } elseif (!Validate::isUnsignedInt($infantMaxAge) || $infantMaxAge > 17) {
+            $this->errors[] = $this->l('Infant maximum age is invalid. Must be below 18.');
+        }
+
         if (!count($this->errors)) {
             if ($idHotel) {
                 $objHotelBranch = new HotelBranchInformation($idHotel);
@@ -378,6 +387,7 @@ class AdminAddHotelController extends ModuleAdminController
             $objHotelBranch->longitude = $longitude;
             $objHotelBranch->map_formated_address = $map_formated_address;
             $objHotelBranch->map_input_text = $map_input_text;
+            $objHotelBranch->infant_max_age = $infantMaxAge;
             $objHotelBranch->save();
 
             // hotel categories before save categories

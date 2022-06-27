@@ -827,7 +827,7 @@ class HotelCartBookingData extends ObjectModel
                         );
 
                         $unitPriceWithoutReduction = $objProduct->getPriceWithoutReduct(!$price_tax);
-                        $cartHotelData[$prodKey]['adult'] = $roomDetail['adult'];
+                        $cartHotelData[$prodKey]['adult'] = $roomDetail['adults'];
                         $cartHotelData[$prodKey]['children'] = $roomDetail['children'];
                         $cartHotelData[$prodKey]['total_num_rooms'] = 0;
                         $cartHotelData[$prodKey]['id_product'] = $product['id_product'];

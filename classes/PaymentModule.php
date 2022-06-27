@@ -1360,7 +1360,7 @@ abstract class PaymentModuleCore extends Module
                     $cart_htl_data[$type_key]['name']        = $product->name;
                     $cart_htl_data[$type_key]['unit_price'] = $unit_price;
                     $cart_htl_data[$type_key]['hotel_name'] = $rm_dtl['hotel_name'];
-                    $cart_htl_data[$type_key]['adult']        = $rm_dtl['adult'];
+                    $cart_htl_data[$type_key]['adult']        = $rm_dtl['adults'];
                     $cart_htl_data[$type_key]['children']    = $rm_dtl['children'];
 
                     foreach ($cart_bk_data as $data_k => $data_v) {

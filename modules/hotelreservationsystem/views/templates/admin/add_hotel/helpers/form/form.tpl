@@ -246,6 +246,16 @@
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="control-label col-lg-3 required">
+							<span class="label-tooltip" data-toggle="tooltip" data-html="true" title="" data-original-title="{l s='Enter the age of the child, below which that child will be considered as infant. (This setting will be used in occupancy wise search)' mod='hotelreservationsystem'}">
+								{l s='Consider child as infant below age' mod='hotelreservationsystem'} :
+							</span>
+						</label>
+						<div class="col-sm-6">
+							<input class="form-control" type="" data-validate="" id="infant_max_age" name="infant_max_age" value="{if isset($edit)}{$hotel_info.infant_max_age|escape:'htmlall':'UTF-8'}{else}{$WK_GLOBAL_INFANT_MAX_AGE|escape:'htmlall':'UTF-8'}{/if}" />
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="col-sm-3 control-label">
 							{l s='Hotel Policies :' mod='hotelreservationsystem'}
 							{include file="../../../_partials/htl-form-fields-flag.tpl"}

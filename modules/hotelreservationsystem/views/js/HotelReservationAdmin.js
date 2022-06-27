@@ -109,7 +109,7 @@ var GoogleMapsManager = {
             that.autocomplete.addListener('place_changed', function() {
                 that.clearAllMarkers();
                 var place = that.autocomplete.getPlace();
-                
+
                 if (place.geometry.viewport) {
                     that.map.fitBounds(place.geometry.viewport);
                 } else {
@@ -136,7 +136,7 @@ var GoogleMapsManager = {
                     e.preventDefault();
                 }
             });
-            
+
             if(cb && typeof cb === 'function') {
                 cb();
             }
@@ -901,7 +901,7 @@ $(document).ready(function() {
 
     //$( "#max_global_book_date" ).datepicker( "option", "maxDate", '20 Mar 2020');
     /*END*/
-    
+
     /* ----  AdminHotelFeaturePricesSettingsController Admin ---- */
 
     $('#date_selection_type').on('change', function() {
@@ -1042,6 +1042,15 @@ $(document).ready(function() {
             var selectedDate = new Date(date_format[2], date_format[1] - 1, date_format[0]);
             selectedDate.setDate(selectedDate.getDate() - 1);
             $("#feature_plan_date_from").datepicker("option", "maxDate", selectedDate);
+        }
+    });
+
+    // extra occupancy price rules
+    $("input[name='active_for_occupancy']").on('change', function () {
+        if (parseInt($(this).val())) {
+            $(".occupancy_rule_block").show(200);
+        } else {
+            $(".occupancy_rule_block").hide(200);
         }
     });
 

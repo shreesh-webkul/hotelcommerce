@@ -932,7 +932,7 @@ class HotelBookingDetail extends ObjectModel
                                     // if ($room_left <= (int)Configuration::get('WK_ROOM_LEFT_WARNING_NUMBER'))
                                     $booking_data['rm_data'][$key]['room_left'] = $room_left;
 
-                                    $booking_data['rm_data'][$key]['adult'] = $rm_dtl['adult'];
+                                    $booking_data['rm_data'][$key]['adult'] = $rm_dtl['adults'];
                                     $booking_data['rm_data'][$key]['children'] = $rm_dtl['children'];
 
                                     $booking_data['rm_data'][$key]['ratting'] = $prod_ratting;
@@ -940,10 +940,16 @@ class HotelBookingDetail extends ObjectModel
                                         $booking_data['rm_data'][$key]['num_review'] = ProductComment::getCommentNumber($value['id_product']);
                                     }
 
+                                    // create URL with the parameters from URL
+                                    $urlData = array ('date_from' => $date_from, 'date_to' => $date_to);
+                                    if ($occupancy = Tools::getValue('occupancy')) {
+                                        $urlData['occupancy'] = $occupancy;
+                                    }
+
                                     if (Configuration::get('PS_REWRITING_SETTINGS')) {
-                                        $booking_data['rm_data'][$key]['product_link'] = $this->context->link->getProductLink($product).'?date_from='.$date_from.'&date_to='.$date_to;
+                                        $booking_data['rm_data'][$key]['product_link'] = $this->context->link->getProductLink($product).'?'.http_build_query($urlData);
                                     } else {
-                                        $booking_data['rm_data'][$key]['product_link'] = $this->context->link->getProductLink($product).'&date_from='.$date_from.'&date_to='.$date_to;
+                                        $booking_data['rm_data'][$key]['product_link'] = $this->context->link->getProductLink($product).'&'.http_build_query($urlData);
                                     }
                                 } else {
                                     unset($booking_data['rm_data'][$key]);

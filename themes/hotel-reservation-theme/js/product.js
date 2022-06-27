@@ -1204,6 +1204,7 @@ $(document).ready(function() {
     });
 
 
+    // Here if occupancy block will be closed then we will get price info again
     $(document).on('focusout', '#quantity_wanted', function(e) {
         changeRoomTypeDemands();
     });
@@ -1263,7 +1264,262 @@ $(document).ready(function() {
         }
         e.preventDefault();
 	});
+
+    // Occupancy field dropdown
+    // add occupancy info block
+    $('#booking_occupancy_wrapper .add_new_occupancy_btn').on('click', function(e) {
+        e.preventDefault();
+
+        var occupancy_block = '';
+        var roomBlockIndex = parseInt($("#booking_occupancy_wrapper .occupancy_info_block").last().attr('occ_block_index'));
+        roomBlockIndex += 1;
+
+        var countRooms = parseInt($('#booking_occupancy_wrapper .occupancy_info_block').length);
+        countRooms += 1
+
+        occupancy_block += '<div class="occupancy_info_block" occ_block_index="'+roomBlockIndex+'">';
+            occupancy_block += '<div class="occupancy_info_head"><span class="room_num_wrapper">'+ room_txt + ' - ' + countRooms + '</span><a class="remove-room-link pull-right" href="#">' + remove_txt + '</a></div>';
+            occupancy_block += '<div class="row">';
+                occupancy_block += '<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">';
+                    occupancy_block += '<div class="row">';
+                        occupancy_block += '<label class="col-sm-12">' + adults_txt + '</label>';
+                        occupancy_block += '<div class="col-sm-12">';
+                            occupancy_block += '<input type="hidden" class="num_occupancy num_adults" name="occupancy['+roomBlockIndex+'][adults]" value="1">';
+                            occupancy_block += '<div class="occupancy_count pull-left">';
+                                occupancy_block += '<span>1</span>';
+                            occupancy_block += '</div>';
+                            occupancy_block += '<div class="qty_direction pull-left">';
+                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
+                                    occupancy_block += '<span><i class="icon-plus"></i></span>';
+                                occupancy_block += '</a>';
+                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
+                                    occupancy_block += '<span><i class="icon-minus"></i></span>';
+                                occupancy_block += '</a>';
+                            occupancy_block += '</div>';
+                        occupancy_block += '</div>';
+                    occupancy_block += '</div>';
+                occupancy_block += '</div>';
+                occupancy_block += '<div class="form-group col-sm-7 col-xs-6 occupancy_count_block">';
+                    occupancy_block += '<div class="row">';
+                        occupancy_block += '<label class="col-sm-12">' + child_txt + '<span class="label-desc-txt">(' + below_txt + ' ' + max_child_age + ' ' + years_txt + ')</span></label>';
+                        occupancy_block += '<div class="col-sm-12">';
+                            occupancy_block += '<input type="hidden" class="num_occupancy num_children room_occupancies" name="occupancy['+roomBlockIndex+'][children]" value="0">';
+                            occupancy_block += '<div class="occupancy_count pull-left">';
+                                occupancy_block += '<span>0</span>';
+                            occupancy_block += '</div>';
+                            occupancy_block += '<div class="qty_direction pull-left">';
+                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
+                                    occupancy_block += '<span><i class="icon-plus"></i></span>';
+                                occupancy_block += '</a>';
+                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
+                                    occupancy_block += '<span><i class="icon-minus"></i></span>';
+                                occupancy_block += '</a>';
+                            occupancy_block += '</div>';
+                        occupancy_block += '</div>';
+                    occupancy_block += '</div>';
+                occupancy_block += '</div>';
+            occupancy_block += '</div>';
+            occupancy_block += '<div class="form-group row children_age_info_block">';
+                occupancy_block += '<label class="col-sm-12">' + all_children_txt + '</label>';
+                occupancy_block += '<div class="col-sm-12">';
+                    occupancy_block += '<div class="row children_ages">';
+                    occupancy_block += '</div>';
+                occupancy_block += '</div>';
+            occupancy_block += '</div>';
+            occupancy_block += '<hr class="occupancy-info-separator">';
+        occupancy_block += '</div>';
+
+        $('#booking_occupancy_inner').append(occupancy_block);
+
+        // scroll to the latest added room
+        var objDiv = document.getElementById("booking_occupancy_wrapper");
+        objDiv.scrollTop = objDiv.scrollHeight;
+
+        setGuestOccupancy();
+    });
+
+    // remove occupancy info block
+    $(document).on('click', '#booking_occupancy_wrapper .remove-room-link', function(e) {
+        e.preventDefault();
+        $(this).closest('#booking_occupancy_wrapper .occupancy_info_block').remove();
+
+        $( "#booking_occupancy_wrapper .room_num_wrapper" ).each(function(key, val) {
+            $(this).text(room_txt + ' - '+ (key+1) );
+        });
+
+        setGuestOccupancy();
+    });
+
+    $(document).on('click', '#booking_occupancy_wrapper .occupancy_quantity_up', function(e) {
+        e.preventDefault();
+        // set input field value
+        var element = $(this).closest('.occupancy_count_block').find('.num_occupancy');
+        var elementVal = parseInt(element.val()) + 1;
+
+        var childElement = $(this).closest('.occupancy_count_block').find('.num_children').length;
+        if (childElement) {
+            var totalChilds = $(this).closest('.occupancy_info_block').find('.guest_child_age').length;
+
+            if (totalChilds < max_child_in_room) {
+                element.val(elementVal);
+                $(this).closest('.occupancy_info_block').find('.children_age_info_block').show();
+
+                var roomBlockIndex = parseInt($(this).closest('.occupancy_info_block').attr('occ_block_index'));
+
+                var childAgeSelect = '<div class="col-xs-4">';
+                    childAgeSelect += '<select class="guest_child_age room_occupancies" name="occupancy[' +roomBlockIndex+ '][child_ages][]">';
+                        childAgeSelect += '<option value="-1">' + select_age_txt + '</option>';
+                        childAgeSelect += '<option value="0">' + under_1_age + '</option>';
+                        for (let age = 1; age < max_child_age; age++) {
+                            childAgeSelect += '<option value="'+age+'">'+age+'</option>';
+                        }
+                    childAgeSelect += '</select>';
+                childAgeSelect += '</div>';
+
+                $(this).closest('.occupancy_info_block').find('.children_ages').append(childAgeSelect);
+
+                // set input field value
+                $(this).closest('.occupancy_count_block').find('.occupancy_count > span').text(elementVal);
+            }
+        } else {
+            element.val(elementVal);
+
+            // set input field value
+            $(this).closest('.occupancy_count_block').find('.occupancy_count > span').text(elementVal);
+        }
+        setGuestOccupancy();
+    });
+
+    $(document).on('click', '#booking_occupancy_wrapper .occupancy_quantity_down', function(e) {
+        e.preventDefault();
+        // set input field value
+        var element = $(this).closest('.occupancy_count_block').find('.num_occupancy');
+        var elementVal = parseInt(element.val()) - 1;
+        var childElement = $(this).closest('.occupancy_count_block').find('.num_children').length;
+
+        if (childElement) {
+            if (elementVal < 0) {
+                elementVal = 0;
+            } else {
+                $(this).closest('.occupancy_info_block').find('.children_ages select').last().closest('div').remove();
+                if (elementVal <= 0) {
+                    $(this).closest('.occupancy_info_block').find('.children_age_info_block').hide();
+                }
+            }
+        } else {
+            if (elementVal == 0) {
+                elementVal = 1;
+            }
+        }
+
+        element.val(elementVal);
+        // set input field value
+        $(this).closest('.occupancy_count_block').find('.occupancy_count > span').text(elementVal);
+
+        setGuestOccupancy();
+    });
+
+    // toggle occupancy block
+    $('#booking_guest_occupancy').on('click', function(e) {
+        e.stopPropagation();
+        $("#booking_occupancy_wrapper").toggle();
+    });
+
+    // close the occupancy block when clink anywhere in the body outside occupancy block
+    $('body').on('click', function(e) {
+        // @TODO better approach to be found
+        if ($('#booking_occupancy_wrapper').css('display') !== 'none') {
+            if (!($(e.target).closest("#booking_occupancy_wrapper").length)) {
+                // Before closing the occupancy block validate the vaules inside
+                let hasErrors = 0;
+
+                let adults = $("#booking_occupancy_wrapper").find(".num_adults").map(function(){return $(this).val();}).get();
+                let children = $("#booking_occupancy_wrapper").find(".num_children").map(function(){return $(this).val();}).get();
+                let child_ages = $("#booking_occupancy_wrapper").find(".guest_child_age").map(function(){return $(this).val();}).get();
+
+                // start validating above values
+                if (!adults.length || (adults.length != children.length)) {
+                    hasErrors = 1;
+                    showErrorMessage(invalid_occupancy_txt);
+                } else {
+                    $("#booking_occupancy_wrapper").find('.occupancy_count').removeClass('error_border');
+
+                    // validate values of adults and children
+                    adults.forEach(function (item, index) {
+                        if (isNaN(item) || parseInt(item) < 1) {
+                            hasErrors = 1;
+                            $("#booking_occupancy_wrapper .num_adults").eq(index).closest('.occupancy_count_block').find('.occupancy_count').addClass('error_border');
+                        }
+                        if (isNaN(children[index])) {
+                            hasErrors = 1;
+                            $("#booking_occupancy_wrapper .num_children").eq(index).closest('.occupancy_count_block').find('.occupancy_count').addClass('error_border');
+                        }
+                    });
+
+                    // validate values of selected child ages
+                    $("#booking_occupancy_wrapper").find('.guest_child_age').removeClass('error_border');
+                    child_ages.forEach(function (age, index) {
+                        age = parseInt(age);
+                        if (isNaN(age) || (age < 0) || (age >= parseInt(max_child_age))) {
+                            hasErrors = 1;
+                            $("#booking_occupancy_wrapper .guest_child_age").eq(index).addClass('error_border');
+                        }
+                    });
+                }
+
+                if (hasErrors == 0) {
+                    $("#booking_occupancy_wrapper").hide();
+                    $(".booking_room_fields #booking_guest_occupancy").removeClass('error_border');
+
+                    // lets call the ajax to change prices as per selecte occupancy
+                    var checkIn = formatDate($("#room_check_in").val());
+                    var checkOut = formatDate($("#room_check_out").val());
+                    changeRoomDate(checkIn, checkOut);
+                } else {
+                    $(".booking_room_fields #booking_guest_occupancy").addClass('error_border');
+                    return false;
+                }
+            }
+        }
+    });
 });
+
+// function to set occupancy infor in guest occupancy field(booking form)
+function setGuestOccupancy()
+{
+    var adults = 0;
+    var children = 0;
+    var rooms = $('#booking_occupancy_wrapper .occupancy_info_block').length;
+    $( "#booking_occupancy_wrapper .num_adults" ).each(function(key, val) {
+        adults += parseInt($(this).val());
+    });
+    $( "#booking_occupancy_wrapper .num_children" ).each(function(key, val) {
+        children += parseInt($(this).val());
+    });
+    var guestButtonVal = parseInt(adults) + ' ';
+    if (parseInt(adults) > 1) {
+        guestButtonVal += adults_txt;
+    } else {
+        guestButtonVal += adult_txt;
+    }
+    if (parseInt(children) > 0) {
+        if (parseInt(children) > 1) {
+            guestButtonVal += ', ' + parseInt(children) + ' ' + children_txt;
+        } else {
+            guestButtonVal += ', ' + parseInt(children) + ' ' + child_txt;
+        }
+    }
+    if (parseInt(rooms) > 1) {
+        guestButtonVal += ', ' + parseInt(rooms) + ' ' + rooms_txt;
+    } else {
+        guestButtonVal += ', ' + parseInt(rooms) + ' ' + room_txt;
+    }
+
+    $('#booking_guest_occupancy > span').text(guestButtonVal);
+}
+
+// @todo merge with function changeRoomDate()
+// function calls when room demands changes
 
 function changeRoomTypeDemands() {
     var qty_wntd = $('#quantity_wanted').val();
@@ -1335,9 +1591,13 @@ function changeRoomTypeDemands() {
     }
 }
 
+// function calls when date changes
 function changeRoomDate(date_in, date_out){
     // get the selected extra demands by customer
     var roomDemands = getRoomsExtraDemands();
+    // get the guest occupancy in the booking form
+    var guestOccupancy = getBookingOccupancy();
+
 
     /*by webkul to manage quantity of rooms*/
     $.ajax({
@@ -1355,6 +1615,7 @@ function changeRoomDate(date_in, date_out){
 	    qty: $('#quantity_wanted').val(),
 	    id_product: $('#product_page_product_id').val(),
 	    room_demands: JSON.stringify(roomDemands),
+        occupancy: JSON.stringify(guestOccupancy),
 	    action: 'checkRoomAvailabilityAndRate',
 	    ajax: true
 	},
@@ -1426,8 +1687,35 @@ function changeRoomDate(date_in, date_out){
 		    disableRoomTypeDemands(1);
 		}
 	    } else {
-		alert(some_error_cond);
+		    showErrorMessage(some_error_cond);
 	    }
 	}
     });
+}
+// get guest occupancies of the booking
+function getBookingOccupancy()
+{
+    let occupancies = [];
+    let adults = $("#booking_occupancy_wrapper").find("input.num_adults");
+    $.each(adults, function(key, adultEle) {
+        var roomBlockIndex = parseInt($(this).closest('.occupancy_info_block').attr('occ_block_index'));
+        // create room occupancy
+        let occupancy = {
+            'adults': parseInt($(this).val()),
+            'children': $("#booking_occupancy_wrapper input.num_children").eq(key).val(),
+        };
+
+        // set guest agaes
+        occupancy.children_ages = [];
+        if (occupancy.children && parseInt(occupancy.children) > 0) {
+            occupancy.children_ages = $("#booking_occupancy_wrapper")
+            .find("select[name='occupancy[" + roomBlockIndex + "][child_ages][]']")
+            .map(function(){return $(this).val();}).get();
+        }
+
+        // push room occupancy in the occupacies array
+        occupancies.push(occupancy);
+    });
+
+    return occupancies;
 }

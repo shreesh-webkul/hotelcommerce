@@ -155,7 +155,7 @@ class OrderConfirmationControllerCore extends FrontController
 
                             $cart_htl_data[$type_key]['id_product'] = $type_value['product_id'];
                             $cart_htl_data[$type_key]['cover_img'] = $cover_img;
-                            $cart_htl_data[$type_key]['adult'] = $rm_dtl['adult'];
+                            $cart_htl_data[$type_key]['adult'] = $rm_dtl['adults'];
                             $cart_htl_data[$type_key]['children'] = $rm_dtl['children'];
                             foreach ($order_bk_data as $data_k => $data_v) {
                                 $date_join = strtotime($data_v['date_from']).strtotime($data_v['date_to']);

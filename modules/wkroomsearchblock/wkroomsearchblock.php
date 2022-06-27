@@ -68,6 +68,21 @@ class WkRoomSearchBlock extends Module
                     'less_checkin_date' => $this->l('Check In date can not be before current date.'),
                     'more_checkout_date' => $this->l('Check Out date must be greater than Check In date.'),
                     'select_htl_txt' => $this->l('Select Hotel'),
+                    'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
+                    'max_child_in_room' => Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'),
+                    'select_age_txt' => $this->l('Select age'),
+                    'under_1_age' => $this->l('Under 1'),
+                    'room_txt' => $this->l('Room'),
+                    'rooms_txt' => $this->l('Rooms'),
+                    'remove_txt' => $this->l('Remove'),
+                    'adult_txt' => $this->l('Adult'),
+                    'adults_txt' => $this->l('Adults'),
+                    'child_txt' => $this->l('Child'),
+                    'children_txt' => $this->l('Children'),
+                    'below_txt' => $this->l('Below'),
+                    'years_txt' => $this->l('years'),
+                    'all_children_txt' => $this->l('All Children'),
+                    'invalid_occupancy_txt' => $this->l('Invalid occupancy(adults/children) found.'),
                 )
             );
         }

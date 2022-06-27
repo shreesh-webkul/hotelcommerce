@@ -308,7 +308,7 @@
 										</div>
 									</div>
 									<div class="room_unavailability_date_error_div"></div>
-									<div class="unvail_rooms_cond_display row">
+									{* <div class="unvail_rooms_cond_display row">
 										<div class="form-group col-sm-6" id="quantity_wanted_p"{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || $PS_CATALOG_MODE} style="display: none;"{/if}>
 											<label for="quantity_wanted">{l s='No. of Rooms'}</label>
 											<div class="qty_sec_cont">
@@ -333,7 +333,156 @@
 											</div>
 											<span class="clearfix"></span>
 										</div>
+									</div> *}
+									{* occupancy field *}
+									<div class="row">
+										<div class="form-group col-sm-12">
+											<label class="control-label">{l s='Guests'}</label>
+											<div class="form-group dropdown">
+												<button class="form-control header-rmsearch-input {if isset($error) && $error == 1}error_border{/if}" type="button" data-toggle="dropdown" id="booking_guest_occupancy">
+													<span class="pull-left">{if (isset($occupancy_adults) && $occupancy_adults)}{$occupancy_adults} {l s='Adult' mod='wkroomsearchblock'}, {if isset($occupancy_children) && $occupancy_children}{$occupancy_children} {if $occupancy_children > 1} {l s='Children' mod='wkroomsearchblock'}{else}{l s='Child' mod='wkroomsearchblock'}{/if}, {/if}{$occupancies|count} {l s='Room(s)' mod='wkroomsearchblock'}{else}{l s='1 Adult, 1 Room' mod='wkroomsearchblock'}{/if}</span>
+												</button>
+												<div id="booking_occupancy_wrapper" class="dropdown-menu">
+													<div id="booking_occupancy_inner">
+														{if isset($occupancies) && $occupancies}
+															{assign var=countRoom value=1}
+															{foreach from=$occupancies key=key item=$occupancy name=occupancyInfo}
+																<div class="occupancy_info_block" occ_block_index="{$key|escape:'htmlall':'UTF-8'}">
+																	<div class="occupancy_info_head"><span class="room_num_wrapper">{l s='Room' mod='wkroomsearchblock'} - {$countRoom|escape:'htmlall':'UTF-8'} </span>{if !$smarty.foreach.occupancyInfo.first}<a class="remove-room-link pull-right" href="#">{l s='Remove' mod='wkroomsearchblock'}</a>{/if}</div>
+																	<div class="row">
+																		<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">
+																			<div class="row">
+																				<label class="col-sm-12">{l s='Adults' mod='wkroomsearchblock'}</label>
+																				<div class="col-sm-12">
+																					<input type="hidden" class="num_occupancy num_adults room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][adults]" value="{$occupancy['adults']|escape:'htmlall':'UTF-8'}">
+																					<div class="occupancy_count pull-left">
+																						<span>{$occupancy['adults']|escape:'htmlall':'UTF-8'}</span>
+																					</div>
+																					<div class="qty_direction pull-left">
+																						<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">
+																							<span><i class="icon-plus"></i></span>
+																						</a>
+																						<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">
+																							<span><i class="icon-minus"></i></span>
+																						</a>
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+																		<div class="form-group col-sm-7 col-xs-6 occupancy_count_block">
+																			<div class="row">
+																				<label class="col-sm-12">{l s='Child' mod='wkroomsearchblock'}<span class="label-desc-txt"> ({l s='Below' mod='wkroomsearchblock'} {$max_child_age|escape:'htmlall':'UTF-8'} {l s='years' mod='wkroomsearchblock'})</span></label>
+																				<div class="col-sm-12">
+																					<input type="hidden" class="num_occupancy num_children room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][children]" value="{$occupancy['children']|escape:'htmlall':'UTF-8'}">
+																					<div class="occupancy_count pull-left">
+																						<span>{$occupancy['children']|escape:'htmlall':'UTF-8'}</span>
+																					</div>
+																					<div class="qty_direction pull-left">
+																						<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">
+																							<span><i class="icon-plus"></i></span>
+																						</a>
+																						<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">
+																							<span><i class="icon-minus"></i></span>
+																						</a>
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+																	</div>
+																	<div class="form-group row children_age_info_block" {if isset($occupancy['child_ages']) && $occupancy['child_ages']}style="display:block;"{/if}>
+																		<label class="col-sm-12">{l s='All Children' mod='wkroomsearchblock'}</label>
+																		<div class="col-sm-12">
+																			<div class="row children_ages">
+																				{if isset($occupancy['child_ages']) && $occupancy['child_ages']}
+																					{foreach $occupancy['child_ages'] as $childAge}
+																						<div class="col-xs-4">
+																							<select class="guest_child_age room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][child_ages][]">
+																								<option value="-1" {if $childAge == -1}selected{/if}>{l s='Select 1' mod='wkroomsearchblock'}</option>
+																								<option value="0" {if $childAge == 0}selected{/if}>{l s='Under 1' mod='wkroomsearchblock'}</option>
+																								{for $age=1 to ($max_child_age-1)}
+																									<option value="{$age|escape:'htmlall':'UTF-8'}" {if $childAge == $age}selected{/if}>{$age|escape:'htmlall':'UTF-8'}</option>
+																								{/for}
+																							</select>
+																						</div>
+																					{/foreach}
+																				{/if}
+																			</div>
+																		</div>
+																	</div>
+																	<hr class="occupancy-info-separator">
+																</div>
+																{assign var=countRoom value=$countRoom+1}
+															{/foreach}
+														{else}
+															<div class="occupancy_info_block">
+																<div class="occupancy_info_head"><span class="room_num_wrapper">{l s='Room - 1' mod='wkroomsearchblock'}</span></div>
+																<div class="row">
+																	<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">
+																		<div class="row">
+																			<label class="col-sm-12">{l s='Adults' mod='wkroomsearchblock'}</label>
+																			<div class="col-sm-12">
+																				<input type="hidden" class="num_occupancy num_adults" name="num_adults[]" value="1">
+																				<div class="occupancy_count pull-left">
+																					<span>1</span>
+																				</div>
+																				<div class="qty_direction pull-left">
+																					<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">
+																						<span>
+																							<i class="icon-plus"></i>
+																						</span>
+																					</a>
+																					<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">
+																						<span>
+																							<i class="icon-minus"></i>
+																						</span>
+																					</a>
+																				</div>
+																			</div>
+																		</div>
+																	</div>
+																	<div class="form-group col-sm-7 col-xs-6 occupancy_count_block">
+																		<div class="row">
+																			<label class="col-sm-12">{l s='Child' mod='wkroomsearchblock'} <span class="label-desc-txt">({l s='Below' mod='wkroomsearchblock'}  {$max_child_age|escape:'htmlall':'UTF-8'} {l s='years' mod='wkroomsearchblock'})</span></label>
+																			<div class="col-sm-12">
+																				<input type="hidden" class="num_occupancy num_children" name="num_children[]" value="0">
+																				<div class="occupancy_count pull-left">
+																					<span>0</span>
+																				</div>
+																				<div class="qty_direction pull-left">
+																					<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">
+																						<span>
+																							<i class="icon-plus"></i>
+																						</span>
+																					</a>
+																					<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">
+																						<span>
+																							<i class="icon-minus"></i>
+																						</span>
+																					</a>
+																				</div>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+																<div class="form-group row children_age_info_block">
+																	<label class="col-sm-12">{l s='All Children' mod='wkroomsearchblock'}</label>
+																	<div class="col-sm-12">
+																		<div class="row children_ages">
+																		</div>
+																	</div>
+																</div>
+																<hr class="occupancy-info-separator">
+															</div>
+														{/if}
+													</div>
+													<div class="add_occupancy_block">
+														<a class="add_new_occupancy_btn" href="#"><i class="icon-plus"></i> <span>{l s='Add Room' mod='wkroomsearchblock'}</span></a>
+													</div>
+												</div>
+											</div>
+										</div>
 									</div>
+
 									{if isset($room_type_demands) && $room_type_demands}
 										<hr class="separator-hr-mg-10 unvail_rooms_cond_display">
 										<div class="row price_desc_block unvail_rooms_cond_display">
@@ -811,5 +960,21 @@
 	{addJsDefL name=unavail_qty_text}{l s='Required quantity of rooms are Not available.' js=1}{/addJsDefL}
 	{addJsDefL name=out_of_stock_cond}{l s='No room is available for this period.' js=1}{/addJsDefL}
 	{addJsDefL name=wrong_qty_cond}{l s='you are trying for a invalid quantity.' js=1}{/addJsDefL}
+	{* Occupancy fields *}
+		{addJsDef max_child_age=$max_child_age}
+		{addJsDef max_child_in_room=$max_child_in_room}
+		{addJsDefL name='select_age_txt'}{l s='Select age' js=1}{/addJsDefL}
+		{addJsDefL name='under_1_age'}{l s='Under 1' js=1}{/addJsDefL}
+		{addJsDefL name='room_txt'}{l s='Room' js=1}{/addJsDefL}
+		{addJsDefL name='rooms_txt'}{l s='Rooms' js=1}{/addJsDefL}
+		{addJsDefL name='remove_txt'}{l s='Remove' js=1}{/addJsDefL}
+		{addJsDefL name='adult_txt'}{l s='Adult' js=1}{/addJsDefL}
+		{addJsDefL name='adults_txt'}{l s='Adults' js=1}{/addJsDefL}
+		{addJsDefL name='child_txt'}{l s='Child' js=1}{/addJsDefL}
+		{addJsDefL name='children_txt'}{l s='Children' js=1}{/addJsDefL}
+		{addJsDefL name='below_txt'}{l s='Below' js=1}{/addJsDefL}
+		{addJsDefL name='years_txt'}{l s='years' js=1}{/addJsDefL}
+		{addJsDefL name='all_children_txt'}{l s='years' js=1}{/addJsDefL}
+		{addJsDefL name='invalid_occupancy_txt'}{l s='Invalid occupancy(adults/children) found.' js=1}{/addJsDefL}
 	{/strip}
 {/if}

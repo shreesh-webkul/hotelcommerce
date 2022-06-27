@@ -144,3 +144,95 @@
         text-transform: uppercase;
         border: none;
         border-radius: 4px;}
+
+
+/* occupancy  */
+#occupancy_wrapper {
+  border: none;
+  max-height: 730px;
+  overflow: auto;
+  box-shadow: 0 8px 25px -4px rgba(0,0,0,0.39);
+  left: 0px;
+  padding: 20px;}
+  #occupancy_wrapper .occupancy-info-separator {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    margin-right: -20px;
+      margin-left: -20px;}
+  #occupancy_wrapper .children_age_info_block {
+    display: none;}
+  #occupancy_wrapper .children_age_info_block label {
+    font-size: 12px;
+    color: #777777;}
+  #occupancy_wrapper label {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 400;}
+    #occupancy_wrapper .add_new_occupancy_btn {
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 14px;
+      color: #0000FF;
+      line-height: 24px;}
+      #occupancy_wrapper .add_new_occupancy_btn:active, #occupancy_wrapper .add_new_occupancy_btn:focus, #occupancy_wrapper .add_new_occupancy_btn:hover {
+        text-decoration: none;
+        color: #0000FF;}
+    #occupancy_wrapper .occupancy_info_head {
+      font-size: 14px;
+      color: #333333;
+      font-weight: bold;
+      margin-bottom: 10px;}
+      #occupancy_wrapper .occupancy_info_head .remove-room-link {
+        font-size: 12px;
+        color: #FF4343;
+        text-align: right;}
+      #occupancy_wrapper .occupancy_info_block .occupancy_count {
+        padding: 14px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333333;
+        text-align: center;
+        border-radius: 4px;}
+      #occupancy_wrapper .occupancy_info_block .occupancy_count > span {
+        min-width: 21px;
+        text-align: center;
+        display: block;}
+      #occupancy_wrapper .occupancy_info_block .qty_direction {
+        margin-left: 1px;
+        width: 22px;}
+        #occupancy_wrapper .occupancy_info_block .qty_direction a {
+          padding: 2px 5px;
+          border: 0px;
+          border-color: #999;
+          background: #DBDBDB;
+          color: #333;
+          border-radius: 2px;
+          font-weight: 400;}
+          #occupancy_wrapper .occupancy_info_block .qty_direction .occupancy_quantity_down {
+            margin-top: 3px;}
+
+  #occupancy_wrapper .children_ages.row {
+    margin-left: -5px;
+    margin-right: -5px;}
+  #occupancy_wrapper .children_ages .col-xs-4 {
+    padding-left: 5px;
+    margin-bottom: 5px;
+    padding-right: 5px;}
+  #occupancy_wrapper .children_ages select {
+    background-color: #fff;
+    height: 37px;
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 12px;
+    color: #333;
+    border: 1px solid #777777;
+    width: 100%;}
+
+
+@media (max-width: 411px) {
+  #occupancy_wrapper .occupancy_info_block .occupancy_count_block {
+    width: 100%;}
+  #occupancy_wrapper .occupancy_info_block .occupancy_count {
+      width: 80%;}
+}

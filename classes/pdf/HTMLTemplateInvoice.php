@@ -352,7 +352,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
                     $cart_htl_data[$type_key]['id_product'] = $type_value['product_id'];
                     $cart_htl_data[$type_key]['cover_img']    = $cover_img;
-                    $cart_htl_data[$type_key]['adult']        = $rm_dtl['adult'];
+                    $cart_htl_data[$type_key]['adult']        = $rm_dtl['adults'];
                     $cart_htl_data[$type_key]['children']    = $rm_dtl['children'];
                     $cart_htl_data[$type_key]['hotel_name']    = $rm_dtl['hotel_name'];
                     $objBookingDemand = new HotelBookingDemands();

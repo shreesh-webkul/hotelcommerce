@@ -23,8 +23,15 @@ class HotelRoomType extends ObjectModel
     public $id;
     public $id_product;
     public $id_hotel;
-    public $adult;
+    public $adults;
     public $children;
+    public $max_extra_adults;
+	public $max_extra_children;
+    public $max_extra_infants;
+    public $max_guests;
+	public $extra_adult_price;
+	public $extra_child_price;
+	public $extra_infant_price;
     public $date_add;
     public $date_upd;
 
@@ -34,7 +41,14 @@ class HotelRoomType extends ObjectModel
         'fields' => array(
             'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
             'id_hotel' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
-            'adult' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
+            'adults' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
+            'max_extra_adults' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'default' => 2),
+            'max_extra_children' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
+            'max_extra_infants' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
+            'max_guests' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'default' => 2),
+            'extra_adult_price' => array('type' => self::TYPE_FLOAT),
+            'extra_child_price' => array('type' => self::TYPE_FLOAT),
+            'extra_infant_price' => array('type' => self::TYPE_FLOAT),
             'children' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
@@ -214,7 +228,7 @@ class HotelRoomType extends ObjectModel
     public function getRoomTypeInfoByIdProduct($id_product)
     {
         $idLang = Context::getContext()->language->id;
-        $sql = 'SELECT hrt.`id`,hrt.`id_hotel`, hrt.`adult`, hrt.`children`, hbl.`hotel_name`
+        $sql = 'SELECT hrt.*, hbl.`hotel_name`
                 FROM `'._DB_PREFIX_.'htl_room_type` AS hrt
                 INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` AS hbl
                 ON (hbl.`id` = hrt.`id_hotel` AND hbl.`id_lang` = '.(int)$idLang.')
@@ -290,7 +304,7 @@ class HotelRoomType extends ObjectModel
      */
     public function getIdProductByHotelId($hotel_id, $room_type = 0, $onlyActiveProd = 0, $onlyActiveHotel = 0)
     {
-        $sql = 'SELECT DISTINCT hrt.`id_product`, hrt.`adult`, hrt.`children`, hrt.`id`	FROM `'._DB_PREFIX_.
+        $sql = 'SELECT DISTINCT hrt.`id_product`, hrt.`adults`, hrt.`children`, hrt.`id`	FROM `'._DB_PREFIX_.
         'htl_room_type` AS hrt ';
 
         if ($onlyActiveHotel) {
@@ -320,7 +334,7 @@ class HotelRoomType extends ObjectModel
      */
     public static function getMaxAdults($id_hotel)
     {
-        $sql = 'SELECT MAX(adult) AS max_adult FROM '._DB_PREFIX_.'htl_room_type WHERE id_hotel='.$id_hotel;
+        $sql = 'SELECT MAX(adults) AS max_adult FROM '._DB_PREFIX_.'htl_room_type WHERE id_hotel='.$id_hotel;
 
         $max_adult = Db::getInstance()->getValue($sql);
 

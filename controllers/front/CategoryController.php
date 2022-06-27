@@ -138,6 +138,9 @@ class CategoryControllerCore extends FrontController
             $date_to = date('Y-m-d', strtotime($date_from) + 86400);
         }
 
+        // get occupancy of the search
+        $occupancy = Tools::getValue('occupancy');
+
         $currency = new Currency($this->context->currency->id);
 
         if (Module::isInstalled('hotelreservationsystem')) {
@@ -149,6 +152,7 @@ class CategoryControllerCore extends FrontController
             $id_guest = $this->context->cookie->id_guest;
 
             $obj_booking_dtl = new HotelBookingDetail();
+             // @todo Send occupancy in the DataForFrontSearch function
             $booking_params = array(
                 'date_from' => $date_from,
                 'date_to' => $date_to,
@@ -233,6 +237,10 @@ class CategoryControllerCore extends FrontController
         $date_from = Tools::getValue('date_from');
         $date_to = Tools::getValue('date_to');
         $htl_id_category = Tools::getValue('id_category');
+
+        // occupancy of the search
+        // @todo send occupancy in the search function
+        $occupancy = Tools::getValue('occupancy');
 
         $sort_by = Tools::getValue('sort_by');
         $sort_value = Tools::getValue('sort_value');

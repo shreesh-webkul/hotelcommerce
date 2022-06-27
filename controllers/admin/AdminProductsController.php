@@ -211,7 +211,7 @@ class AdminProductsControllerCore extends AdminController
 				LEFT JOIN `'._DB_PREFIX_.'address` aa ON (aa.`id_hotel` = hb.`id`)';
 
         $this->_select .= ' (SELECT COUNT(hri.`id`) FROM `'._DB_PREFIX_.'htl_room_information` hri WHERE hri.`id_product` = a.`id_product`) as num_rooms, ';
-        $this->_select .= 'hrt.`adult`, hrt.`children`, hb.`id` as id_hotel, aa.`city`, hbl.`hotel_name`, ';
+        $this->_select .= 'hrt.`adults`, hrt.`children`, hb.`id` as id_hotel, hb.`city`, hbl.`hotel_name`, ';
         $this->_select .= 'shop.`name` AS `shopname`, a.`id_shop_default`, ';
         $this->_select .= $alias_image.'.`id_image` AS `id_image`, cl.`name` AS `name_category`, '.$alias.'.`price`, 0 AS `price_final`, a.`is_virtual`, pd.`nb_downloadable`, sav.`quantity` AS `sav_quantity`, '.$alias.'.`active`, IF(sav.`quantity`<=0, 1, 0) AS `badge_danger`';
 
@@ -253,9 +253,9 @@ class AdminProductsControllerCore extends AdminController
                 'callback' => 'getHotelName',
             );
         }
-        $this->fields_list['adult'] = array(
+        $this->fields_list['adults'] = array(
             'title' => $this->l('Adults'),
-            'filter_key' => 'hrt!adult',
+            'filter_key' => 'hrt!adults',
             'align' => 'center',
         );
         $this->fields_list['child'] = array(
@@ -3450,6 +3450,7 @@ class AdminProductsControllerCore extends AdminController
         } else {
             $this->displayWarning($this->l('You must save this room type before managing occupancy.'));
         }
+        $smartyVars['currency'] = $this->context->currency;
         $data->assign($smartyVars);
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
@@ -3466,16 +3467,52 @@ class AdminProductsControllerCore extends AdminController
                 if (Validate::isLoadedObject($objRoomType = new HotelRoomType($idHtlRoomType))) {
                     $baseAdults = Tools::getValue('base_adults');
                     $baseChildren = Tools::getValue('base_children');
+                    $maxExtraAdults = Tools::getValue('max_extra_adults');
+                    $maxExtraChildren = Tools::getValue('max_extra_children');
+                    $maxExtraInfants = Tools::getValue('max_extra_infants');
+                    $maxGuests = Tools::getValue('max_guests');
+                    $perAdultPrice = Tools::getValue('extra_adult_price');
+                    $perChildPrice = Tools::getValue('extra_child_price');
+                    $perInfantPrice = Tools::getValue('extra_infant_price');
 
                     if (!$baseAdults || !Validate::isUnsignedInt($baseAdults)) {
                         $this->errors[] = Tools::displayError('Invalid base adults');
                     }
-                    if (!Validate::isUnsignedInt($baseChildren)) {
+                    if (!$baseChildren || !Validate::isUnsignedInt($baseChildren)) {
                         $this->errors[] = Tools::displayError('Invalid base children');
                     }
+                    if (!$maxExtraAdults || !Validate::isUnsignedInt($maxExtraAdults)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of extra adults');
+                    }
+                    if (!$maxExtraChildren || !Validate::isUnsignedInt($maxExtraChildren)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of extra children');
+                    }
+                    if (!$maxExtraInfants || !Validate::isUnsignedInt($maxExtraInfants)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of extra infants');
+                    }
+                    if (!$maxGuests || !Validate::isUnsignedInt($maxGuests)) {
+                        $this->errors[] = Tools::displayError('Invalid maximum number of guests');
+                    }
+                    if (!Validate::isPrice($perAdultPrice)) {
+                        $this->errors[] = Tools::displayError('Invalid price for per extra adult');
+                    }
+                    if (!Validate::isPrice($perChildPrice)) {
+                        $this->errors[] = Tools::displayError('Invalid price for per extra child');
+                    }
+                    if (!Validate::isPrice($perInfantPrice)) {
+                        $this->errors[] = Tools::displayError('Invalid price for per extra infant');
+                    }
+
                     if (!count($this->errors)) {
-                        $objRoomType->adult = $baseAdults;
+                        $objRoomType->adults = $baseAdults;
                         $objRoomType->children = $baseChildren;
+                        $objRoomType->max_extra_adults = $maxExtraAdults;
+                        $objRoomType->max_extra_children = $maxExtraChildren;
+                        $objRoomType->max_extra_infants = $maxExtraInfants;
+                        $objRoomType->max_guests = $maxGuests;
+                        $objRoomType->extra_adult_price = $perAdultPrice;
+                        $objRoomType->extra_child_price = $perChildPrice;
+                        $objRoomType->extra_infant_price = $perInfantPrice;
                         $objRoomType->save();
                     }
                 } else {
@@ -3660,7 +3697,7 @@ class AdminProductsControllerCore extends AdminController
                     $bookingParams['date_to'] = $date_to;
                     $bookingParams['hotel_id'] = $rm_info['id_hotel'];
                     $bookingParams['room_type'] = $obj->id;
-                    $bookingParams['adult'] = $rm_info['adult'];
+                    $bookingParams['adult'] = $rm_info['adults'];
                     $bookingParams['children'] = $rm_info['children'];
                     $bookingParams['num_rooms'] = 0;
 

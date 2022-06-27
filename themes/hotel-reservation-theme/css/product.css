@@ -1327,7 +1327,7 @@ Quick View Styles
 .product_wrapper .input-date {
   background: transparent url(../img/icon/icon-calendar.svg) no-repeat scroll 92% 50%!important;
   background-size: 16px!important;}
-.product_wrapper input {
+.product_wrapper .form-control {
   background-color: transparent!important;
   border: 1px solid #999999;
   box-shadow: 0 1px 0 0 rgba(0,0,0,0.13);
@@ -1356,6 +1356,11 @@ Quick View Styles
   opacity: 0.5;
   margin-bottom: 10px;
   text-transform: uppercase;}
+.booking_room_fields #booking_guest_occupancy {
+  background: url("../img/icon/icon-users.svg") no-repeat 4% 50%, url("../img/icon/icon-dropdown-arrow.svg") no-repeat 96% 50%;
+  padding-left: 45px;
+  padding-right: 35px;}
+
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
   background-color: transparent;
 }
@@ -1470,3 +1475,96 @@ Quick View Styles
 	display:none;
 	border-top: 1px solid #eee;
 	padding-top: 15px;} */
+
+
+
+/* occupancy  */
+#booking_occupancy_wrapper {
+  border: none;
+  max-height: 730px;
+  overflow: auto;
+  box-shadow: 0 8px 25px -4px rgba(0,0,0,0.39);
+  left: 0px;
+  padding: 20px;}
+  #booking_occupancy_wrapper .occupancy-info-separator {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    margin-right: -20px;
+      margin-left: -20px;}
+  #booking_occupancy_wrapper .children_age_info_block {
+    display: none;}
+  #booking_occupancy_wrapper .children_age_info_block label {
+    font-size: 12px;
+    color: #777777;}
+  #booking_occupancy_wrapper label {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 400;}
+    #booking_occupancy_wrapper .add_new_occupancy_btn {
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 14px;
+      color: #0000FF;
+      line-height: 24px;}
+      #booking_occupancy_wrapper .add_new_occupancy_btn:active, #booking_occupancy_wrapper .add_new_occupancy_btn:focus, #booking_occupancy_wrapper .add_new_occupancy_btn:hover {
+        text-decoration: none;
+        color: #0000FF;}
+    #booking_occupancy_wrapper .occupancy_info_head {
+      font-size: 14px;
+      color: #333333;
+      font-weight: bold;
+      margin-bottom: 10px;}
+      #booking_occupancy_wrapper .occupancy_info_head .remove-room-link {
+        font-size: 12px;
+        color: #FF4343;
+        text-align: right;}
+      #booking_occupancy_wrapper .occupancy_info_block .occupancy_count {
+        padding: 14px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333333;
+        text-align: center;
+        border-radius: 4px;}
+      #booking_occupancy_wrapper .occupancy_info_block .occupancy_count > span {
+        min-width: 21px;
+        text-align: center;
+        display: block;}
+      #booking_occupancy_wrapper .occupancy_info_block .qty_direction {
+        margin-left: 1px;
+        width: 22px;}
+        #booking_occupancy_wrapper .occupancy_info_block .qty_direction a {
+          padding: 2px 5px;
+          border: 0px;
+          border-color: #999;
+          background: #DBDBDB;
+          color: #333;
+          border-radius: 2px;
+          font-weight: 400;}
+          #booking_occupancy_wrapper .occupancy_info_block .qty_direction .occupancy_quantity_down {
+            margin-top: 3px;}
+
+  #booking_occupancy_wrapper .children_ages.row {
+    margin-left: -5px;
+    margin-right: -5px;}
+  #booking_occupancy_wrapper .children_ages .col-xs-4 {
+    padding-left: 5px;
+    margin-bottom: 5px;
+    padding-right: 5px;}
+  #booking_occupancy_wrapper .children_ages select {
+    background-color: #fff;
+    height: 37px;
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 12px;
+    color: #333;
+    border: 1px solid #777777;
+    width: 100%;}
+
+
+@media (max-width: 411px) {
+  #booking_occupancy_wrapper .occupancy_info_block .occupancy_count_block {
+    width: 100%;}
+  #booking_occupancy_wrapper .occupancy_info_block .occupancy_count {
+      width: 80%;}
+}

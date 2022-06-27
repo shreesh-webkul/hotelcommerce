@@ -31,6 +31,11 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
     public $impact_type;
     public $impact_value;
     public $active;
+    // occupancy wise pricing fields
+    public $active_for_occupancy;
+    public $adult_impact_value;
+	public $child_impact_value;
+	public $infant_impact_value;
     public $date_add;
     public $date_upd;
 
@@ -51,6 +56,11 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
             'impact_type' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'impact_value' => array('type' => self::TYPE_FLOAT, 'required' => true),
             'active' => array('type' => self::TYPE_INT),
+            // occupancy wise pricing fields
+            'active_for_occupancy' => array('type' => self::TYPE_INT, 'default' => 0),
+            'adult_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
+            'child_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
+            'infant_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             //lang fields

@@ -269,7 +269,7 @@ class ProductControllerCore extends FrontController
             $obj_hotel_room_type = new HotelRoomType();
             $room_info_by_product_id = $obj_hotel_room_type->getRoomTypeInfoByIdProduct($this->product->id);
             $productCapacity = array();
-            $productCapacity['adult'] = $room_info_by_product_id['adult'];
+            $productCapacity['adult'] = $room_info_by_product_id['adults'];
             $productCapacity['children'] = $room_info_by_product_id['children'];
             $this->product->capacity = $productCapacity;
             $hotel_id = $room_info_by_product_id['id_hotel'];
@@ -317,6 +317,9 @@ class ProductControllerCore extends FrontController
                     $total_price = $roomTypeDateRangePrice['total_price_tax_excl'];
                 }
                 //END
+
+                // @todo Send occupancy in the DataForFrontSearch function
+                $occupancy = Tools::getValue('occupancy');
                 $obj_booking_dtl = new HotelBookingDetail();
                 $booking_params = array(
                     'date_from' => $date_from,
@@ -362,8 +365,21 @@ class ProductControllerCore extends FrontController
                     );
                 }
 
+                // send occupancy information searched by the user
+                if ($occupancy = Tools::getvalue('occupancy')) {
+                    $this->context->smarty->assign(
+                        array(
+                            'occupancy_adults' => array_sum(array_column($occupancy, 'adults')),
+                            'occupancy_children' => array_sum(array_column($occupancy, 'children')),
+                            'occupancy_child_ages' => array_sum(array_column($occupancy, 'child_ages'))
+                        )
+                    );
+                }
+
                 $this->context->smarty->assign(
                     array(
+                        // send occupancy information searched by the user
+                        'occupancies' => $occupancy,
                         'isHotelRefundable' => $hotel_branch_obj->isRefundable(),
                         'max_order_date' => $max_order_date,
                         'warning_num' => Configuration::get('WK_ROOM_LEFT_WARNING_NUMBER'),
@@ -420,6 +436,10 @@ class ProductControllerCore extends FrontController
 
             $this->context->smarty->assign(
                 array(
+                    // occupancy fields
+                    'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
+		            'max_child_in_room' => Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'),
+
                     'room_type_demands' => $roomTypeDemands,
                     'WK_PRICE_CALC_METHOD_EACH_DAY' => HotelRoomTypeGlobalDemand::WK_PRICE_CALC_METHOD_EACH_DAY,
                     'product_id_hotel' => $hotel_id,
@@ -937,7 +957,12 @@ class ProductControllerCore extends FrontController
             if ($roomTypeInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
                 $dateFrom = Tools::getValue('date_from');
                 $dateTo = Tools::getValue('date_to');
-                $quantity = Tools::getValue('qty');
+                // occupancy is created for sending to the search function
+                $occupancy = Tools::getValue('occupancy');
+                $occupancy = json_decode($occupancy, true);
+                // @todo for now we are sending the num of rooms for current algo,
+                // @todo Send occupancy in the DataForFrontSearch function
+                $quantity = count($occupancy);
                 if ($idHotel = $roomTypeInfo['id_hotel']) {
                     $objBookingDetail = new HotelBookingDetail();
                     $booking_params = array(

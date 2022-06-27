@@ -34,6 +34,8 @@ class HotelBranchInformation extends ObjectModel
     public $longitude;
     public $map_formated_address;
     public $map_input_text;
+    // max age of infant after which guest will considered as child // below 18
+    public $infant_max_age;
     public $active_refund;
     public $date_add;
     public $date_upd;
@@ -53,6 +55,7 @@ class HotelBranchInformation extends ObjectModel
             'longitude' => array('type' => self::TYPE_FLOAT),
             'map_formated_address' => array('type' => self::TYPE_HTML, 'size' => 128),
             'map_input_text' => array('type' => self::TYPE_STRING, 'size' => 128),
+            'infant_max_age' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'default' => 5),
             'active_refund' => array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
