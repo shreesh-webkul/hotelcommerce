@@ -247,6 +247,10 @@ class HotelHelper
         Configuration::updateValue('WK_ADVANCED_PAYMENT_GLOBAL_MIN_AMOUNT', 10);
         Configuration::updateValue('WK_ADVANCED_PAYMENT_INC_TAX', 1);
 
+        Configuration::updateValue('WK_GLOBAL_CHILD_MAX_AGE', 15);
+        Configuration::updateValue('WK_GLOBAL_INFANT_MAX_AGE', 3);
+        Configuration::updateValue('WK_GLOBAL_MAX_CHILD_IN_ROOM', 3);
+
         Configuration::updateValue(
             'MAX_GLOBAL_BOOKING_DATE',
             date('d-m-Y', strtotime(date('Y-m-d', time()).' + 1 year'))

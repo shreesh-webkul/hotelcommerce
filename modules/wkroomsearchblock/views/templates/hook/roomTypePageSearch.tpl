@@ -179,7 +179,7 @@
 											{assign var=countRoom value=$countRoom+1}
 										{/foreach}
 									{else}
-										<div class="occupancy_info_block">
+										<div class="occupancy_info_block" occ_block_index="0">
 											<div class="occupancy_info_head"><span class="room_num_wrapper">{l s='Room - 1' mod='wkroomsearchblock'}</span></div>
 											<div class="row">
 												<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">

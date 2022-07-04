@@ -81,7 +81,7 @@
 							{if isset($search_data['occupancies']) && $search_data['occupancies']}
 								{assign var=countRoom value=1}
 								{foreach from=$search_data['occupancies'] key=key item=$occupancy name=occupancyInfo}
-									<div class="occupancy_info_block">
+									<div class="occupancy_info_block" occ_block_index="{$key|escape:'htmlall':'UTF-8'}">
 										<div class="occupancy_info_head"><span class="room_num_wrapper">{l s='Room' mod='wkroomsearchblock'} - {$countRoom|escape:'htmlall':'UTF-8'} </span>{if !$smarty.foreach.occupancyInfo.first}<a class="remove-room-link pull-right" href="#">{l s='Remove' mod='wkroomsearchblock'}</a>{/if}</div>
 										<div class="row">
 											<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">
@@ -148,7 +148,7 @@
 									{assign var=countRoom value=$countRoom+1}
 								{/foreach}
 							{else}
-								<div class="occupancy_info_block">
+								<div class="occupancy_info_block" occ_block_index="0">
 									<div class="occupancy_info_head"><span class="room_num_wrapper">{l s='Room - 1' mod='wkroomsearchblock'}</span></div>
 									<div class="form-group row">
 										<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">

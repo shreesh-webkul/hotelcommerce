@@ -153,6 +153,8 @@ class WkRoomSearchBlock extends Module
         $maxOrderDate = Tools::getValue('max_order_date');
         $maxOrderDate = date('Y-m-d', strtotime($maxOrderDate));
 
+        $occupancy = Tools::getValue('occupancy');
+
         $objSearchHelper = new WkRoomSearchHelper();
         $this->context->controller->errors = array_merge(
             $this->context->controller->errors,
@@ -163,6 +165,7 @@ class WkRoomSearchBlock extends Module
             $urlData = array (
                 'date_from' => $checkIn,
                 'date_to' => $checkOut,
+                'occupancy' => $occupancy
             );
             if (Configuration::get('PS_REWRITING_SETTINGS')) {
                 $redirectLink = $this->context->link->getCategoryLink(
