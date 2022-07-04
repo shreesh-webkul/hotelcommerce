@@ -846,48 +846,25 @@ class HotelBookingDetail extends ObjectModel
      *
      * @return [array] [Returns true if successfully updated else returns false]
      *                 Note:: $for_room_type is used for product page and category page for block cart
-     * @deprecated 1.6.0 use getRoomsAvailable
      */
-    public function DataForFrontSearch($date_from, $date_to, $id_hotel, $id_product = 0, $for_room_type = 0, $adult = 0, $children = 0, $ratting = -1, $amenities = 0, $price = 0, $id_cart = 0, $id_guest = 0)
+    public function DataForFrontSearch($bookingParams)
     {
-        $bookingParams = array();
-        $bookingParams['date_from'] = $date_from;
-        $bookingParams['date_to'] = $date_to;
-        $bookingParams['hotel_id'] = $id_hotel;
-        $bookingParams['room_type'] = $id_product;
-        $bookingParams['adult'] = $adult;
-        $bookingParams['children'] = $children;
-        $bookingParams['num_rooms'] = 0;
-        $bookingParams['for_calendar'] = 0;
-        $bookingParams['search_available'] = 1;
-        $bookingParams['search_partial'] = 0;
-        $bookingParams['search_booked'] = 0;
-        $bookingParams['search_unavai'] = 0;
-        $bookingParams['id_cart'] = $id_cart;
-        $bookingParams['id_guest'] = $id_guest;
-        $bookingParams['for_room_type'] = $for_room_type;
-        $bookingParams['ratting'] = $ratting;
-        $bookingParams['amenities'] = $amenities;
-        $bookingParams['price'] = $price;
-
-        return $this->getRoomsAvailable($bookingParams);
-    }
-
-    public function getRoomsAvailable($bookingParams)
-    {
-        $bookingParams['num_rooms'] = 0;
-        $bookingParams['search_partial'] = 0;
-        $bookingParams['search_booked'] = 0;
-        $bookingParams['search_unavai'] = 0;
-        $booking_data = $this->getBookingData($bookingParams);
-
-        extract($this->getBookingDataParams($bookingParams));
-
         if (Module::isInstalled('productcomments')) {
             require_once _PS_MODULE_DIR_.'productcomments/ProductComment.php';
         }
 
         $this->context = Context::getContext();
+
+        $bookingParams['search_partial'] = 0;
+        $bookingParams['search_booked'] = 0;
+        $bookingParams['search_unavai'] = 0;
+
+        $booking_data = $this->getBookingData($bookingParams);
+
+        extract($this->getBookingDataParams($bookingParams));
+
+        $this->context = Context::getContext();
+
         if (!$for_room_type) {
             if (!empty($booking_data)) {
                 $obj_rm_type = new HotelRoomType();

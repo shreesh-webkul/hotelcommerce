@@ -158,7 +158,7 @@ class CategoryControllerCore extends FrontController
                 'id_guest' => $id_guest,
             );
 
-            $booking_data = $obj_booking_dtl->getRoomsAvailable($booking_params);
+            $booking_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
 
             $feat_img_dir = _PS_IMG_.'rf/';
             $ratting_img = _MODULE_DIR_.'hotelreservationsystem/views/img/Slices/icons-sprite.png';
@@ -286,7 +286,7 @@ class CategoryControllerCore extends FrontController
                 'id_guest' => $this->context->cookie->id_guest,
             );
 
-            $booking_data = $obj_booking_dtl->getRoomsAvailable($booking_params);
+            $booking_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
             // reset array keys from 0
             $booking_data['rm_data'] = array_values($booking_data['rm_data']);
             if ($sort_by && $sort_value) {

@@ -1804,7 +1804,7 @@ class AdminOrdersControllerCore extends AdminController
                     'id_cart' => $id_cart,
                     'id_guest' => $id_guest,
                 );
-                $hotel_room_data = $obj_booking_dtl->getRoomsAvailable($booking_params);
+                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $req_rm) {

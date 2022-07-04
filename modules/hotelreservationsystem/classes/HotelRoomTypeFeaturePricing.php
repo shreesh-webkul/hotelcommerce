@@ -260,7 +260,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                     'room_type' => $id_product,
                     'for_room_type' => 1,
                 );
-                $roomTypeAvailabilityInfo = $objBookingDetail->getRoomsAvailable($booking_params);
+                $roomTypeAvailabilityInfo = $objBookingDetail->DataForFrontSearch($booking_params);
                 if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                     $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                 } else {
@@ -289,7 +289,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                             'room_type' => $product['id_product'],
                             'for_room_type' => 1,
                         );
-                        $roomTypeAvailabilityInfo = $objBookingDetail->getRoomsAvailable($booking_params);
+                        $roomTypeAvailabilityInfo = $objBookingDetail->DataForFrontSearch($booking_params);
                         if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                             $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                         } else {
@@ -437,7 +437,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                                         'room_type' => $id_product,
                                         'for_room_type' => 1,
                                     );
-                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->getRoomsAvailable($booking_params);
+                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->DataForFrontSearch($booking_params);
                                     $bookedRoomsInfo = $hotelRoomInformation->getRoomTypeBookedRoomsForDateRange(
                                         $id_hotel,
                                         $id_product,

@@ -184,7 +184,7 @@ class CartControllerCore extends FrontController
                         'room_type' => $id_product,
                         'for_room_type' => 1,
                     );
-                    if ($hotel_room_data = $obj_booking_dtl->getRoomsAvailable($booking_params)) {
+                    if ($hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params)) {
                         $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                     }
                 }
@@ -323,7 +323,7 @@ class CartControllerCore extends FrontController
                                 'id_cart' => $id_cart,
                                 'id_guest' => $id_guest,
                             );
-                            if ($hotel_room_data = $obj_booking_dtl->getRoomsAvailable($booking_params)) {
+                            if ($hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params)) {
                                 if (isset($hotel_room_data['stats']['num_avail'])) {
                                     $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                                     if (Tools::getValue('op', 'up') == 'up') {

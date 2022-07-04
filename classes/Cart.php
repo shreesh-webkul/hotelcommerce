@@ -4419,7 +4419,7 @@ class CartCore extends ObjectModel
                                 'id_cart' => $idCart,
                                 'id_guest' => $idGuest,
                             );
-                            if ($hotelRoomData = $obj_booking_dtl->getRoomsAvailable($booking_params)) {
+                            if ($hotelRoomData = $obj_booking_dtl->DataForFrontSearch($booking_params)) {
                                 if (isset($hotelRoomData['stats']['num_avail'])) {
                                     $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                                     if ($totalAvailRooms < $reqRooms) {

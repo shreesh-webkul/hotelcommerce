@@ -326,7 +326,7 @@ class ProductControllerCore extends FrontController
                     'for_room_type' => 1
                 );
 
-                $hotel_room_data = $obj_booking_dtl->getRoomsAvailable($booking_params);
+                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
                 if ($hotel_room_data) {
                     $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                 }
@@ -948,7 +948,7 @@ class ProductControllerCore extends FrontController
                         'id_guest' => $this->context->cart->id_guest
                     );
 
-                    if ($hotelRoomData = $objBookingDetail->getRoomsAvailable($booking_params)) {
+                    if ($hotelRoomData = $objBookingDetail->DataForFrontSearch($booking_params)) {
                         $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                         if ($totalAvailRooms >= $quantity) {
                             $totalPrice = 0;
