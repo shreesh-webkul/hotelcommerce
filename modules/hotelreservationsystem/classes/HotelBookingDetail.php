@@ -863,8 +863,6 @@ class HotelBookingDetail extends ObjectModel
 
         extract($this->getBookingDataParams($bookingParams));
 
-        $this->context = Context::getContext();
-
         if (!$for_room_type) {
             if (!empty($booking_data)) {
                 $obj_rm_type = new HotelRoomType();
