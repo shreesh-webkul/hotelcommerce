@@ -29,16 +29,15 @@
                     <div class="container">
                         <div class="row header-rmsearch-inner-wrapper">
                             <form method="POST" id="search_hotel_block_form">
-                                <div class="row">
                                     {if isset($location_enabled) && $location_enabled}
-                                        <div class="form-group col-md-5 col-sm-6 wk-padding-5">
+                                        <div class="form-group {if count($hotels_info) <= 1 && !$show_hotel_name}col-md-3{else}col-md-2{/if} col-sm-6 wk-padding-5">
                                             <input type="text" class="form-control header-rmsearch-input" id="hotel_location" name="hotel_location" autocomplete="off" placeholder="{l s='Hotel Location' mod='wkroomsearchblock'}">
                                             <div class="dropdown">
                                                 <ul class="location_search_results_ul"></ul>
                                             </div>
                                         </div>
                                     {/if}
-                                    <div class="form-group wk-padding-5 {if isset($location_enabled) && $location_enabled}col-md-5{/if} col-sm-6 {if count($hotels_info) <= 1 && !$show_hotel_name} hidden {/if}">
+                                    <div class="form-group wk-padding-5 col-md-3 col-sm-6{if count($hotels_info) <= 1 && !$show_hotel_name} hidden {/if}">
                                         <input type="hidden" name="is_hotel_rooms_search" value="1">
                                         {if !$show_hotel_name}
                                             <input type="hidden" id="max_order_date" name="max_order_date" value="{if isset($hotels_info[0]['max_order_date'])}{$hotels_info[0]['max_order_date']|escape:'htmlall':'UTF-8'}{/if}">
@@ -65,15 +64,12 @@
                                             {/if}
                                         {/if}
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-3 col-sm-3 wk-padding-5 check_in_field_block">
-                                        <input type="text" class="form-control header-rmsearch-input input-date" id="check_in_time" name="check_in_time" autocomplete="off" placeholder="{l s='Check In Date' mod='wkroomsearchblock'}" readonly>
+                                    <div class="form-group {if count($hotels_info) <= 1 && !$show_hotel_name}{if !isset($location_enabled) || !$location_enabled}col-md-4{/if}{elseif isset($location_enabled) && $location_enabled}col-md-2{else}col-md-3{/if} wk-padding-5 check_in_field_block">
+                                        <input type="hidden" class="form-control header-rmsearch-input input-date" id="check_in_time" name="check_in_time" autocomplete="off" placeholder="{l s='Check In Date' mod='wkroomsearchblock'}" readonly>
+                                        <input type="hidden" class="form-control header-rmsearch-input input-date" id="check_out_time" name="check_out_time" autocomplete="off" placeholder="{l s='Check Out Date' mod='wkroomsearchblock'}" readonly>
+                                        <input type="text" class="form-control header-rmsearch-input input-date" name="daterange" id="daterange_value"  autocomplete="off" placeholder="{l s='Date' mod='wkroomsearchblock'}" readonly/>
                                     </div>
-                                    <div class="form-group col-md-3 col-sm-3 check_out_field_block wk-padding-5">
-                                        <input type="text" class="form-control header-rmsearch-input input-date" id="check_out_time" name="check_out_time" autocomplete="off" placeholder="{l s='Check Out Date' mod='wkroomsearchblock'}" readonly>
-                                    </div>
-                                    <div class="form-group col-md-4 col-sm-6 wk-padding-5">
+                                    <div class="form-group {if count($hotels_info) <= 1 && !$show_hotel_name}{if !isset($location_enabled) || !$location_enabled}col-md-5{/if}{elseif isset($location_enabled) && $location_enabled}col-md-3{else}col-md-3{/if} wk-padding-5">
                                         <div class="dropdown">
                                             <button class="form-control header-rmsearch-input {if isset($error) && $error == 1}error_border{/if}" type="button" data-toggle="dropdown" id="guest_occupancy">
                                                 <span class="pull-left">{if (isset($search_data['occupancy_adults']) && $search_data['occupancy_adults'])}{$search_data['occupancy_adults']} {l s='Adult' mod='wkroomsearchblock'}, {if isset($search_data['occupancy_children']) && $search_data['occupancy_children']}{$search_data['occupancy_children']} {if $search_data['occupancy_children'] > 1}
@@ -218,12 +214,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-2 col-sm-3 wk-padding-5 search_room_submit_block">
+                                    <div class="form-group {if count($hotels_info) <= 1 && !$show_hotel_name}{if !isset($location_enabled) || !$location_enabled}col-md-3{/if}{elseif isset($location_enabled) && $location_enabled}col-md-2{else}col-md-3{/if} wk-padding-5 search_room_submit_block">
                                         <button type="submit" class="btn btn-default button button-medium exclusive" name="search_room_submit" id="search_room_submit">
                                             <span>{l s='Search Now' mod='wkroomsearchblock'}</span>
                                         </button>
                                     </div>
-                                </div>
+                                {* </div> *}
                             </form>
                         </div>
                     </div>
