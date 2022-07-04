@@ -1607,7 +1607,16 @@ class HotelBookingDetail extends ObjectModel
                 }
                 /*END*/
                 $obj_booking_dtl = new HotelBookingDetail();
-                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($date_from, $date_to, $id_hotel, $id_product, 1, 0, 0, -1, 0, 0, $id_cart, $this->context->cookie->id_guest);
+                $booking_params = array(
+                    'date_from' => $date_from,
+                    'date_to' => $date_to,
+                    'hotel_id' => $id_hotel,
+                    'room_type' => $id_product,
+                    'for_room_type' => 1,
+                    'id_cart' => $id_cart,
+                    'id_guest' => $this->context->cookie->id_guest,
+                );
+                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $params['req_qty']) {
