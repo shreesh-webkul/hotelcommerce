@@ -123,7 +123,7 @@
 												</div>
 											</div>
 										</div>
-										<div class="form-group row children_age_info_block" {if isset($search_data['occupancy_child_ages'][$key]) && $search_data['occupancy_child_ages'][$key]}style="display:block;"{/if}>
+										<div class="form-group row children_age_info_block" {if isset($occupancy['child_ages']) && $occupancy['child_ages']}style="display:block;"{/if}>
 											<label class="col-sm-12">{l s='All Children' mod='wkroomsearchblock'}</label>
 											<div class="col-sm-12">
 												<div class="row children_ages">
