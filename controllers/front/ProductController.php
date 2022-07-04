@@ -303,14 +303,14 @@ class ProductControllerCore extends FrontController
                 if (!($date_to = Tools::getValue('date_to'))) {
                     $date_to = date('Y-m-d', strtotime('+1 day', strtotime($date_from)));
                 }
-
+                $occupancy = Tools::getValue('occupancy');
                 $obj_htl_cart_booking_data = new HotelCartBookingData();
                 $obj_booking_detail = new HotelBookingDetail();
                 $num_days = $obj_booking_detail->getNumberOfDays($date_from, $date_to);
                 //$price_tax_incl = Product::getPriceStatic($this->product->id, HotelBookingDetail::useTax());
                 //$total_price = $price_tax_incl * $num_days;
                 //// By webkul New way to calculate product prices with feature Prices
-                $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice($this->product->id, $date_from, $date_to);
+                $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPriceByOccupancy($this->product->id, $date_from, $date_to, $occupancy);
                 if ($useTax) {
                     $total_price = $roomTypeDateRangePrice['total_price_tax_incl'];
                 } else {
@@ -319,7 +319,6 @@ class ProductControllerCore extends FrontController
                 //END
 
                 // @todo Send occupancy in the DataForFrontSearch function
-                $occupancy = Tools::getValue('occupancy');
                 $obj_booking_dtl = new HotelBookingDetail();
                 $booking_params = array(
                     'date_from' => $date_from,
@@ -366,7 +365,7 @@ class ProductControllerCore extends FrontController
                 }
 
                 // send occupancy information searched by the user
-                if ($occupancy = Tools::getvalue('occupancy')) {
+                if ($occupancy) {
                     $this->context->smarty->assign(
                         array(
                             'occupancy_adults' => array_sum(array_column($occupancy, 'adults')),
@@ -983,24 +982,25 @@ class ProductControllerCore extends FrontController
                             $product = new Product($idProduct);
                             $productPriceWithoutReduction = $product->getPriceWithoutReduct(!$useTax);
                             $numDays = $objBookingDetail->getNumberOfDays($dateFrom, $dateTo);
-                            $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
+                            $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPriceByOccupancy(
                                 $idProduct,
                                 $dateFrom,
-                                $dateTo
+                                $dateTo,
+                                $occupancy
                             );
                             if ($useTax) {
                                 $priceProduct = Product::getPriceStatic($idProduct, true);
-                                $featurePrice = HotelRoomTypeFeaturePricing::getRoomTypeFeaturePricesPerDay($idProduct, $dateFrom, $dateTo, true);
+                                $featurePrice = HotelRoomTypeFeaturePricing::getRoomTypeFeaturePricesPerDayByOccupancy($idProduct, $dateFrom, $dateTo, $occupancy, true);
                                 $roomTypeDateRangePrice = $roomTypeDateRangePrice['total_price_tax_incl'];
                             } else {
                                 $priceProduct = Product::getPriceStatic($idProduct, false);
-                                $featurePrice = HotelRoomTypeFeaturePricing::getRoomTypeFeaturePricesPerDay($idProduct, $dateFrom, $dateTo, false);
+                                $featurePrice = HotelRoomTypeFeaturePricing::getRoomTypeFeaturePricesPerDayByOccupancy($idProduct, $dateFrom, $dateTo, $occupancy, false);
                                 $roomTypeDateRangePrice = $roomTypeDateRangePrice['total_price_tax_excl'];
                             }
                             $featurePriceDiff = (float)($productPriceWithoutReduction - $featurePrice);
 
                             //$price_tax_incl = Product::getPriceStatic($idProduct, $price_tax);
-                            $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
+                            // $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
                             $totalPrice += $totalRoomPrice;
                             $demandsPrice = 0;
                             if ($roomDemand = Tools::getValue('room_demands')) {

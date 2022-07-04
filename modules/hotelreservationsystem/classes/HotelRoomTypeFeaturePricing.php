@@ -700,6 +700,11 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
         return $totalPrice;
     }
 
+    public static function getRoomTypeTotalPriceByOccupancy($id_product, $date_from, $date_to, $occupancy = 0, $id_group = 0)
+    {
+        return self::getRoomTypeTotalPrice($id_product, $date_from, $date_to, $occupancy, $id_group);
+    }
+
     /**
      * [getRoomTypeFeaturePricePerDay returns per day feature price od the Room Type]
      * @param  [int] $id_product [id of the product]
@@ -729,6 +734,11 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
             $pricePerDay = $totalDurationPriceTE/$numDaysInDuration;
         }
         return $pricePerDay;
+    }
+
+    public static function getRoomTypeFeaturePricesPerDayByOccupancy($id_product, $date_from, $date_to, $occupancy, $use_tax = true, $id_group = 0)
+    {
+        return self::getRoomTypeFeaturePricesPerDay($id_product, $date_from, $date_to, $use_tax, $id_group);
     }
 
     /**
