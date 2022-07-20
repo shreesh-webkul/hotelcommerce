@@ -2075,6 +2075,15 @@ class AdminThemesControllerCore extends AdminController
                         }
                     }
                     break;
+                case 3:
+                    foreach ($xml->modules as $row) {
+                        if ($row['type'] == 'disk') {
+                            foreach ($row->module as $row2) {
+                                $natives[] = (string)$row2['name'];
+                            }
+                        }
+                    }
+                    break;
             }
 
             if (count($natives) > 0) {

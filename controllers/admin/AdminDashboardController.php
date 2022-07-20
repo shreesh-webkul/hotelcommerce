@@ -276,6 +276,11 @@ class AdminDashboardControllerCore extends AdminController
                 'hotel_name' => $objHotelBranchInfo->hotel_name.', '.$objHotelBranchInfo->city,
             );
         }
+
+        $upgradeInfo = Tools::addonsRequest('check-version');
+        $xml = @simplexml_load_string($upgradeInfo);
+        $upgrade_panel_content = $xml->dash_upgrade_panel;
+
         $this->tpl_view_vars = array(
             'date_from' => $this->context->employee->stats_date_from,
             'date_to' => $this->context->employee->stats_date_to,
@@ -288,6 +293,7 @@ class AdminDashboardControllerCore extends AdminController
             //'translations' => $translations,
             'action' => self::$currentIndex.'&token='.$this->token,
             'warning' => $this->getWarningDomainName(),
+            'upgrade_panel_content' => $upgrade_panel_content,
             'new_version_url' => Tools::getCurrentUrlProtocolPrefix()._PS_API_DOMAIN_.'/version/check_version.php?v='._PS_VERSION_.'&lang='.$this->context->language->iso_code.'&autoupgrade='.(int)(Module::isInstalled('autoupgrade') && Module::isEnabled('autoupgrade')).'&hosted_mode='.(int)defined('_PS_HOST_MODE_'),
             'dashboard_use_push' => Configuration::get('PS_DASHBOARD_USE_PUSH'),
             'calendar' => $calendar_helper->generate(),

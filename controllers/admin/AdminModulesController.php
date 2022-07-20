@@ -131,7 +131,9 @@ class AdminModulesControllerCore extends AdminController
                 foreach ($xml_module->children() as $module) {
                     /** @var SimpleXMLElement $module */
                     foreach ($module->attributes() as $key => $value) {
-                        if ($xml_module->attributes() == 'native' && $key == 'name') {
+                        if (($xml_module->attributes() == 'native' || $xml_module->attributes() == 'disk')
+                            && $key == 'name'
+                        ) {
                             $this->list_natives_modules[] = (string)$value;
                         }
                         if ($xml_module->attributes() == 'partner' && $key == 'name') {
@@ -164,10 +166,9 @@ class AdminModulesControllerCore extends AdminController
 
     public function ajaxProcessRefreshModuleList($force_reload_cache = false)
     {
-        $xml_modules_list = _QLO_API_DOMAIN_.'/xml/'.str_replace('.', '', _QLOAPPS_VERSION_).'.xml';
-
         // Refresh modules_list.xml every week
         if (!$this->isFresh(Module::CACHE_FILE_MODULES_LIST, 86400) || $force_reload_cache) {
+            $xml_modules_list = _QLO_API_DOMAIN_.'/xml/'.str_replace('.', '', _QLOAPPS_VERSION_).'.xml';
             if ($this->refresh(Module::CACHE_FILE_MODULES_LIST, 'https://'.$xml_modules_list)) {
                 $this->status = 'refresh';
             } elseif ($this->refresh(Module::CACHE_FILE_MODULES_LIST, 'http://'.$xml_modules_list)) {
@@ -183,6 +184,16 @@ class AdminModulesControllerCore extends AdminController
         if ($this->status != 'error') {
             if (!$this->isFresh(Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 86400) || $force_reload_cache) {
                 if (file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, Tools::addonsRequest('native'))) {
+                    $this->status = 'refresh';
+                } else {
+                    $this->status = 'error';
+                }
+            } else {
+                $this->status = 'cache';
+            }
+
+            if (!$this->isFresh(Module::CACHE_FILE_ADDONS_MODULES_LIST, 86400) || $force_reload_cache) {
+                if (file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_ADDONS_MODULES_LIST, Tools::addonsRequest('addons-modules'))) {
                     $this->status = 'refresh';
                 } else {
                     $this->status = 'error';
@@ -715,7 +726,7 @@ class AdminModulesControllerCore extends AdminController
             } elseif ($key == 'checkAndUpdate') {
                 $modules = array();
                 $this->ajaxProcessRefreshModuleList(true);
-                $modules_on_disk = Module::getModulesOnDisk(true, $this->logged_on_addons, $this->id_employee);
+                $modules_on_disk = Module::getModulesOnDisk(true, $this->logged_on_addons, $this->id_employee, true);
 
                 // Browse modules list
                 foreach ($modules_on_disk as $km => $module_on_disk) {
@@ -769,7 +780,7 @@ class AdminModulesControllerCore extends AdminController
                         $files_list = array(
                             array('type' => 'addonsNative', 'file' => Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 'loggedOnAddons' => 0),
                             // array('type' => 'addonsBought', 'file' => Module::CACHE_FILE_CUSTOMER_MODULES_LIST, 'loggedOnAddons' => 1),
-                            // array('type' => 'addonsMustHave', 'file' => Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 1),
+                            array('type' => 'addonsMustHave', 'file' => Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 1),
                         );
 
                         foreach ($files_list as $f) {
@@ -783,6 +794,9 @@ class AdminModulesControllerCore extends AdminController
                                             $module_to_update[$name]['name'] = $modaddons->name;
                                             $module_to_update[$name]['displayName'] = $modaddons->displayName;
                                             $module_to_update[$name]['need_loggedOnAddons'] = $f['loggedOnAddons'];
+                                            if ($modaddons->url) {
+                                                $module_to_update[$name]['url'] = $modaddons->url;
+                                            }
                                         }
                                     }
                                 }
@@ -791,7 +805,8 @@ class AdminModulesControllerCore extends AdminController
 
                         foreach ($module_to_update as $name => $attr) {
                             if ((is_null($attr) && $this->logged_on_addons == 0) || ($attr['need_loggedOnAddons'] == 1 && $this->logged_on_addons == 0)) {
-                                $this->errors[] = sprintf(Tools::displayError('You need to be logged in to your PrestaShop Addons account in order to update the %s module. %s'), '<strong>'.$name.'</strong>', '<a href="#" class="addons_connect" data-toggle="modal" data-target="#modal_addons_connect" title="Addons">'.$this->l('Click here to log in.').'</a>');
+                                $this->errors[] = sprintf(Tools::displayError('You need to be download this module from store in order to update the %s module. %s'), '<strong>'.$name.'</strong>', '<a href="'.$attr['url'].'" title="Store">'.$this->l('Click here to download.').'</a>');
+                                // $this->errors[] = sprintf(Tools::displayError('You need to be logged in to your PrestaShop Addons account in order to update the %s module. %s'), '<strong>'.$name.'</strong>', '<a href="#" class="addons_connect" data-toggle="modal" data-target="#modal_addons_connect" title="Addons">'.$this->l('Click here to log in.').'</a>');
                             } elseif (!is_null($attr['name'])) {
                                 $download_ok = false;
                                 if ($attr['need_loggedOnAddons'] == 0 && file_put_contents(_PS_MODULE_DIR_.$name.'.zip', Tools::addonsRequest('module', array('module_name' => pSQL($attr['name']))))) {
@@ -1042,7 +1057,8 @@ class AdminModulesControllerCore extends AdminController
 
     protected function getModulesByInstallation($tab_modules_list = null)
     {
-        $all_modules = Module::getModulesOnDisk(true, $this->logged_on_addons, $this->id_employee);
+        // $all_modules = Module::getModulesOnDisk(true, $this->logged_on_addons, $this->id_employee);
+        $all_modules = Module::getSuggestedModules();
         $all_unik_modules = array();
         $modules_list = array('installed' =>array(), 'not_installed' => array());
 
@@ -1441,7 +1457,7 @@ class AdminModulesControllerCore extends AdminController
         }
 
         // Retrieve Modules List
-        $modules = Module::getModulesOnDisk(true, $this->logged_on_addons, $this->id_employee);
+        $modules = Module::getInstalledModulesOnDisk(true, $this->logged_on_addons, $this->id_employee);
         $this->initModulesList($modules);
         $this->nb_modules_total = count($modules);
         $module_errors = array();
@@ -1555,7 +1571,7 @@ class AdminModulesControllerCore extends AdminController
             }
             unset($object);
             if ($module->installed && isset($module->version_addons) && $module->version_addons) {
-                $upgrade_available[] = array('anchor' => ucfirst($module->name), 'name' => $module->name, 'displayName' => $module->displayName);
+                $upgrade_available[] = array('anchor' => ucfirst($module->name), 'name' => $module->name, 'displayName' => $module->displayName, 'is_native' => $module->is_native);
             }
 
             if (in_array($module->name, $this->list_partners_modules)) {
