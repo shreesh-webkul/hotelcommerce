@@ -277,9 +277,13 @@ class AdminDashboardControllerCore extends AdminController
             );
         }
 
-        $upgradeInfo = Tools::addonsRequest('check-version');
-        $xml = @simplexml_load_string($upgradeInfo);
-        $upgrade_panel_content = $xml->dash_upgrade_panel;
+        if (file_exists(_PS_ROOT_DIR_.Upgrader::CACHE_FILE_UPGRADE_AVAILABE)) {
+            $content = Tools::file_get_contents( _PS_ROOT_DIR_.Upgrader::CACHE_FILE_UPGRADE_AVAILABE);
+            $upgradeInfo = simplexml_load_string($content);
+            $this->context->smarty->assign(array(
+                'upgrade_info' => $upgradeInfo
+            ));
+        }
 
         $this->tpl_view_vars = array(
             'date_from' => $this->context->employee->stats_date_from,
@@ -293,8 +297,7 @@ class AdminDashboardControllerCore extends AdminController
             //'translations' => $translations,
             'action' => self::$currentIndex.'&token='.$this->token,
             'warning' => $this->getWarningDomainName(),
-            'upgrade_panel_content' => $upgrade_panel_content,
-            'new_version_url' => Tools::getCurrentUrlProtocolPrefix()._PS_API_DOMAIN_.'/version/check_version.php?v='._PS_VERSION_.'&lang='.$this->context->language->iso_code.'&autoupgrade='.(int)(Module::isInstalled('autoupgrade') && Module::isEnabled('autoupgrade')).'&hosted_mode='.(int)defined('_PS_HOST_MODE_'),
+            'new_version_url' => Tools::getCurrentUrlProtocolPrefix()._QLO_API_DOMAIN_.'/index.php?version='._QLOAPPS_VERSION_.'&lang='.$this->context->language->iso_code.'&method=check-upgrade&autoupgrade='.(int)(Module::isInstalled('qloautoupgrade') && Module::isEnabled('qloautoupgrade')).'&hosted_mode='.(int)defined('_PS_HOST_MODE_'),
             'dashboard_use_push' => Configuration::get('PS_DASHBOARD_USE_PUSH'),
             'calendar' => $calendar_helper->generate(),
             'PS_DASHBOARD_SIMULATION' => Configuration::get('PS_DASHBOARD_SIMULATION'),

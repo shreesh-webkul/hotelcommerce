@@ -114,14 +114,13 @@
 		<div class="col-md-4 col-md-pull-8 col-lg-2 col-lg-pull-0" id="hookDashboardZoneThree">
 			<div class="row">
 				{$hookDashboardZoneThree}
-				<div class="col-sm-12">
-					<section id="dashupdate" class="widget panel">
-						<div class="panel-heading">
-							<i class="icon-refresh"></i> {l s='QloApps Update'}
-						</div>
-						{$upgrade_panel_content}
-					</section>
-				</div>
+				{if isset($upgrade_info) && $upgrade_info}
+					<div class="col-sm-12">
+						<section class="widget panel">
+							{$upgrade_info->dash_upgrade_panel}
+						</section>
+					</div>
+				{/if}
 				<div class="col-sm-12">
 					<section class="dash_links widget panel">
 						<h3><i class="icon-link"></i> {l s="Useful links"}</h3>

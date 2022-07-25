@@ -2823,6 +2823,19 @@ class AdminControllerCore extends Controller
             'submit_form_ajax' => (int)Tools::getValue('submitFormAjax')
         ));
 
+        // get upgrade available info
+        if (!$this->isFresh(Upgrader::CACHE_FILE_UPGRADE_AVAILABE, 86400)) {
+            file_put_contents(_PS_ROOT_DIR_.Upgrader::CACHE_FILE_UPGRADE_AVAILABE, Tools::addonsRequest('check-version'));
+        }
+        if (file_exists(_PS_ROOT_DIR_.Upgrader::CACHE_FILE_UPGRADE_AVAILABE)) {
+            $content = Tools::file_get_contents( _PS_ROOT_DIR_.Upgrader::CACHE_FILE_UPGRADE_AVAILABE);
+            $upgradeInfo = simplexml_load_string($content);
+
+            $this->context->smarty->assign(array(
+                'upgrade_info' => $upgradeInfo
+            ));
+        }
+
         Employee::setLastConnectionDate($this->context->employee->id);
 
         $this->initProcess();

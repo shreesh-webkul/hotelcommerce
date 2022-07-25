@@ -3386,13 +3386,13 @@ exit;
                 $post_data .= '&method=listing&action=install-modules';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
-            case 'suggestion':
+            case 'catalog-suggestion':
                 $protocols[] = 'http';
                 $post_data .= '&method=content&action=suggestion';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
             case 'check-version':
-                $post_data .= '&method=version';
+                $post_data .= '&method=check-version&autoupgrade='.(int)(Module::isInstalled('qloautoupgrade') && Module::isEnabled('qloautoupgrade'));
                 break;
             default:
                 return false;

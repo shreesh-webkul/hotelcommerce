@@ -23,7 +23,7 @@ class AdminModulesCatalogControllerCore extends AdminController
 
     public $modules;
 
-    const SUGGESTION_CONTENT = '/cache/suggestion.html';
+    const CATALOG_SUGGESTION_CONTENT = '/cache/catalog_suggestion.html';
 
     const ELEMENT_TYPE_MODULE = 1;
     const ELEMENT_TYPE_THEME = 2;
@@ -176,12 +176,11 @@ class AdminModulesCatalogControllerCore extends AdminController
 
     public function getSuggestionContent()
     {
-        return Tools::addonsRequest('suggestion');
-        if (!$this->isFresh(self::SUGGESTION_CONTENT, 86400)) {
-            @file_put_contents(_PS_ROOT_DIR_.self::SUGGESTION_CONTENT, Tools::addonsRequest('suggestion'));
+        if (!$this->isFresh(self::CATALOG_SUGGESTION_CONTENT, 86400)) {
+            @file_put_contents(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT, Tools::addonsRequest('catalog-suggestion'));
         }
-        if (file_exists(_PS_ROOT_DIR_.self::SUGGESTION_CONTENT)) {
-            return Tools::file_get_contents(_PS_ROOT_DIR_.self::SUGGESTION_CONTENT);
+        if (file_exists(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT)) {
+            return Tools::file_get_contents(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT);
         }
         return false;
     }
@@ -282,7 +281,6 @@ class AdminModulesCatalogControllerCore extends AdminController
             } else {
                 if (!$installedMod->installed) {
                     $installedMod->element_type = self::ELEMENT_TYPE_MODULE;
-                    // $this->fillModuleData($installedMod, 'array');
                     $modulesToAdd[] = $installedMod;
                 }
             }
@@ -365,5 +363,9 @@ class AdminModulesCatalogControllerCore extends AdminController
     {
         parent::setMedia();
         $this->addJS(_PS_JS_DIR_.'admin/modules_catalog.js');
+        $this->context->controller->addJS(_PS_JS_DIR_.'/twbs-pagination/jquery.twbsPagination.min.js');
+        Media::addJSdef(array(
+            'num_block_per_page' => 15
+        ));
     }
 }

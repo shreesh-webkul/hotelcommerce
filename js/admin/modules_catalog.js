@@ -1,10 +1,30 @@
+/**
+* 2010-2022 Webkul.
+*
+* NOTICE OF LICENSE
+*
+* All right is reserved,
+* Please go through LICENSE.txt file inside our module
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade this module to newer
+* versions in the future. If you wish to customize this module for your
+* needs please refer to CustomizationPolicy.txt file inside our module for more information.
+*
+* @author Webkul IN
+* @copyright 2010-2022 Webkul IN
+* @license LICENSE.txt
+*/
+
 $('document').ready( function() {
 	loadSuggestion();
+	initPagination();
     // ScrollTo
     $('#module-search').on('keyup', function(){
         val = this.value;
         var interval = setTimeout(function () {
-            filterModules(val, 'module-name');
+            filterPanel(val, 'suggested-modules-list');
         }, 200);
     }).on('keydown', function(e){
         if (e.keyCode == 13)
@@ -17,7 +37,7 @@ $('document').ready( function() {
 	$('#theme-search').on('keyup', function(){
         val = this.value;
         var interval = setTimeout(function () {
-            filterTheme(val, 'module-name');
+            filterPanel(val, 'suggested-theme-list');
         }, 200);
     }).on('keydown', function(e){
         if (e.keyCode == 13)
@@ -27,48 +47,28 @@ $('document').ready( function() {
 		}
     });
 
-
 	$('#theme-sort, #module-sort').on('change', function(){
 		setFilter();
 	});
 
-	function filterModules(val, element_class)
-    {
-		// unhide all elements
-		$('#suggested-modules-list .list-empty').hide();
-        $('#suggested-modules-list .module-panel').show();
-
-        if (val != '') {
-            var reg = new RegExp(val, "i");
-            $('#suggested-modules-list .module-panel .'+element_class).each(function(id, mod_name) {
-                if (!reg.test($(mod_name).text()) && !reg.test($(mod_name).data('module'))){
-                // if (!$(mod_name).text().includes(val)) {
-                    $(mod_name).closest('.module-panel').hide();
-                }
-            });
-        }
-		if (!$('#suggested-modules-list .module-panel:visible').length) {
-			$('#suggested-modules-list .list-empty').show();
-		}
-    }
-
-	function filterTheme(val, element_class)
+	function filterPanel(val, element_class)
 	{
-		$('#suggested-theme-list .list-empty').hide();
-        $('#suggested-theme-list .module-panel').show();
+		$('#'+element_class+' .list-empty').hide();
+        $('#'+element_class+' .element-panel').show().removeClass('hidden');
+
 		if (val != '') {
-            // unhide all elements
             var reg = new RegExp(val, "i");
-            $('#suggested-theme-list .module-panel .'+element_class).each(function(id, mod_name) {
-                if (!reg.test($(mod_name).text()) && !reg.test($(mod_name).data('module'))){
+            $('#'+element_class+' .element-panel .name').each(function(id, ele_name) {
+                if (!reg.test($(ele_name).text()) && !reg.test($(ele_name).data('name'))){
                 // if (!$(mod_name).text().includes(val)) {
-                    $(mod_name).closest('.module-panel').hide();
+                    $(ele_name).closest('.element-panel').hide().addClass('hidden');
                 }
             });
         }
-		if (!$('#suggested-theme-list .module-panel:visible').length) {
-			$('#suggested-theme-list .list-empty').show();
+		if (!$('#'+element_class+' .element-panel:visible').length) {
+			$('#'+element_class+' .list-empty').show();
 		}
+		initPagination(element_class);
 	}
 
 	function loadSuggestion()
@@ -116,4 +116,26 @@ $('document').ready( function() {
 		});
 	}
 
+	function initPagination(selected_element_class) {
+		$.each($('.suggested-elements'), function(i, element) {
+			if (selected_element_class) {
+				if ($(element).closest('.list-container').attr('id') != selected_element_class)
+					return;
+			}
+			$(element).siblings('.pagination-container').find('.pagination-block').twbsPagination('destroy');
+			let items = $(element).children(':not(.hidden)');
+			if (items.length) {
+				let total_pages = Math.ceil(items.length / num_block_per_page);
+				$(element).siblings('.pagination-container').find('.pagination-block').twbsPagination({
+					totalPages: total_pages,
+					visiblePages: 5,
+					onPageClick: function(e, pageNumber) {
+						let showFrom = num_block_per_page * (pageNumber - 1);
+						let showTo = showFrom + num_block_per_page;
+						items.hide().slice(showFrom, showTo).show();
+					}
+				});
+			}
+		});
+	}
 });
