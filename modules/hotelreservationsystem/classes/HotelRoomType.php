@@ -23,7 +23,7 @@ class HotelRoomType extends ObjectModel
     public $id;
     public $id_product;
     public $id_hotel;
-    public $adults;
+    public $adult;
     public $children;
     public $max_extra_adults;
 	public $max_extra_children;
@@ -41,7 +41,7 @@ class HotelRoomType extends ObjectModel
         'fields' => array(
             'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
             'id_hotel' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
-            'adults' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
+            'adult' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
             'max_extra_adults' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'default' => 2),
             'max_extra_children' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
             'max_extra_infants' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
@@ -304,7 +304,7 @@ class HotelRoomType extends ObjectModel
      */
     public function getIdProductByHotelId($hotel_id, $room_type = 0, $onlyActiveProd = 0, $onlyActiveHotel = 0)
     {
-        $sql = 'SELECT DISTINCT hrt.`id_product`, hrt.`adults`, hrt.`children`, hrt.`id`	FROM `'._DB_PREFIX_.
+        $sql = 'SELECT DISTINCT hrt.`id_product`, hrt.`adult`, hrt.`children`, hrt.`id`	FROM `'._DB_PREFIX_.
         'htl_room_type` AS hrt ';
 
         if ($onlyActiveHotel) {
@@ -326,15 +326,15 @@ class HotelRoomType extends ObjectModel
     }
 
     /**
-     * [getMaxAdults :: To get Maximum number of adults can be in a room type for a hotel].
+     * [getMaxAdults :: To get Maximum number of adult can be in a room type for a hotel].
      *
-     * @param [int] $id_hotel [Id of the hotel for Maximum number of adults data you want]
+     * @param [int] $id_hotel [Id of the hotel for Maximum number of adult data you want]
      *
-     * @return [int|false] [If data found returns number of maximum adults can be in a room type for hotel else returns false ]
+     * @return [int|false] [If data found returns number of maximum adult can be in a room type for hotel else returns false ]
      */
     public static function getMaxAdults($id_hotel)
     {
-        $sql = 'SELECT MAX(adults) AS max_adult FROM '._DB_PREFIX_.'htl_room_type WHERE id_hotel='.$id_hotel;
+        $sql = 'SELECT MAX(adult) AS max_adult FROM '._DB_PREFIX_.'htl_room_type WHERE id_hotel='.$id_hotel;
 
         $max_adult = Db::getInstance()->getValue($sql);
 

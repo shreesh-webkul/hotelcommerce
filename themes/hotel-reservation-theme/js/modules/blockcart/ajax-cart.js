@@ -151,7 +151,8 @@ var ajaxCart = {
                 e.preventDefault();
                 var date_from = $('#room_check_in').val();
                 var date_to = $('#room_check_out').val();
-                ajaxCart.add($('#product_page_product_id').val(), $('#idCombination').val(), true, null, $('#quantity_wanted').val(), null, date_from, date_to);
+                var occupancy = getBookingOccupancyDetails();
+                ajaxCart.add($('#product_page_product_id').val(), $('#idCombination').val(), true, null, occupancy, null, date_from, date_to);
 
             });
         }
@@ -318,7 +319,7 @@ var ajaxCart = {
     // close fancybox
     updateFancyBox: function() {},
     // add a product in the cart via ajax
-    add: function(idProduct, idCombination, addedFromProductPage, callerElement, quantity, whishlist, dateFrom, dateTo) {
+    add: function(idProduct, idCombination, addedFromProductPage, callerElement, occupancy, whishlist, dateFrom, dateTo) {
 
         if (addedFromProductPage && !checkCustomizations()) {
             if (contentOnly) {
@@ -364,7 +365,7 @@ var ajaxCart = {
             async: true,
             cache: false,
             dataType: "json",
-            data: 'controller=cart&add=1&dateFrom=' + dateFrom + '&dateTo=' + dateTo + '&ajax=true&qty=' + ((quantity && quantity != null) ? quantity : '1') + '&id_product=' + idProduct + '&roomDemands=' + JSON.stringify(roomDemands) + '&token=' + static_token + ((parseInt(idCombination) && idCombination != null) ? '&ipa=' + parseInt(idCombination) : '' + '&id_customization=' + ((typeof customizationId !== 'undefined') ? customizationId : 0)),
+            data: 'controller=cart&add=1&dateFrom=' + dateFrom + '&dateTo=' + dateTo + '&ajax=true&occupancy=' + JSON.stringify(occupancy) + '&id_product=' + idProduct + '&roomDemands=' + JSON.stringify(roomDemands) + '&token=' + static_token + ((parseInt(idCombination) && idCombination != null) ? '&ipa=' + parseInt(idCombination) : '' + '&id_customization=' + ((typeof customizationId !== 'undefined') ? customizationId : 0)),
             success: function(jsonData, textStatus, jqXHR) {
                 /*by webkul checking and setting availability of rooms*/
                 /*for product page add to cart quantity management*/
@@ -1219,4 +1220,23 @@ function getRoomsExtraDemands()
     });
 
     return roomDemands;
+}
+
+function getBookingOccupancyDetails()
+{
+    var occupancy = [];
+
+    $(".booking_room_fields .occupancy_info_block").each(function(ind, element) {
+        let child_ages = []
+        $(element).find('.guest_child_age').each(function(index) {
+            child_ages.push($(this).val());
+        });
+        occupancy.push({
+            'adult': $(element).find('.num_adults').val(),
+            'children': $(element).find('.num_children').val(),
+            'child_ages': child_ages
+        });
+    });
+
+    return occupancy;
 }

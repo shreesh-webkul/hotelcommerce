@@ -122,7 +122,7 @@ class HotelOrderRestrictDate extends ObjectModel
                                 'room_type' => $product['id_product'],
                                 'for_room_type' => 1,
                             );
-                            $avai_rm = $obj_htl_bk_dtl->DataForFrontSearch($booking_params);
+                            $avai_rm = $obj_htl_bk_dtl->dataForFrontSearch($booking_params);
                             $isRmBooked = 0;
                             if (count($avai_rm['rm_data'][0]['data']['available']) < count($cl_val['id_rms'])) {
                                 foreach ($cl_val['id_rms'] as $cr_key => $cr_val) {

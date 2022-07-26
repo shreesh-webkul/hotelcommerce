@@ -78,6 +78,41 @@
 			</div>
 		{/if}
 	</td>
+	<td class="text-center">
+		<span class="booking_occupancy_show">{if $data['adult'] <= 9}0{$data['adult']}{else}{$data['adult']}{/if} {l s='adult'}, {if $data['children'] <= 9}0{$data['children']}{else} {$data['children']}{/if} {l s='Child'}</span>
+		{if $can_edit}
+			<div class="booking_occupancy_edit" style="display:none;">
+				<div class="form-group">
+					<div class="fixed-width-xl adult_occupancy_div">
+						<div class="input-group">
+							<div class="input-group-addon">{l s='Adults'}</div>
+							<input type="number" class="form-control edit_product_adults" name="edit_product[adult]" value="{$data.adult}"/>
+						</div>
+					</div>
+					<br/>
+					<div class="fixed-width-xl children_occupancy_div">
+						<div class="input-group">
+							<div class="input-group-addon">{l s='Children'}</div>
+							<input type="number" class="form-control edit_product_adults" name="edit_product[children]" value="{$data.children}" min="0"/>
+						</div>
+					</div>
+					<br/>
+					{if $data.children}
+						<div class="fixed-width-xl children_age_div">
+							{foreach $data.child_ages as $child_age}
+								<select class="guest_child_age room_occupancies" name="edit_product_occupancy[child_ages][]">
+									<option value="-1" {if $child_age== -1}selected{/if}>{l s='Select 1' mod='wkroomsearchblock'}</option>
+									<option value="0" {if $child_age== 0}selected{/if}>{l s='Under 1' mod='wkroomsearchblock'}</option>
+									{for $age=1 to ($max_child_age-1)}
+										<option value="{$age|escape:'htmlall':'UTF-8'}" {if $child_age== $age}selected{/if}>{$age|escape:'htmlall':'UTF-8'}</option>
+									{/for}
+								</select>
+							{/foreach}
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</td>
 	<td class="text-center">
 		<span class="product_original_price {if $data.feature_price_diff > 0}room_type_old_price{/if}" {if $data.feature_price_diff < 0} style="display:none;"{/if}>

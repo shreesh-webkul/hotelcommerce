@@ -1634,10 +1634,15 @@ class CartCore extends ObjectModel
             $priceDisplay = Group::getPriceDisplayMethod(Group::getCurrent()->id);
             foreach ($roomTypesByIdProduct as $key => $cartRoomInfo) {
                 // get the real price of the room type
-                $roomTotalPrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
+                $roomTotalPrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPriceByOccupancy(
                     $cartRoomInfo['id_product'],
                     $cartRoomInfo['date_from'],
-                    $cartRoomInfo['date_to']
+                    $cartRoomInfo['date_to'],
+                    array(array(
+                        'adult' => $cartRoomInfo['adult'],
+                        'children' => $cartRoomInfo['children'],
+                        'child_ages' => json_decode($cartRoomInfo['child_ages']),
+                    ))
                 );
                 if ($with_taxes) {
                     $totalPriceByProduct += $roomTotalPrice['total_price_tax_incl'];
@@ -4411,7 +4416,7 @@ class CartCore extends ObjectModel
                                 'id_cart' => $idCart,
                                 'id_guest' => $idGuest,
                             );
-                            if ($hotelRoomData = $obj_booking_dtl->DataForFrontSearch($booking_params)) {
+                            if ($hotelRoomData = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
                                 if (isset($hotelRoomData['stats']['num_avail'])) {
                                     $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                                     if ($totalAvailRooms < $reqRooms) {

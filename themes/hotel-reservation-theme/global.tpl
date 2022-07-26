@@ -43,9 +43,12 @@
 {if isset($cookie->id_lang)}
 	{addJsDef id_lang=$cookie->id_lang|intval}
 {/if}
+{addJsDef lang_iso=$lang_iso}
 {addJsDefL name=FancyboxI18nClose}{l s='Close'}{/addJsDefL}
 {addJsDefL name=FancyboxI18nNext}{l s='Next'}{/addJsDefL}
 {addJsDefL name=FancyboxI18nPrev}{l s='Previous'}{/addJsDefL}
+{addJsDefL name=RangePickerCheckin}{l s='Check-in'}{/addJsDefL}
+{addJsDefL name=RangePickerCheckout}{l s='Check-out'}{/addJsDefL}
 {addJsDef usingSecureMode=Tools::usingSecureMode()|boolval}
 {addJsDef ajaxsearch=Configuration::get('PS_SEARCH_AJAX')|boolval}
 {addJsDef instantsearch=Configuration::get('PS_INSTANT_SEARCH')|boolval}

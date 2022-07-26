@@ -105,10 +105,15 @@ class HotelAdvancedPayment extends ObjectModel
         $objHtlCartBook = new HotelCartBookingData();
         if ($roomTypesByIdProduct = $objHtlCartBook->getCartInfoIdCartIdProduct((int) $idCart, (int)$idProduct)) {
             foreach ($roomTypesByIdProduct as $cartRoomInfo) {
-                $roomTotalPrices = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
+                $roomTotalPrices = HotelRoomTypeFeaturePricing::getRoomTypeTotalPriceByOccupancy(
                     $cartRoomInfo['id_product'],
                     $cartRoomInfo['date_from'],
-                    $cartRoomInfo['date_to']
+                    $cartRoomInfo['date_to'],
+                    array(array(
+                        'adult' => $cartRoomInfo['adult'],
+                        'children' => $cartRoomInfo['children'],
+                        'child_ages' => json_decode($cartRoomInfo['child_ages']),
+                    ))
                 );
 
                 $roomTypeTotalTI += $roomTotalPrices['total_price_tax_incl'];

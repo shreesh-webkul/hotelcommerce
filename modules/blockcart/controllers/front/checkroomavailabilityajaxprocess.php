@@ -40,7 +40,7 @@ class BlockcartCheckRoomAvailabilityAjaxProcessModuleFrontController extends Mod
                                 'id_cart' => $idCart,
                                 'id_guest' => $idGuest,
                             );
-                            if ($hotelRoomData = $obj_booking_dtl->DataForFrontSearch($booking_params)) {
+                            if ($hotelRoomData = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
                                 $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                             }
                         }

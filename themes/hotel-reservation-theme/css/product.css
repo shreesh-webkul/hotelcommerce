@@ -1103,8 +1103,14 @@ Quick View Styles
   width: 100%;
   text-transform: uppercase;
   padding: 15px;}
-.booking_room_fields .hasDatepicker {
+.booking_room_fields #room_date_range {
+  display: grid;
   cursor: text;}
+  .booking_room_fields #room_date_range span {
+    align-self: center;}
+    .booking_room_fields #room_date_range span i {
+    color: #777;}
+
 .booking_room_fields .htl_location_block p {
   line-height: 25px;
   font-size: 18px;
@@ -1324,9 +1330,7 @@ Quick View Styles
   background: #FFFFFF;}
 .room_info_content span.col-sm-4 {
   margin-bottom: 5px;}
-.product_wrapper .input-date {
-  background: transparent url(../img/icon/icon-calendar.svg) no-repeat scroll 92% 50%!important;
-  background-size: 16px!important;}
+
 .product_wrapper .form-control {
   background-color: transparent!important;
   border: 1px solid #999999;
@@ -1360,6 +1364,10 @@ Quick View Styles
   background: url("../img/icon/icon-users.svg") no-repeat 4% 50%, url("../img/icon/icon-dropdown-arrow.svg") no-repeat 96% 50%;
   padding-left: 45px;
   padding-right: 35px;}
+.booking_room_fields #room_date_range {
+  background: url("../img/icon/icon-calendar.svg") no-repeat 4% 50%;
+  padding-left: 45px;
+  padding-right: 35px;}
 
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
   background-color: transparent;
@@ -1369,9 +1377,6 @@ Quick View Styles
     float: left!important;}
   .booking_room_fields .form-group {
     width: 100%;}}
-@media (min-width: 320px) and (max-width: 767px) {
-  .product_wrapper .input-date {
-      background-position: 97% 50%!important;}}
 @media (max-width: 450px) {
   .num_avail_rooms_alert {
     float: left!important;}
@@ -1481,7 +1486,7 @@ Quick View Styles
 /* occupancy  */
 #booking_occupancy_wrapper {
   border: none;
-  max-height: 730px;
+  max-height: 380px;
   overflow: auto;
   box-shadow: 0 8px 25px -4px rgba(0,0,0,0.39);
   left: 0px;
@@ -1494,6 +1499,9 @@ Quick View Styles
   #booking_occupancy_wrapper .children_age_info_block {
     display: none;}
   #booking_occupancy_wrapper .children_age_info_block label {
+    font-size: 12px;
+    color: #777777;}
+  #booking_occupancy_wrapper .label-desc-txt {
     font-size: 12px;
     color: #777777;}
   #booking_occupancy_wrapper label {
@@ -1520,7 +1528,7 @@ Quick View Styles
         text-align: right;}
       #booking_occupancy_wrapper .occupancy_info_block .occupancy_count {
         padding: 14px;
-        border: 1px solid #ccc;
+        border: 1px solid #E1E3E7;
         font-size: 14px;
         font-weight: 600;
         color: #333333;
@@ -1531,15 +1539,14 @@ Quick View Styles
         text-align: center;
         display: block;}
       #booking_occupancy_wrapper .occupancy_info_block .qty_direction {
-        margin-left: 1px;
+        margin-left: 3px;
         width: 22px;}
         #booking_occupancy_wrapper .occupancy_info_block .qty_direction a {
-          padding: 2px 5px;
+          padding: 1px 5px;
           border: 0px;
-          border-color: #999;
-          background: #DBDBDB;
+          border: 1px solid #E1E3E7;
           color: #333;
-          border-radius: 2px;
+          border-radius: 4px;
           font-weight: 400;}
           #booking_occupancy_wrapper .occupancy_info_block .qty_direction .occupancy_quantity_down {
             margin-top: 3px;}
@@ -1558,11 +1565,11 @@ Quick View Styles
     padding: 3px 5px;
     font-size: 12px;
     color: #333;
-    border: 1px solid #777777;
+    border: 1px solid #E1E3E7;
     width: 100%;}
 
 
-@media (max-width: 411px) {
+@media (max-width: 450) {
   #booking_occupancy_wrapper .occupancy_info_block .occupancy_count_block {
     width: 100%;}
   #booking_occupancy_wrapper .occupancy_info_block .occupancy_count {

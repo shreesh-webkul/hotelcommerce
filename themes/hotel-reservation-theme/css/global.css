@@ -7211,6 +7211,9 @@ div.star a:hover {
   padding: 5px 0;
   color: #333; }
 
+#page {
+  position: relative; }
+
 .header-container {
   background: #fff; }
 

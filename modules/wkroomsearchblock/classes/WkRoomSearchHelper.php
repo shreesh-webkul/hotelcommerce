@@ -64,7 +64,7 @@ class WkRoomSearchHelper
             $childTypeErr = 0;
             $childAgeErr = 0;
             foreach ($guestOccupancy as $occupancy) {
-                if (!isset($occupancy['adults']) || !Validate::isUnsignedInt($occupancy['adults'])) {
+                if (!isset($occupancy['adult']) || !Validate::isUnsignedInt($occupancy['adult'])) {
                     $adultTypeErr = 1;
                 }
                 if (!isset($occupancy['children']) || !Validate::isUnsignedInt($occupancy['children'])) {
@@ -74,7 +74,7 @@ class WkRoomSearchHelper
                         $childAgeErr = 1;
                     } else {
                         foreach ($occupancy['child_ages'] as $childAge) {
-                            if (!Validate::isUnsignedInt($occupancy['adults'])) {
+                            if (!Validate::isUnsignedInt($occupancy['adult'])) {
                                 $childAgeErr = 1;
                             }
                         }
@@ -140,8 +140,8 @@ class WkRoomSearchHelper
                 $searchedData['num_days'] = $objBookingDetail->getNumberOfDays($dateFrom, $dateTo);
 
                 $searchedData['parent_data'] = $htlCategoryInfo;
-                $searchedData['date_from'] = date('d-m-Y', strtotime($dateFrom));
-                $searchedData['date_to'] = date('d-m-Y', strtotime($dateTo));
+                $searchedData['date_from'] = $dateFrom;
+                $searchedData['date_to'] = $dateTo;
                 $searchedData['htl_dtl'] = $objHotelInfo->hotelBranchesInfo(0, 1, 1, $idHotel);
 
                 $searchedData['location'] = $searchedData['htl_dtl']['city'];
@@ -164,7 +164,7 @@ class WkRoomSearchHelper
                 // send occupancy information searched by the user
                 if ($searchedData['occupancies'] = Tools::getvalue('occupancy')) {
                     $searchedData['occupancy_adults'] = array_sum(
-                        array_column($searchedData['occupancies'], 'adults')
+                        array_column($searchedData['occupancies'], 'adult')
                     );
                     $searchedData['occupancy_children'] = array_sum(
                         array_column($searchedData['occupancies'], 'children')

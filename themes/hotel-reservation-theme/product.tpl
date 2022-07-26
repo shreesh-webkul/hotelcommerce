@@ -291,57 +291,30 @@
 					</p>
 					<div class="booking-form card">
 						<div class="booking_room_fields">
-							<form action="" method="post">
+							<form id="booking-form" action="" method="post">
 								<div class="form-group htl_location_block">
 									<label for="" class="control-label">{l s='Hotel Location'}</label>
 									<p>{$hotel_location|escape:'html':'UTF-8'}</p>
 								</div>
 								{if $product->show_price && !isset($restricted_country_mode) && !$PS_CATALOG_MODE && !$order_date_restrict}
 									<div class="row">
-										<div class="form-group col-sm-6">
-											<label for="" class="control-label">{l s='Check In Date'}</label>
-											<input type="text" class="form-control input-date" name="room_check_in" id="room_check_in" value="{if isset($date_from)}{$date_from|date_format:"%d-%m-%Y"}{/if}" autocomplete="off" readonly />
-										</div>
-										<div class="form-group col-sm-6">
-											<label for="" class="control-label">{l s='Check Out Date'}</label>
-											<input type="text" class="form-control input-date" name="room_check_out" id="room_check_out" value="{if isset($date_to)}{$date_to|escape:'html':'UTF-8'|date_format:"%d-%m-%Y"}{/if}" autocomplete="off" readonly />
+										<div class="form-group col-sm-12">
+											{* <input type="text" class="form-control input-date" name="room_date_range" id="room_date_range" autocomplete="off" readonly /> *}
+											<div class="form-control header-rmsearch-input input-date" id="room_date_range"  autocomplete="off" placeholder="{l s='Check-in - Check-out' mod='wkroomsearchblock'}"><span>{l s='Check-in' mod='wkroomsearchblock'} &nbsp;<i class="icon icon-minus"></i>&nbsp; {l s='Check-out' mod='wkroomsearchblock'}</span></div>
+											<input type="hidden" class="input-date" name="room_check_in" id="room_check_in" value="{if isset($date_from)}{$date_from}{/if}" />
+											<input type="hidden" class="input-date" name="room_check_out" id="room_check_out" value="{if isset($date_to)}{$date_to}{/if}" />
 										</div>
 									</div>
 									<div class="room_unavailability_date_error_div"></div>
-									{* <div class="unvail_rooms_cond_display row">
-										<div class="form-group col-sm-6" id="quantity_wanted_p"{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || $PS_CATALOG_MODE} style="display: none;"{/if}>
-											<label for="quantity_wanted">{l s='No. of Rooms'}</label>
-											<div class="qty_sec_cont">
-												<div class="qty_input_cont row margin-lr-0">
-													<input autocomplete="off" type="text" min="1" name="qty" id="quantity_wanted" class="text" value="{if isset($quantityBackup)}{$quantityBackup|intval}{else}{if $product->minimal_quantity > 1}{$product->minimal_quantity}{else}1{/if}{/if}">
-
-													<input type="hidden" id="num_days" value="{if isset($num_days)}{$num_days|escape:'html':'UTF-8'}{/if}">
-													<input type="hidden" id="max_avail_type_qty" value="{if isset($total_available_rooms)}{$total_available_rooms|escape:'html':'UTF-8'}{/if}">
-												</div>
-												<div class="qty_direction">
-													<a href="#" data-field-qty="qty" class="btn btn-default product_quantity_up">
-														<span>
-															<i class="icon-plus"></i>
-														</span>
-													</a>
-													<a href="#" data-field-qty="qty" class="btn btn-default product_quantity_down">
-														<span>
-															<i class="icon-minus"></i>
-														</span>
-													</a>
-												</div>
-											</div>
-											<span class="clearfix"></span>
-										</div>
-									</div> *}
 									{* occupancy field *}
 									<div class="row">
 										<div class="form-group col-sm-12">
 											<label class="control-label">{l s='Guests'}</label>
 											<div class="form-group dropdown">
 												<button class="form-control header-rmsearch-input {if isset($error) && $error == 1}error_border{/if}" type="button" data-toggle="dropdown" id="booking_guest_occupancy">
-													<span class="pull-left">{if (isset($occupancy_adults) && $occupancy_adults)}{$occupancy_adults} {l s='Adult' mod='wkroomsearchblock'}, {if isset($occupancy_children) && $occupancy_children}{$occupancy_children} {if $occupancy_children > 1} {l s='Children' mod='wkroomsearchblock'}{else}{l s='Child' mod='wkroomsearchblock'}{/if}, {/if}{$occupancies|count} {l s='Room(s)' mod='wkroomsearchblock'}{else}{l s='1 Adult, 1 Room' mod='wkroomsearchblock'}{/if}</span>
+													<span class="pull-left">{if (isset($occupancy_adults) && $occupancy_adults)}{$occupancy_adults} {if $occupancy_adults > 1}{l s='Adults' mod='wkroomsearchblock'}{else}{l s='Adult' mod='wkroomsearchblock'}{/if}, {if isset($occupancy_children) && $occupancy_children}{$occupancy_children} {if $occupancy_children > 1} {l s='Children' mod='wkroomsearchblock'}{else}{l s='Child' mod='wkroomsearchblock'}{/if}, {/if}{$occupancies|count} {if $occupancies|count > 1}{l s='Rooms' mod='wkroomsearchblock'}{else}{l s='Room'}{/if}{else}{l s='1 Adult, 1 Room' mod='wkroomsearchblock'}{/if}</span>
 												</button>
+												<input type="hidden" id="max_avail_type_qty" value="{if isset($total_available_rooms)}	{$total_available_rooms|escape:'html':'UTF-8'}{/if}">
 												<div id="booking_occupancy_wrapper" class="dropdown-menu">
 													<div id="booking_occupancy_inner">
 														{if isset($occupancies) && $occupancies}
@@ -354,9 +327,9 @@
 																			<div class="row">
 																				<label class="col-sm-12">{l s='Adults' mod='wkroomsearchblock'}</label>
 																				<div class="col-sm-12">
-																					<input type="hidden" class="num_occupancy num_adults room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][adults]" value="{$occupancy['adults']|escape:'htmlall':'UTF-8'}">
+																					<input type="hidden" class="num_occupancy num_adults room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][adult]" value="{$occupancy['adult']|escape:'htmlall':'UTF-8'}">
 																					<div class="occupancy_count pull-left">
-																						<span>{$occupancy['adults']|escape:'htmlall':'UTF-8'}</span>
+																						<span>{$occupancy['adult']|escape:'htmlall':'UTF-8'}</span>
 																					</div>
 																					<div class="qty_direction pull-left">
 																						<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">
@@ -395,7 +368,7 @@
 																			<div class="row children_ages">
 																				{if isset($occupancy['child_ages']) && $occupancy['child_ages']}
 																					{foreach $occupancy['child_ages'] as $childAge}
-																						<div class="col-xs-4">
+																						<div class="col-xs-4 col-sm-12 col-md-6 col-lg-4">
 																							<select class="guest_child_age room_occupancies" name="occupancy[{$key|escape:'htmlall':'UTF-8'}][child_ages][]">
 																								<option value="-1" {if $childAge == -1}selected{/if}>{l s='Select 1' mod='wkroomsearchblock'}</option>
 																								<option value="0" {if $childAge == 0}selected{/if}>{l s='Under 1' mod='wkroomsearchblock'}</option>

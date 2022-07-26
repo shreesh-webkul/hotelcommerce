@@ -20,14 +20,14 @@
 $(document).ready(function() {
     // for screen size changes for room search
     var window_width = $(window).width();
-    if (window_width >= 767) {
+    if (window_width > 767) {
         $('.fancy_search_header_xs').hide();
     }
 
     if ($("body").length) {
         $(window).resize(function() {
             var window_width = $(window).width();
-            if (window_width >= 767) {
+            if (window_width > 767) {
                 $.fancybox.close();
                 $('.fancy_search_header_xs').hide();
             } else {
@@ -54,89 +54,56 @@ $(document).ready(function() {
     var ajax_check_var = '';
     $('.location_search_results_ul').hide();
 
-    $("#check_out_time").datepicker({
-        dateFormat: 'dd-mm-yy',
-        dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-        //for calender Css
-        beforeShowDay: function (date) {
-            // get check-in date
-            return highlightSelectedDateRange(date, $("#check_in_time").val(), $("#check_out_time").val());
-        },
-        beforeShow: function (input, instance) {
-            // So that on translating page date is translated to NaN-NaN-NaN
-            $('.ui-datepicker').addClass('notranslate');
-
-            var date_to = $('#check_in_time').val();
-            if (typeof date_to != 'undefined' && date_to != '') {
-                var date_format = date_to.split("-");
-                var selectedDate = new Date($.datepicker.formatDate('yy-mm-dd', new Date(date_format[2], date_format[1] - 1, date_format[0])));
-                selectedDate.setDate(selectedDate.getDate()+1);
-                $("#check_out_time").datepicker("option", "minDate", selectedDate);
-            } else {
-                var date_format = new Date();
-                var selectedDate = new Date($.datepicker.formatDate('yy-mm-dd', new Date()));
-                selectedDate.setDate(selectedDate.getDate()+1);
-                $("#check_out_time").datepicker("option", "minDate", selectedDate);
-            }
+    function createDateRangePicker(max_order_date, dateFrom, dateTo)
+    {
+        if (max_order_date) {
+            max_order_date = $.datepicker.parseDate('yy-mm-dd', max_order_date );
+        } else {
+            max_order_date = false;
         }
-    });
 
-    $("#check_in_time").datepicker({
-        dateFormat: 'dd-mm-yy',
-        minDate: 0,
-        dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-        beforeShow: function (input, instance) {
-            // So that on translating page date is translated to NaN-NaN-NaN
-            $('.ui-datepicker').addClass('notranslate');
-        },
-        //for calender Css
-        beforeShowDay: function (date) {
-            // highlight dates of the selected date range
-            return highlightSelectedDateRange(date, $("#check_in_time").val(), $("#check_out_time").val());
-        },
-        onClose: function() {
-            // get checkout date before making any changes for the operations
-            var checkOut = $("#check_out_time").val();
-            var date = $("#check_in_time").val();
-            var dateFormat = date.split("-");
-            var selectedDate = new Date(
-                $.datepicker.formatDate('yy-mm-dd', new Date(dateFormat[2], dateFormat[1] - 1, dateFormat[0]))
+        if (typeof $('#daterange_value').data('dateRangePicker') != 'undefined') {
+            if (max_order_date) {
+                if ($.datepicker.parseDate('yy-mm-dd', $('#check_out_time').val()) < max_order_date) {
+                    dateFrom = dateFrom ? dateFrom :$('#check_in_time').val();
+                    dateTo = dateTo ? dateTo : $('#check_out_time').val();
+                } else {
+                    dateFrom = false;
+                    dateTo = false;
+                }
+            }
+            $('#daterange_value').data('dateRangePicker').clear();
+            $('#daterange_value').data('dateRangePicker').destroy();
+            $("#daterange_value").off("datepicker-change");
+        }
+
+        if (max_order_date) {
+            max_order_date = $.datepicker.formatDate('dd-mm-yy', max_order_date);
+        }
+        $('#daterange_value').dateRangePicker({
+            startDate: $.datepicker.formatDate('dd-mm-yy', new Date()),
+            endDate: max_order_date,
+        }).on('datepicker-change', function(event,obj){
+            $('#check_in_time').val($.datepicker.formatDate('yy-mm-dd', obj.date1));
+            $('#check_out_time').val($.datepicker.formatDate('yy-mm-dd', obj.date2));
+        });
+
+        if (dateFrom && dateTo) {
+            $('#daterange_value').data('dateRangePicker').setDateRange(
+                $.datepicker.formatDate('dd-mm-yy', $.datepicker.parseDate('yy-mm-dd', dateFrom)),
+                $.datepicker.formatDate('dd-mm-yy', $.datepicker.parseDate('yy-mm-dd', dateTo))
             );
-            selectedDate.setDate(selectedDate.getDate() + 1);
-            $("#check_out_time").datepicker("option", "minDate", selectedDate);
-
-            /* open datepicker of chechout date only if
-            checkout date is empty or checkin selected is equal or more than check out date */
-            if (checkOut == '') {
-                $("#check_out_time").datepicker( "show" );
-            } else {
-                // Lets make the date in the required format
-                selectedDate.setDate(selectedDate.getDate() - 1);
-                var currentDate = selectedDate.getDate();
-                var currentMonth = selectedDate.getMonth() + 1;
-                if (currentMonth < 10) {
-                    currentMonth = '0' + currentMonth;
-                }
-                if (currentDate < 10) {
-                    currentDate = '0' + currentDate;
-                }
-
-                dmy = selectedDate.getFullYear() + "-" + currentMonth + "-" + currentDate;
-                checkOut = checkOut.split("-");
-                checkOut = (checkOut[2]) + '-' + (checkOut[1]) + '-' + (checkOut[0]);
-
-                if (checkOut <= dmy) {
-                    $("#check_out_time").datepicker('show');
-                }
-            }
         }
+
+    }
+    $(document).on('click',  function() {
+        console.log('test');
     });
+
+    createDateRangePicker(false, $('#check_in_time').val(), $('#check_out_time').val());
 
     if (typeof max_order_date != 'undefined' && typeof booking_date_to != 'undefined') {
-        max_order_date_cal = new Date(max_order_date);
-        $("#check_out_time").datepicker("option", "maxDate", new Date(max_order_date));
-        max_order_date_cal.setDate(max_order_date_cal.getDate() - 1);
-        $("#check_in_time").datepicker("option", "maxDate", max_order_date_cal);
+        createDateRangePicker(max_order_date, $('#check_in_time').val(), $('#check_out_time').val());
     }
 
     function abortRunningAjax() {
@@ -265,17 +232,7 @@ $(document).ready(function() {
 
     $(document).on('click', '.hotel_dropdown_ul li', function() {
         var max_order_date = $(this).attr('data-max_order_date');
-        var max_date_from = new Date(max_order_date);
-        max_date_from.setDate(max_date_from.getDate() - 1);
-        var max_date_to = new Date(max_order_date);
-        if($("#check_in_time").datepicker("getDate") > max_date_from) {
-            $("#check_in_time").val('');
-        }
-        if($("#check_out_time").datepicker("getDate") > max_date_to) {
-            $("#check_out_time").val('');
-        }
-        $("#check_in_time").datepicker("option", "maxDate", max_date_from);
-        $("#check_out_time").datepicker("option", "maxDate", max_date_to);
+        createDateRangePicker(max_order_date, $('#check_in_time').val(), $('#check_out_time').val());
         $("#max_order_date").val(max_order_date);
         $('#id_hotel').val($(this).attr('data-id-hotel'));
         $('#hotel_cat_id').val($(this).attr('data-hotel-cat-id'));
@@ -285,30 +242,14 @@ $(document).ready(function() {
     // If only one hotel then set max order date on date pickers
     var max_order_date = $('#max_order_date').val();
     if (max_order_date != '') {
-        var max_date_from = new Date(max_order_date);
-        max_date_from.setDate(max_date_from.getDate() - 1);
-        var max_date_to = new Date(max_order_date);
-        if($("#check_in_time").datepicker("getDate") > max_date_from) {
-            $("#check_in_time").val('');
-        }
-        if($("#check_out_time").datepicker("getDate") > max_date_to) {
-            $("#check_out_time").val('');
-        }
-        $("#check_in_time").datepicker("option", "maxDate", max_date_from);
-        $("#check_out_time").datepicker("option", "maxDate", max_date_to);
+        createDateRangePicker(max_order_date, $('#check_in_time').val(), $('#check_out_time').val());
     }
 
     // validations on the submit of the search fields
     $('#search_room_submit').on('click', function(e) {
         var check_in_time = $("#check_in_time").val();
         var check_out_time = $("#check_out_time").val();
-
-        var date_format_check_in = check_in_time.split("-");
-        var new_chk_in = new Date($.datepicker.formatDate('yy-mm-dd', new Date(date_format_check_in[2], date_format_check_in[1] - 1, date_format_check_in[0])));
-        var date_format_check_out = check_out_time.split("-");
-        var new_chk_out = new Date($.datepicker.formatDate('yy-mm-dd', new Date(date_format_check_out[2], date_format_check_out[1] - 1, date_format_check_out[0])));
         var max_order_date = $("#max_order_date").val();
-        var max_order_date_format = $.datepicker.formatDate('yy-mm-dd', new Date(max_order_date));
         var error = false;
 
         var locationCatId = $('#hotel_location').attr('city_cat_id');
@@ -325,31 +266,32 @@ $(document).ready(function() {
             error = true;
         }
         if (check_in_time == '') {
-            $("#check_in_time").addClass("error_border");
-            $('#check_in_time_error_p').text(check_in_time_cond);
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(check_in_time_cond);
             error = true;
-        } else if (new_chk_in < $.datepicker.formatDate('yy-mm-dd', new Date())) {
-            $("#check_in_time").addClass("error_border");
-            $('#check_in_time_error_p').text(less_checkin_date);
+        } else if (check_in_time < $.datepicker.formatDate('yy-mm-dd', new Date())) {
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(less_checkin_date);
             error = true;
         }
         if (check_out_time == '') {
-            $("#check_out_time").addClass("error_border");
-            $('#check_out_time_error_p').text(check_out_time_cond);
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(check_out_time_cond);
             error = true;
-        } else if (new_chk_out < new_chk_in) {
-            $("#check_out_time").addClass("error_border");
-            $('#check_out_time_error_p').text(more_checkout_date);
+        } else if (check_out_time < check_in_time) {
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(more_checkout_date);
             error = true;
-        } else if (max_order_date_format < new_chk_in) {
-            $("#check_in_time").addClass("error_border");
-            $('#check_in_time_error_p').text(max_order_date_err + ' ' + max_order_date);
+        } else if (max_order_date < check_in_time) {
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(max_order_date_err + ' ' + max_order_date);
             error = true;
-        } else if (max_order_date_format < new_chk_out) {
-            $("#check_out_time").addClass("error_border");
-            $('#check_out_time_error_p').text(max_order_date_err + ' ' + max_order_date);
+        } else if (max_order_date < check_out_time) {
+            $("#daterange_value").addClass("error_border");
+            $('#daterange_value_error_p').text(max_order_date_err + ' ' + max_order_date);
             error = true;
         }
+
         if (error)
             return false;
         else
@@ -368,52 +310,46 @@ $(document).ready(function() {
         var countRooms = parseInt($('#occupancy_wrapper .occupancy_info_block').length);
         countRooms += 1
 
-        occupancy_block += '<div class="occupancy_info_block" occ_block_index="'+roomBlockIndex+'">';
+        occupancy_block += '<div class="occupancy-room-block">';
             occupancy_block += '<div class="occupancy_info_head"><span class="room_num_wrapper">'+ room_txt + ' - ' + countRooms + '</span><a class="remove-room-link pull-right" href="#">' + remove_txt + '</a></div>';
-            occupancy_block += '<div class="row">';
-                occupancy_block += '<div class="form-group col-sm-5 col-xs-6 occupancy_count_block">';
-                    occupancy_block += '<div class="row">';
-                        occupancy_block += '<label class="col-sm-12">' + adults_txt + '</label>';
-                        occupancy_block += '<div class="col-sm-12">';
-                            occupancy_block += '<input type="hidden" class="num_occupancy num_adults room_occupancies" name="occupancy['+roomBlockIndex+'][adults]" value="1">';
-                            occupancy_block += '<div class="occupancy_count pull-left">';
-                                occupancy_block += '<span>1</span>';
-                            occupancy_block += '</div>';
-                            occupancy_block += '<div class="qty_direction pull-left">';
-                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
-                                    occupancy_block += '<span><i class="icon-plus"></i></span>';
-                                occupancy_block += '</a>';
-                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
-                                    occupancy_block += '<span><i class="icon-minus"></i></span>';
-                                occupancy_block += '</a>';
-                            occupancy_block += '</div>';
+            occupancy_block += '<div class="occupancy_info_block" occ_block_index="'+roomBlockIndex+'">';
+                occupancy_block += '<div class="form-group occupancy_count_block">';
+                    occupancy_block += '<label>' + adults_txt + '</label>';
+                    occupancy_block += '<div>';
+                        occupancy_block += '<input type="hidden" class="num_occupancy num_adults room_occupancies" name="occupancy['+roomBlockIndex+'][adult]" value="1">';
+                        occupancy_block += '<div class="occupancy_count pull-left">';
+                            occupancy_block += '<span>1</span>';
+                        occupancy_block += '</div>';
+                        occupancy_block += '<div class="qty_direction pull-left">';
+                            occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
+                                occupancy_block += '<span><i class="icon-plus"></i></span>';
+                            occupancy_block += '</a>';
+                            occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
+                                occupancy_block += '<span><i class="icon-minus"></i></span>';
+                            occupancy_block += '</a>';
                         occupancy_block += '</div>';
                     occupancy_block += '</div>';
                 occupancy_block += '</div>';
-                occupancy_block += '<div class="form-group col-sm-7 col-xs-6 occupancy_count_block">';
-                    occupancy_block += '<div class="row">';
-                        occupancy_block += '<label class="col-sm-12">' + child_txt + '<span class="label-desc-txt">(' + below_txt + ' ' + max_child_age + ' ' + years_txt + ')</span></label>';
-                        occupancy_block += '<div class="col-sm-12">';
-                            occupancy_block += '<input type="hidden" class="num_occupancy num_children room_occupancies" name="occupancy['+roomBlockIndex+'][children]" value="0">';
-                            occupancy_block += '<div class="occupancy_count pull-left">';
-                                occupancy_block += '<span>0</span>';
-                            occupancy_block += '</div>';
-                            occupancy_block += '<div class="qty_direction pull-left">';
-                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
-                                    occupancy_block += '<span><i class="icon-plus"></i></span>';
-                                occupancy_block += '</a>';
-                                occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
-                                    occupancy_block += '<span><i class="icon-minus"></i></span>';
-                                occupancy_block += '</a>';
-                            occupancy_block += '</div>';
+                occupancy_block += '<div class="form-group occupancy_count_block">';
+                    occupancy_block += '<label>' + child_txt + '<span class="label-desc-txt"> (' + below_txt + ' ' + max_child_age + ' ' + years_txt + ')</span></label>';
+                    occupancy_block += '<div>';
+                        occupancy_block += '<input type="hidden" class="num_occupancy num_children room_occupancies" name="occupancy['+roomBlockIndex+'][children]" value="0">';
+                        occupancy_block += '<div class="occupancy_count pull-left">';
+                            occupancy_block += '<span>0</span>';
+                        occupancy_block += '</div>';
+                        occupancy_block += '<div class="qty_direction pull-left">';
+                            occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_up">';
+                                occupancy_block += '<span><i class="icon-plus"></i></span>';
+                            occupancy_block += '</a>';
+                            occupancy_block += '<a href="#" data-field-qty="qty" class="btn btn-default occupancy_quantity_down">';
+                                occupancy_block += '<span><i class="icon-minus"></i></span>';
+                            occupancy_block += '</a>';
                         occupancy_block += '</div>';
                     occupancy_block += '</div>';
                 occupancy_block += '</div>';
-            occupancy_block += '</div>';
-            occupancy_block += '<div class="form-group row children_age_info_block">';
-                occupancy_block += '<label class="col-sm-12">' + all_children_txt + '</label>';
-                occupancy_block += '<div class="col-sm-12">';
-                    occupancy_block += '<div class="row children_ages">';
+                occupancy_block += '<div class="form-group children_age_info_block">';
+                    occupancy_block += '<label>' + all_children_txt + '</label>';
+                    occupancy_block += '<div class="children_ages">';
                     occupancy_block += '</div>';
                 occupancy_block += '</div>';
             occupancy_block += '</div>';
@@ -431,7 +367,7 @@ $(document).ready(function() {
     // remove occupancy info block
     $(document).on('click', '#occupancy_wrapper .remove-room-link', function(e) {
         e.preventDefault();
-        $(this).closest('#occupancy_wrapper .occupancy_info_block').remove();
+        $(this).closest('#occupancy_wrapper .occupancy-room-block').remove();
 
         $( "#occupancy_wrapper .room_num_wrapper" ).each(function(key, val) {
             $(this).text(room_txt + ' - '+ (key+1) );
@@ -457,7 +393,7 @@ $(document).ready(function() {
 
                 var roomBlockIndex = parseInt($(this).closest('.occupancy_info_block').attr('occ_block_index'));
 
-                var childAgeSelect = '<div class="col-xs-4">';
+                var childAgeSelect = '<div>';
                     childAgeSelect += '<select class="guest_child_age room_occupancies" name="occupancy[' +roomBlockIndex+ '][child_ages][]">';
                         childAgeSelect += '<option value="-1">' + select_age_txt + '</option>';
                         childAgeSelect += '<option value="0">' + under_1_age + '</option>';
@@ -525,19 +461,19 @@ $(document).ready(function() {
                 // Before closing the occupancy block validate the vaules inside
                 let hasErrors = 0;
 
-                let adults = $("#occupancy_wrapper").find(".num_adults").map(function(){return $(this).val();}).get();
+                let adult = $("#occupancy_wrapper").find(".num_adults").map(function(){return $(this).val();}).get();
                 let children = $("#occupancy_wrapper").find(".num_children").map(function(){return $(this).val();}).get();
                 let child_ages = $("#occupancy_wrapper").find(".guest_child_age").map(function(){return $(this).val();}).get();
 
                 // start validating above values
-                if (!adults.length || (adults.length != children.length)) {
+                if (!adult.length || (adult.length != children.length)) {
                     hasErrors = 1;
                     showErrorMessage(invalid_occupancy_txt);
                 } else {
                     $("#occupancy_wrapper").find('.occupancy_count').removeClass('error_border');
 
-                    // validate values of adults and children
-                    adults.forEach(function (item, index) {
+                    // validate values of adult and children
+                    adult.forEach(function (item, index) {
                         if (isNaN(item) || parseInt(item) < 1) {
                             hasErrors = 1;
                             $("#occupancy_wrapper .num_adults").eq(index).closest('.occupancy_count_block').find('.occupancy_count').addClass('error_border');
@@ -573,17 +509,17 @@ $(document).ready(function() {
 // function to set occupancy infor in guest occupancy field(search form)
 function setGuestOccupancy()
 {
-    var adults = 0;
+    var adult = 0;
     var children = 0;
     var rooms = $('#occupancy_wrapper .occupancy_info_block').length;
     $( "#occupancy_wrapper .num_adults" ).each(function(key, val) {
-        adults += parseInt($(this).val());
+        adult += parseInt($(this).val());
     });
     $( "#occupancy_wrapper .num_children" ).each(function(key, val) {
         children += parseInt($(this).val());
     });
-    var guestButtonVal = parseInt(adults) + ' ';
-    if (parseInt(adults) > 1) {
+    var guestButtonVal = parseInt(adult) + ' ';
+    if (parseInt(adult) > 1) {
         guestButtonVal += adults_txt;
     } else {
         guestButtonVal += adult_txt;

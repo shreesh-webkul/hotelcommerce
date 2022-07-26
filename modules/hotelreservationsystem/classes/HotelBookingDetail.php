@@ -60,6 +60,7 @@ class HotelBookingDetail extends ObjectModel
     public $room_num;
     public $adult;
     public $children;
+    public $child_ages;
 
     public $date_add;
     public $date_upd;
@@ -111,6 +112,7 @@ class HotelBookingDetail extends ObjectModel
             'check_out_time' => array('type' => self::TYPE_STRING, 'required' => true),
             'adult' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'children' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'child_ages' => array('type' => self::TYPE_STRING),
 
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
@@ -200,12 +202,6 @@ class HotelBookingDetail extends ObjectModel
         if (!isset($params['for_room_type'])) {
             $params['for_room_type'] = 0;
         }
-        if (!isset($params['adult'])) {
-            $params['adult'] = 0;
-        }
-        if (!isset($params['children'])) {
-            $params['children'] = 0;
-        }
         if (!isset($params['ratting'])) {
             $params['ratting'] = -1;
         }
@@ -250,7 +246,7 @@ class HotelBookingDetail extends ObjectModel
      *
      * @return [array] [Returns Array of rooms data ]
      *
-     * Note: Adult and children both are used for front category page only in available rooms
+     * Note: Adults and children both are used for front category page only in available rooms
      * Note :: $for_calendar is used both for calender and also for getting stats of rooms
      */
     public function getBookingData($params)
@@ -829,7 +825,7 @@ class HotelBookingDetail extends ObjectModel
     }
 
     /**
-     * [DataForFrontSearch ].
+     * [dataForFrontSearch ].
      *
      * @param [date] $date_from     [Start date of the booking]
      * @param [date] $date_to       [End date of the booking]
@@ -847,7 +843,7 @@ class HotelBookingDetail extends ObjectModel
      * @return [array] [Returns true if successfully updated else returns false]
      *                 Note:: $for_room_type is used for product page and category page for block cart
      */
-    public function DataForFrontSearch($bookingParams)
+    public function dataForFrontSearch($bookingParams)
     {
         if (Module::isInstalled('productcomments')) {
             require_once _PS_MODULE_DIR_.'productcomments/ProductComment.php';
@@ -932,7 +928,7 @@ class HotelBookingDetail extends ObjectModel
                                     // if ($room_left <= (int)Configuration::get('WK_ROOM_LEFT_WARNING_NUMBER'))
                                     $booking_data['rm_data'][$key]['room_left'] = $room_left;
 
-                                    $booking_data['rm_data'][$key]['adult'] = $rm_dtl['adults'];
+                                    $booking_data['rm_data'][$key]['adult'] = $rm_dtl['adult'];
                                     $booking_data['rm_data'][$key]['children'] = $rm_dtl['children'];
 
                                     $booking_data['rm_data'][$key]['ratting'] = $prod_ratting;
@@ -942,7 +938,10 @@ class HotelBookingDetail extends ObjectModel
 
                                     // create URL with the parameters from URL
                                     $urlData = array ('date_from' => $date_from, 'date_to' => $date_to);
-                                    if ($occupancy = Tools::getValue('occupancy')) {
+                                    if (!isset($occupancy)) {
+                                        $occupancy = Tools::getValue('occupancy');
+                                    }
+                                    if ($occupancy) {
                                         $urlData['occupancy'] = $occupancy;
                                     }
 
@@ -1623,7 +1622,7 @@ class HotelBookingDetail extends ObjectModel
                     'id_cart' => $id_cart,
                     'id_guest' => $this->context->cookie->id_guest,
                 );
-                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
+                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $params['req_qty']) {

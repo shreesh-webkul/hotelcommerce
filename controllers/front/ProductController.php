@@ -46,10 +46,10 @@ class ProductControllerCore extends FrontController
             $this->addCSS(_THEME_CSS_DIR_.'product.css');
             $this->addCSS(_THEME_CSS_DIR_.'print.css', 'print');
             $this->addJqueryPlugin(array('fancybox', 'idTabs', 'scrollTo', 'serialScroll', 'bxslider'));
-            $this->addCSS(_THEME_CSS_DIR_.'datepicker.css');
+
             $this->addJS(array(
                 _THEME_JS_DIR_.'tools.js',  // retro compat themes 1.5
-                _THEME_JS_DIR_.'product.js'
+                _THEME_JS_DIR_.'product.js',
             ));
         } else {
             $this->addJqueryPlugin(array('scrollTo', 'serialScroll'));
@@ -269,7 +269,7 @@ class ProductControllerCore extends FrontController
             $obj_hotel_room_type = new HotelRoomType();
             $room_info_by_product_id = $obj_hotel_room_type->getRoomTypeInfoByIdProduct($this->product->id);
             $productCapacity = array();
-            $productCapacity['adult'] = $room_info_by_product_id['adults'];
+            $productCapacity['adult'] = $room_info_by_product_id['adult'];
             $productCapacity['children'] = $room_info_by_product_id['children'];
             $this->product->capacity = $productCapacity;
             $hotel_id = $room_info_by_product_id['id_hotel'];
@@ -318,7 +318,7 @@ class ProductControllerCore extends FrontController
                 }
                 //END
 
-                // @todo Send occupancy in the DataForFrontSearch function
+                // @todo Send occupancy in the dataForFrontSearch function
                 $obj_booking_dtl = new HotelBookingDetail();
                 $booking_params = array(
                     'date_from' => $date_from,
@@ -328,7 +328,7 @@ class ProductControllerCore extends FrontController
                     'for_room_type' => 1
                 );
 
-                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
+                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
                 if ($hotel_room_data) {
                     $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                 }
@@ -365,10 +365,10 @@ class ProductControllerCore extends FrontController
                 }
 
                 // send occupancy information searched by the user
-                if ($occupancy) {
+                if ($occupancy && is_array($occupancy)) {
                     $this->context->smarty->assign(
                         array(
-                            'occupancy_adults' => array_sum(array_column($occupancy, 'adults')),
+                            'occupancy_adults' => array_sum(array_column($occupancy, 'adult')),
                             'occupancy_children' => array_sum(array_column($occupancy, 'children')),
                             'occupancy_child_ages' => array_sum(array_column($occupancy, 'child_ages'))
                         )
@@ -960,13 +960,13 @@ class ProductControllerCore extends FrontController
                 $occupancy = Tools::getValue('occupancy');
                 $occupancy = json_decode($occupancy, true);
                 // @todo for now we are sending the num of rooms for current algo,
-                // @todo Send occupancy in the DataForFrontSearch function
+                // @todo Send occupancy in the dataForFrontSearch function
                 $quantity = count($occupancy);
                 if ($idHotel = $roomTypeInfo['id_hotel']) {
                     $objBookingDetail = new HotelBookingDetail();
                     $booking_params = array(
                         'date_from' => $dateFrom,
-                        'date_to' => $dateFrom,
+                        'date_to' => $dateTo,
                         'hotel_id' => $idHotel,
                         'room_type' => $idProduct,
                         'for_room_type' => 1,
@@ -974,7 +974,7 @@ class ProductControllerCore extends FrontController
                         'id_guest' => $this->context->cart->id_guest
                     );
 
-                    if ($hotelRoomData = $objBookingDetail->DataForFrontSearch($booking_params)) {
+                    if ($hotelRoomData = $objBookingDetail->dataForFrontSearch($booking_params)) {
                         $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                         if ($totalAvailRooms >= $quantity) {
                             $totalPrice = 0;
@@ -1001,6 +1001,7 @@ class ProductControllerCore extends FrontController
 
                             //$price_tax_incl = Product::getPriceStatic($idProduct, $price_tax);
                             // $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
+                            $totalRoomPrice = $roomTypeDateRangePrice;
                             $totalPrice += $totalRoomPrice;
                             $demandsPrice = 0;
                             if ($roomDemand = Tools::getValue('room_demands')) {

@@ -270,7 +270,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                     'room_type' => $id_product,
                     'for_room_type' => 1,
                 );
-                $roomTypeAvailabilityInfo = $objBookingDetail->DataForFrontSearch($booking_params);
+                $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($booking_params);
                 if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                     $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                 } else {
@@ -299,7 +299,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                             'room_type' => $product['id_product'],
                             'for_room_type' => 1,
                         );
-                        $roomTypeAvailabilityInfo = $objBookingDetail->DataForFrontSearch($booking_params);
+                        $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($booking_params);
                         if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                             $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                         } else {
@@ -447,7 +447,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                                         'room_type' => $id_product,
                                         'for_room_type' => 1,
                                     );
-                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->DataForFrontSearch($booking_params);
+                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->dataForFrontSearch($booking_params);
                                     $bookedRoomsInfo = $hotelRoomInformation->getRoomTypeBookedRoomsForDateRange(
                                         $id_hotel,
                                         $id_product,
@@ -702,7 +702,10 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
 
     public static function getRoomTypeTotalPriceByOccupancy($id_product, $date_from, $date_to, $occupancy = 0, $id_group = 0)
     {
-        return self::getRoomTypeTotalPrice($id_product, $date_from, $date_to, $occupancy, $id_group);
+        $total = self::getRoomTypeTotalPrice($id_product, $date_from, $date_to, count($occupancy), $id_group);
+        $total['total_price_tax_incl'] += (float)100;
+        $total['total_price_tax_excl'] += (float)100;
+        return $total;
     }
 
     /**
@@ -738,7 +741,7 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
 
     public static function getRoomTypeFeaturePricesPerDayByOccupancy($id_product, $date_from, $date_to, $occupancy, $use_tax = true, $id_group = 0)
     {
-        return self::getRoomTypeFeaturePricesPerDay($id_product, $date_from, $date_to, $use_tax, $id_group);
+        return (self::getRoomTypeFeaturePricesPerDay($id_product, $date_from, $date_to, $use_tax, $id_group) + 100);
     }
 
     /**

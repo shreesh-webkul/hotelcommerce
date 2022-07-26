@@ -539,7 +539,7 @@ function init()
 					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						jAlert("Impossible to add the room to the cart.\n\ntextStatus: '" + textStatus + "'\nerrorThrown: '" + errorThrown + "'\nresponseText:\n" + XMLHttpRequest.responseText);
 					},
-					complete: function() { 
+					complete: function() {
 						$('#submitAddProduct').removeAttr('disabled');
 					}
 				});
@@ -633,14 +633,11 @@ function init()
 					if (!element_list.length)
 					{
 						element_list = element.parents('.product-line-row');
-						element_list.find('td .booking_duration_show').hide();
-						element_list.find('td .booking_duration_edit').show();
 					}
-					else
-					{
-						element_list.find('td .booking_duration_show').hide();
-						element_list.find('td .booking_duration_edit').show();
-					}
+					element_list.find('td .booking_duration_show').hide();
+					element_list.find('td .booking_duration_edit').show();
+					element_list.find('td .booking_occupancy_show').hide();
+					element_list.find('td .booking_occupancy_edit').show();
 					//element_list.find('td .product_price_show').hide();
 					//element_list.find('td .product_price_edit').show();
 					element_list.find('td.cancelCheck').hide();
@@ -679,6 +676,8 @@ function init()
 		element_list.find('td .booking_duration_show').show();
 		element_list.find('td .product_price_edit').hide();
 		element_list.find('td .booking_duration_edit').hide();
+		element_list.find('td .booking_occupancy_show').show();
+		element_list.find('td .booking_occupancy_edit').hide();
 		element_list.find('td.product_invoice').hide();
 		element_list.find('td.cancelCheck').show();
 		element_list.find('td.cancelQuantity').show();
@@ -718,10 +717,12 @@ function init()
 			var id_order_detail = $(this).closest('.product-line-row').find('td .edit_product_id_order_detail').val();
 			//some vaues are added to the query by webkul
 			query = 'ajax=1&token='+token+'&action=editProductOnOrder&id_order='+id_order+'&id_room='+id_room+'&id_product='+id_product+'&id_hotel='+id_hotel+'&date_from='+date_from+'&date_to='+date_to+'&order_detail_id='+order_detail_id+'&';
-			if (element_list.length)
+
+			if (element_list.length) {
 				query += element_list.parent().parent().find('input, select, .edit_product_id_order_detail').serialize();
-			else
+			} else {
 				query += element.parent().parent().find('input, select, .edit_product_id_order_detail').serialize();
+			}
 
 			$.ajax({
 				type: 'POST',

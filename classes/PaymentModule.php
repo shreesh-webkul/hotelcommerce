@@ -728,15 +728,23 @@ abstract class PaymentModuleCore extends Module
                                 if ($objCartBookingData->is_back_order) {
                                     $objBookingDetail->is_back_order = 1;
                                 }
-                                $total_price = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
+                                $total_price = HotelRoomTypeFeaturePricing::getRoomTypeTotalPriceByOccupancy(
                                     $idProduct,
                                     $objCartBookingData->date_from,
-                                    $objCartBookingData->date_to
+                                    $objCartBookingData->date_to,
+                                    array(array(
+                                        'adult' => $objCartBookingData->adult,
+                                        'children' => $objCartBookingData->children,
+                                        'child_ages' => json_decode($objCartBookingData->child_ages),
+                                    ))
                                 );
                                 $objBookingDetail->date_from = $objCartBookingData->date_from;
                                 $objBookingDetail->date_to = $objCartBookingData->date_to;
                                 $objBookingDetail->total_price_tax_excl = Tools::ps_round($total_price['total_price_tax_excl'], 6);
                                 $objBookingDetail->total_price_tax_incl = Tools::ps_round($total_price['total_price_tax_incl'], 6);
+                                $objBookingDetail->adult = $objCartBookingData->adult;
+                                $objBookingDetail->children = $objCartBookingData->children;
+                                $objBookingDetail->child_ages = $objCartBookingData->child_ages;
 
                                 // Save hotel information/location/contact
                                 if (Validate::isLoadedObject($objRoom = new HotelRoomInformation($objCartBookingData->id_room))) {
@@ -758,10 +766,6 @@ abstract class PaymentModuleCore extends Module
                                         $objBookingDetail->zipcode = $hotelAddress['postcode'];
                                         $objBookingDetail->phone = $hotelAddress['phone'];
                                     }
-                                }
-                                if ($roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
-                                    $objBookingDetail->adult = $roomTypeInfo['adult'];
-                                    $objBookingDetail->children = $roomTypeInfo['children'];
                                 }
 
                                 /*for saving details of the advance payment product wise*/
@@ -1360,8 +1364,6 @@ abstract class PaymentModuleCore extends Module
                     $cart_htl_data[$type_key]['name']        = $product->name;
                     $cart_htl_data[$type_key]['unit_price'] = $unit_price;
                     $cart_htl_data[$type_key]['hotel_name'] = $rm_dtl['hotel_name'];
-                    $cart_htl_data[$type_key]['adult']        = $rm_dtl['adults'];
-                    $cart_htl_data[$type_key]['children']    = $rm_dtl['children'];
 
                     foreach ($cart_bk_data as $data_k => $data_v) {
                         $date_join = strtotime($data_v['date_from']).strtotime($data_v['date_to']);
@@ -1371,6 +1373,9 @@ abstract class PaymentModuleCore extends Module
 
                             $num_days = $cart_htl_data[$type_key]['date_diff'][$date_join]['num_days'];
                             $vart_quant = (int)$cart_htl_data[$type_key]['date_diff'][$date_join]['num_rm'];
+
+                            $cart_htl_data[$type_key]['date_diff'][$date_join]['adult'] += $data_v['adult'];
+                            $cart_htl_data[$type_key]['date_diff'][$date_join]['children'] += $data_v['children'];
 
                             //$amount = Product::getPriceStatic($type_value['product_id'], true, null, 6, null,	false, true, 1);
                             //$amount *= $vart_quant;
@@ -1415,6 +1420,8 @@ abstract class PaymentModuleCore extends Module
                             $cart_htl_data[$type_key]['date_diff'][$date_join]['data_form'] = $data_v['date_from'];
                             $cart_htl_data[$type_key]['date_diff'][$date_join]['data_to'] = $data_v['date_to'];
                             $cart_htl_data[$type_key]['date_diff'][$date_join]['num_days'] = $num_days;
+                            $cart_htl_data[$type_key]['date_diff'][$date_join]['adult'] = $data_v['adult'];
+                            $cart_htl_data[$type_key]['date_diff'][$date_join]['children'] = $data_v['children'];
                             /*$amount = Product::getPriceStatic($type_value['product_id'], true, null, 6, null, false, true, 1);
                             $amount *= $num_days;*/
 

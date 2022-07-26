@@ -822,4 +822,13 @@ class HotelHelper
 
         return false;
     }
+
+    public static function getNumberOfDays($dateFrom, $dateTo)
+    {
+        $startDate = new DateTime($dateFrom);
+        $endDate = new DateTime($dateTo);
+        $daysDifference = $startDate->diff($endDate)->days;
+
+        return $daysDifference;
+    }
 }

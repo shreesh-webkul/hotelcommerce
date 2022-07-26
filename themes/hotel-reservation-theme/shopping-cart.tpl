@@ -142,7 +142,7 @@
 							<div class="col-sm-4 col-xs-6">
 								<p class="room_duration_block_head">{l s='NO. OF GUESTS'}</p>
 								<p class="room_duration_block_value">
-									{if {$data_v['adult']} <= 9}0{$data_v['adult']}{else}{$data_v['adult']}{/if} {l s='Adults'}, {if {$data_v['children']} <= 9}0{$data_v['children']}{else}{$data_v['children']}{/if} {l s='Child'}
+									{if {$rm_v['adult']} <= 9}0{$rm_v['adult']}{else}{$rm_v['adult']}{/if} {l s='Adults'}, {if {$rm_v['children']} <= 9}0{$rm_v['children']}{else}{$rm_v['children']}{/if} {l s='Child'}
 								</p>
 							</div>
 						</div>

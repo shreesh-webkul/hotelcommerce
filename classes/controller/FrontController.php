@@ -981,6 +981,12 @@ class FrontControllerCore extends Controller
             }
         }
 
+        $this->addJS(_PS_JS_DIR_.'daterangepicker/moment.min.js');
+        $this->addjqueryPlugin('daterangepicker.min', _PS_JS_DIR_.'daterangepicker/');
+        $this->addJS(_PS_JS_DIR_.'daterangepicker/qlodaterangepicker.js');
+
+        $this->addCSS(_THEME_CSS_DIR_.'daterangepicker.css');
+
         if (Tools::isSubmit('live_edit') && Tools::getValue('ad') && Tools::getAdminToken('AdminModulesPositions'.(int)Tab::getIdFromClassName('AdminModulesPositions').(int)Tools::getValue('id_employee'))) {
             $this->addJqueryUI('ui.sortable');
             $this->addjqueryPlugin('fancybox');

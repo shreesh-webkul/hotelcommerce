@@ -1529,6 +1529,7 @@ class AdminOrdersControllerCore extends AdminController
             'htl_booking_order_data' => $bookingOrderInfo,
             'hotel_order_status' => $htlOrderStatus,
             'order_detail_data' => $order_detail_data,
+            'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
             /*END*/
             'order' => $order,
             'cart' => new Cart($order->id_cart),
@@ -1804,7 +1805,7 @@ class AdminOrdersControllerCore extends AdminController
                     'id_cart' => $id_cart,
                     'id_guest' => $id_guest,
                 );
-                $hotel_room_data = $obj_booking_dtl->DataForFrontSearch($booking_params);
+                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $req_rm) {
@@ -2328,7 +2329,7 @@ class AdminOrdersControllerCore extends AdminController
         $product_quantity = (int) $obj_booking_detail->getNumberOfDays($new_date_from, $new_date_to);
         $old_product_quantity =  (int) $obj_booking_detail->getNumberOfDays($old_date_from, $old_date_to);
         $qty_diff = $product_quantity - $old_product_quantity;
-        
+
         /*By webkul to validate fields before deleting the cart and order data form the tables*/
         if ($id_hotel == '') {
             die(json_encode(array(

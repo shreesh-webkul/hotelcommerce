@@ -51,9 +51,9 @@ class WkRoomSearchBlock extends Module
             || 'index' == $controller
             || 'product' == $controller
         ) {
+
             $this->context->controller->addCSS($this->_path.'/views/css/wk-global-search.css');
             $this->context->controller->addJS($this->_path.'/views/js/wk-room-search-block.js');
-            $this->context->controller->addCSS(_THEME_CSS_DIR_.'datepicker.css');
 
             Media::addJsDef(
                 array (
