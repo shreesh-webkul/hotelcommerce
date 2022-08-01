@@ -52,7 +52,7 @@
     <name>Awaiting partial payment</name>
     <template/>
   </order_state>
-  <order_state id="OverBooking">
+  <order_state id="Overbooking">
     <name>Over Booking</name>
     <template/>
   </order_state>
