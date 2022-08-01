@@ -69,11 +69,15 @@ class Cheque extends PaymentModule
 			$this->warning = $this->l('No currency has been set for this module.');
 		}
 
+		$this->context->smarty->assign(array(
+			'cheque_name' => Configuration::get('CHEQUE_NAME'),
+			'cheque_address' => Configuration::get('CHEQUE_ADDRESS'),
+			'cheque_address_html' => str_replace("\n", '<br />', Configuration::get('CHEQUE_ADDRESS'))
+		));
 		$this->extra_mail_vars = array(
-											'{cheque_name}' => Configuration::get('CHEQUE_NAME'),
-											'{cheque_address}' => Configuration::get('CHEQUE_ADDRESS'),
-											'{cheque_address_html}' => str_replace("\n", '<br />', Configuration::get('CHEQUE_ADDRESS'))
-											);
+			'{payment_detail}' => $this->display(__FILE__, 'mail_template.tpl'),
+			'{payment_detail_text}' => $this->display(__FILE__, 'mail_template_text.tpl')
+		);
 	}
 
 	public function install()
@@ -177,9 +181,7 @@ class Cheque extends PaymentModule
         if (in_array(
 			$orderState,
 			array(
-				Configuration::get('PS_OS_CHEQUE'),
-				Configuration::get('PS_OS_OUTOFSTOCK'),
-				Configuration::get('PS_OS_OUTOFSTOCK_UNPAID')
+				Configuration::get('PS_OS_AWATING')
 			)
 		)) {
 			$objCart = new Cart($objOrder->id_cart);

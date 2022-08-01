@@ -74,11 +74,15 @@ class bankwire extends PaymentModule
             $this->warning = $this->l('No currency has been set for this module.');
         }
 
+        $this->context->smarty->assign(array(
+            'bankwire_owner' => Configuration::get('BANK_WIRE_OWNER'),
+            'bankwire_details' => nl2br(Configuration::get('BANK_WIRE_DETAILS')),
+            'bankwire_address' => nl2br(Configuration::get('BANK_WIRE_ADDRESS'))
+        ));
         $this->extra_mail_vars = array(
-                                        '{bankwire_owner}' => Configuration::get('BANK_WIRE_OWNER'),
-                                        '{bankwire_details}' => nl2br(Configuration::get('BANK_WIRE_DETAILS')),
-                                        '{bankwire_address}' => nl2br(Configuration::get('BANK_WIRE_ADDRESS'))
-                                        );
+            '{payment_detail}' => $this->display(__FILE__, 'mail_template.tpl'),
+			'{payment_detail_text}' => $this->display(__FILE__, 'mail_template_text.tpl')
+		);
     }
 
     public function install()
@@ -195,9 +199,7 @@ class bankwire extends PaymentModule
         if (in_array(
             $orderState,
             array(
-                Configuration::get('PS_OS_BANKWIRE'),
-                Configuration::get('PS_OS_OUTOFSTOCK'),
-                Configuration::get('PS_OS_OUTOFSTOCK_UNPAID')
+                Configuration::get('PS_OS_AWATING'),
             )
         )) {
             $objCart = new Cart($objOrder->id_cart);

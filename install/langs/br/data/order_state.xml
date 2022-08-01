@@ -1,14 +1,14 @@
 <?xml version='1.0'?>
 <entity_order_state>
-  <order_state id='Awaiting_cheque_payment'>
-    <name>Aguardando o pagamento por cheque</name>
-    <template>cheque</template>
+  <order_state id='Awaiting'>
+    <name>Aguardando pagamento</name>
+    <template>awating</template>
   </order_state>
   <order_state id='Payment_accepted'>
     <name>Pagamento aceito</name>
     <template>payment</template>
   </order_state>
-  <order_state id='Preparation_in_progress'>
+  <order_state id='Processing_in_progress'>
     <name>Preparação em andamento</name>
     <template>preparation</template>
   </order_state>
@@ -52,8 +52,13 @@
     <name>Awaiting partial payment</name>
     <template/>
   </order_state>
+  <order_state id="OverBooking">
+    <name>Over Booking</name>
+    <template/>
+  </order_state>
   <order_state id="Partial_payment_accepted">
     <name>Partial payment accepted</name>
     <template/>
   </order_state>
+
 </entity_order_state>

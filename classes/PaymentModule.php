@@ -305,6 +305,7 @@ abstract class PaymentModuleCore extends Module
 
                     $order->secure_key = ($secure_key ? pSQL($secure_key) : pSQL($this->context->customer->secure_key));
                     $order->payment = $payment_method;
+                    $order->payment_type = OrderPaymentCore::PAYMENT_TYPE_ONLINE;
                     if (isset($this->name)) {
                         $order->module = $this->name;
                     }
@@ -432,7 +433,7 @@ abstract class PaymentModuleCore extends Module
                     $transaction_id = null;
                 }
 
-                if (!isset($order) || !Validate::isLoadedObject($order) || !$order->addOrderPayment($amount_paid, null, $transaction_id)) {
+                if (!isset($order) || !Validate::isLoadedObject($order) || !$order->addOrderPayment($amount_paid, null, OrderPayment::PAYMENT_TYPE_ONLINE , $transaction_id)) {
                     PrestaShopLogger::addLog('PaymentModule::validateOrder - Cannot save Order Payment', 3, null, 'Cart', (int)$id_cart, true);
                     throw new PrestaShopException('Can\'t save Order Payment');
                 }
@@ -751,7 +752,7 @@ abstract class PaymentModuleCore extends Module
                                     $objBookingDetail->email = $objHotelBranch->email;
                                     $objBookingDetail->check_in_time = $objHotelBranch->check_in;
                                     $objBookingDetail->check_out_time = $objHotelBranch->check_out;
-                                    if ($hotelAddress = $objHotelBranch->getAddress($objCartBkData->id_hotel)) {
+                                    if ($hotelAddress = $objHotelBranch->getAddress($objBookingDetail->id_hotel)) {
                                         $objBookingDetail->city = $hotelAddress['city'];
                                         $objBookingDetail->state = $hotelAddress['state'];
                                         $objBookingDetail->country = $hotelAddress['country'];

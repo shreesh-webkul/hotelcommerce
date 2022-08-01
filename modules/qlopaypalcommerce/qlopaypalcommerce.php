@@ -534,8 +534,6 @@ class QloPaypalCommerce extends PaymentModule
     {
         $objModuleDb = new WkPaypalCommerceDb();
         if (!parent::install()
-            || !$objModuleDb->createPartialPaymentOrderState()
-            || !$objModuleDb->createPaypalAwaitingOrderState()
             || !$objModuleDb->createTables()
             || !$this->callInstallTab()
             || !$this->registerModuleHooks()
