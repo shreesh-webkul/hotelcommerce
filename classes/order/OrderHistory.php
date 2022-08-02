@@ -322,10 +322,16 @@ class OrderHistoryCore extends ObjectModel
                 /** @var OrderInvoice $invoice */
                 $rest_paid = $invoice->getRestPaid();
                 if ($rest_paid > 0) {
+                    if (Configuration::get('PS_OS_PARTIAL_PAYMENT') == $new_os->id
+                        && $order->total_paid_real < $order->advance_paid_amount
+                    ) {
+                        $rest_paid =  $order->advance_paid_amount - $order->total_paid_real;
+                    }
                     $payment = new OrderPayment();
                     $payment->order_reference = Tools::substr($order->reference, 0, 9);
                     $payment->id_currency = $order->id_currency;
                     $payment->amount = $rest_paid;
+                    $payment->payment_type = $order->payment_type;
 
                     if ($order->total_paid != 0) {
                         $payment->payment_method = $payment_method->displayName;

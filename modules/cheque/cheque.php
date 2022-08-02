@@ -78,6 +78,8 @@ class Cheque extends PaymentModule
 			'{payment_detail}' => $this->display(__FILE__, 'mail_template.tpl'),
 			'{payment_detail_text}' => $this->display(__FILE__, 'mail_template_text.tpl')
 		);
+
+		$this->payment_type = PaymentModule::PAYMENT_TYPE_REMOTE_PAYMENT;
 	}
 
 	public function install()

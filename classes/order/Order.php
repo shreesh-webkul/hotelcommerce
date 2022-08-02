@@ -889,7 +889,7 @@ class OrderCore extends ObjectModel
 
     public function isInPreparation()
     {
-        return count($this->getHistory((int)$this->id_lang, Configuration::get('PS_OS_PREPARATION')));
+        return count($this->getHistory((int)$this->id_lang, Configuration::get('PS_OS_PROCESSING')));
     }
 
     /**
@@ -1612,7 +1612,7 @@ class OrderCore extends ObjectModel
         $payment_module = Module::getInstanceByName($this->module);
         $payment_module->orderSource = $this->source;
         $customer = new Customer($this->id_customer);
-        $payment_module->validateOrder($this->id_cart, Configuration::get('PS_OS_WS_PAYMENT'), $this->total_paid, $this->payment, null, array(), null, false, $customer->secure_key);
+        $payment_module->validateOrder($this->id_cart, Configuration::get('PS_OS_PAYMENT'), $this->total_paid, $this->payment, null, array(), null, false, $customer->secure_key);
         $this->id = $payment_module->currentOrder;
         return true;
     }

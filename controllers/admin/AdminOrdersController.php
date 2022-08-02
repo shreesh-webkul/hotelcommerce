@@ -801,7 +801,7 @@ class AdminOrdersControllerCore extends AdminController
                 } elseif (!Validate::isDate(Tools::getValue('payment_date'))) {
                     $this->errors[] = Tools::displayError('The date is invalid');
                 } else {
-                    if (!$order->addOrderPayment($amount, Tools::getValue('payment_method'), OrderPayment::PAYMENT_TYPE_PAY_AT_HOTEL, Tools::getValue('payment_transaction_id'), $currency, Tools::getValue('payment_date'), $order_invoice)) {
+                    if (!$order->addOrderPayment($amount, Tools::getValue('payment_method'), PaymentModule::PAYMENT_TYPE_PAY_AT_HOTEL, Tools::getValue('payment_transaction_id'), $currency, Tools::getValue('payment_date'), $order_invoice)) {
                         $this->errors[] = Tools::displayError('An error occurred during payment.');
                     } else {
                         Tools::redirectAdmin(self::$currentIndex.'&id_order='.$order->id.'&vieworder&conf=4&token='.$this->token);

@@ -39,10 +39,6 @@ class OrderPaymentCore extends ObjectModel
     public $card_holder;
     public $date_add;
 
-    const PAYMENT_TYPE_ONLINE = 1;
-    const PAYMENT_TYPE_PAY_AT_HOTEL = 2;
-    const PAYMENT_TYPE_REMOTE_PAYMENT = 3;
-
     /**
      * @see ObjectModel::$definition
      */

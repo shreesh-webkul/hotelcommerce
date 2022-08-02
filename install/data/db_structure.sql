@@ -1106,6 +1106,7 @@ CREATE TABLE `PREFIX_orders` (
   `current_state` int(10) unsigned NOT NULL,
   `secure_key` varchar(32) NOT NULL DEFAULT '-1',
   `payment` varchar(255) NOT NULL,
+  `payment_type` tinyint(10) UNSIGNED NOT NULL,
   `conversion_rate` decimal(13,6) NOT NULL DEFAULT 1,
   `module` varchar(255) DEFAULT NULL,
   `recyclable` tinyint(1) unsigned NOT NULL DEFAULT '0',

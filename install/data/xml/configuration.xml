@@ -377,7 +377,7 @@
 	<configuration id="PS_OS_PAYMENT" name="PS_OS_PAYMENT">
 		<value>2</value>
 	</configuration>
-	<configuration id="PS_OS_PREPARATION" name="PS_OS_PREPARATION">
+	<configuration id="PS_OS_PROCESSING" name="PS_OS_PROCESSING">
 		<value>3</value>
 	</configuration>
 	<configuration id="PS_OS_CANCELED" name="PS_OS_CANCELED">
