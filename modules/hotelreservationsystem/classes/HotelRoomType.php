@@ -32,6 +32,8 @@ class HotelRoomType extends ObjectModel
 	public $extra_adult_price;
 	public $extra_child_price;
 	public $extra_infant_price;
+    public $min_los;
+    public $max_los;
     public $date_add;
     public $date_upd;
 
@@ -50,6 +52,8 @@ class HotelRoomType extends ObjectModel
             'extra_child_price' => array('type' => self::TYPE_FLOAT),
             'extra_infant_price' => array('type' => self::TYPE_FLOAT),
             'children' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
+            'min_los' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'default' => 1),
+            'max_los' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'default' => 0),
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
         ),
@@ -225,14 +229,17 @@ class HotelRoomType extends ObjectModel
      *
      * @return [array|false] [If data found returns array containing information of the room type else returns false]
      */
-    public function getRoomTypeInfoByIdProduct($id_product)
+    public function getRoomTypeInfoByIdProduct($id_product, $idLang = false)
     {
-        $idLang = Context::getContext()->language->id;
+        if (!$idLang) {
+            $idLang = Context::getContext()->language->id;
+        }
+
         $sql = 'SELECT hrt.*, hbl.`hotel_name`
-                FROM `'._DB_PREFIX_.'htl_room_type` AS hrt
-                INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` AS hbl
-                ON (hbl.`id` = hrt.`id_hotel` AND hbl.`id_lang` = '.(int)$idLang.')
-                WHERE `id_product` = '.(int)$id_product;
+            FROM `'._DB_PREFIX_.'htl_room_type` AS hrt
+            INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` AS hbl
+            ON (hbl.`id` = hrt.`id_hotel` AND hbl.`id_lang` = '.(int)$idLang.')
+            WHERE hrt.`id_product` = '.(int)$id_product;
 
         return Db::getInstance()->getRow($sql);
     }
