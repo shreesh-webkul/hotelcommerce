@@ -2224,22 +2224,6 @@ class AdminOrdersControllerCore extends AdminController
         }
 
         $product_informations = $_POST['add_product'];
-<<<<<<< HEAD
-        $new_date_from = trim(date('Y-m-d', strtotime($product_informations['date_from'])));
-        $new_date_to = trim(date('Y-m-d', strtotime($product_informations['date_to'])));
-        $old_date_from = trim(Tools::getValue('date_from'));
-        $old_date_to = trim(Tools::getValue('date_to'));
-        $id_hotel = trim(Tools::getValue('id_hotel'));
-        $id_room = trim(Tools::getValue('id_room'));
-        $id_product = trim(Tools::getValue('id_product'));
-        $obj_booking_detail = new HotelBookingDetail();
-        $product_quantity = (int) $obj_booking_detail->getNumberOfDays($new_date_from, $new_date_to);
-        $old_product_quantity =  (int) $obj_booking_detail->getNumberOfDays($old_date_from, $old_date_to);
-        $qty_diff = $product_quantity - $old_product_quantity;
-
-        /*By webkul to validate fields before deleting the cart and order data form the tables*/
-        if ($id_hotel == '') {
-=======
 
         /*By Webkul Code is added to add order information In our table while adding product in the process order edit from order detail page.*/
         $date_from = date('Y-m-d', strtotime($product_informations['date_from']));
@@ -2247,7 +2231,6 @@ class AdminOrdersControllerCore extends AdminController
         $curr_date = date('Y-m-d');
         /*Validations*/
         if ($date_from == '') {
->>>>>>> initial commit for normal product
             die(json_encode(array(
                 'result' => false,
                 'error' => Tools::displayError('Please Enter Check In Date.'),
@@ -3258,76 +3241,6 @@ class AdminOrdersControllerCore extends AdminController
                 'error' => Tools::displayError('An error occurred while editing the product line.')
             )));
         }
-
-<<<<<<< HEAD
-        // get extra demands of the room before changing in the booking table
-        $objBookingDemand = new HotelBookingDemands();
-        $extraDemands = $objBookingDemand->getRoomTypeBookingExtraDemands(
-            $id_order,
-            0,
-            $id_room,
-            $old_date_from,
-            $old_date_to
-        );
-
-        /*By webkul to edit the Hotel Cart and Hotel Order tables when editing the room for the order detail page*/
-        if ($update_htl_tables = $obj_booking_detail->UpdateHotelCartHotelOrderOnOrderEdit(
-            $id_order,
-            $id_room,
-            $old_date_from,
-            $old_date_to,
-            $new_date_from,
-            $new_date_to
-        )) {
-            // update extra demands total prices if dates are changes (price calc method for each day)
-            if ($extraDemands) {
-                $objOrder = new Order($id_order);
-                foreach ($extraDemands as $demand) {
-                    if (isset($demand['extra_demands']) && $demand['extra_demands']) {
-                        foreach ($demand['extra_demands'] as $rDemand) {
-                            if ($rDemand['price_calc_method'] == HotelRoomTypeGlobalDemand::WK_PRICE_CALC_METHOD_EACH_DAY) {
-                                $objBookingDemand = new HotelBookingDemands($rDemand['id_booking_demand']);
-
-                                // change order total
-                                $objOrder->total_paid_tax_excl -= $objBookingDemand->total_price_tax_excl;
-                                $objOrder->total_paid_tax_incl -= $objBookingDemand->total_price_tax_incl;
-                                $objOrder->total_paid -= $objBookingDemand->total_price_tax_incl;
-
-                                $numDays = $obj_booking_detail->getNumberOfDays($new_date_from, $new_date_to);
-                                $demandPriceTE = $objBookingDemand->unit_price_tax_excl * $numDays;
-                                $demandPriceTI = $objBookingDemand->unit_price_tax_incl * $numDays;
-
-                                $objOrder->total_paid_tax_excl += $demandPriceTE;
-                                $objOrder->total_paid_tax_incl += $demandPriceTI;
-                                $objOrder->total_paid += $demandPriceTI;
-
-                                $objBookingDemand->total_price_tax_excl = $demandPriceTE;
-                                $objBookingDemand->total_price_tax_incl = $demandPriceTI;
-
-                                $objBookingDemand->save();
-                            }
-                        }
-                    }
-                }
-
-                if (isset($order_invoice)) {
-                    // Apply changes on OrderInvoice
-                    $order_invoice->total_paid_tax_excl = $objOrder->total_paid_tax_excl;
-                    $order_invoice->total_paid_tax_incl = $objOrder->total_paid_tax_incl;
-                }
-
-
-                // Save order invoice
-                if (isset($order_invoice)) {
-                    $res &= $order_invoice->update();
-                }
-
-                // change order total save
-                $objOrder->save();
-            }
-        }
-=======
->>>>>>> initial commit for normal product
 
         if (is_array(Tools::getValue('product_quantity'))) {
             $view = $this->createTemplate('_customized_data.tpl')->fetch();

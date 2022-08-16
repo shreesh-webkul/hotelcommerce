@@ -862,5 +862,11 @@ Country</value>
     <configuration id="PS_ADVANCED_PAYMENT_API" name="PS_ADVANCED_PAYMENT_API">
       <value>0</value>
     </configuration>
+	<configuration id="PS_STANDARD_PRODUCT_DISPLAY_TYPE" name="PS_STANDARD_PRODUCT_DISPLAY_TYPE">
+      <value>list</value>
+    </configuration>
+	<configuration id="PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER" name="PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER">
+      <value>true</value>
+    </configuration>
   </entities>
 </entity_configuration>

@@ -365,7 +365,7 @@
 													<span class="clearfix"></span>
 												</div>
 											</div>
-											{if (isset($room_type_demands) && $room_type_demands) || isset($standard_products) && $standard_products}
+											{if (isset($room_type_demands) && $room_type_demands) || isset($standard_products_exists) && $standard_products_exists}
 												<hr class="separator-hr-mg-10 unvail_rooms_cond_display">
 												<div class="row price_desc_block unvail_rooms_cond_display">
 													<div class="col-sm-6">

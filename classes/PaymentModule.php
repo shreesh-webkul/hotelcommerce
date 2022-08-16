@@ -863,7 +863,7 @@ abstract class PaymentModuleCore extends Module
                         foreach($normalProducts as $product) {
                             $idProduct = $product['id_product'];
                             if ($cartAdditialServices = $objStandardProductCartDetail->getStandardProductsInCart(
-                                    $cart->id,
+                                    $this->context->cart->id,
                                     $product['id_product'],
                                     isset($product['id_hotel']) ? $product['id_hotel'] : 0,
                                     0,
@@ -872,9 +872,9 @@ abstract class PaymentModuleCore extends Module
                                     0,
                                     0
                                 )) {
-                                    $idOrderDetail = $objHtlBkDtl->getPsOrderDetailIdByIdProduct($idProduct, $order->id);
+                                    $idOrderDetail = $objBookingDetail->getPsOrderDetailIdByIdProduct($idProduct, $order->id);
                                     foreach ($cartAdditialServices as $additionalService) {
-                                        $roomBookingDetail = $objHtlBkDtl->getRowByIdOrderIdProductInDateRange(
+                                        $roomBookingDetail = $objBookingDetail->getRowByIdOrderIdProductInDateRange(
                                             $order->id,
                                             $additionalService['room_type_id_product'],
                                             $additionalService['date_from'],
@@ -885,7 +885,7 @@ abstract class PaymentModuleCore extends Module
                                         $objStandardProductOrderDetail->id_product = $idProduct;
                                         $objStandardProductOrderDetail->id_order = $order->id;
                                         $objStandardProductOrderDetail->id_order_detail = $idOrderDetail;
-                                        $objStandardProductOrderDetail->id_cart = $cart->id;
+                                        $objStandardProductOrderDetail->id_cart = $this->context->cart->id;
                                         $objStandardProductOrderDetail->id_htl_booking_detail = $roomBookingDetail['id'];
                                         $objStandardProductOrderDetail->unit_price_tax_excl = $additionalService['unit_price_tax_excl'];
                                         $objStandardProductOrderDetail->unit_price_tax_incl = $additionalService['unit_price_tax_incl'];
