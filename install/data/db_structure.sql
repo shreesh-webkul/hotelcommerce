@@ -1504,7 +1504,6 @@ CREATE TABLE `PREFIX_product` (
   `available_date` date NOT NULL DEFAULT '0000-00-00',
   `condition` ENUM('new', 'used', 'refurbished') NOT NULL DEFAULT 'new',
   `show_price` tinyint(1) NOT NULL DEFAULT '1',
-  `show_price` tinyint(1) NOT NULL DEFAULT '1',
   `indexed` tinyint(1) NOT NULL DEFAULT '0',
   `visibility` ENUM('both', 'catalog', 'search', 'none') NOT NULL DEFAULT 'both',
   `cache_is_pack` tinyint(1) NOT NULL DEFAULT '0',
