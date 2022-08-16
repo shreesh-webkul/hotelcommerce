@@ -471,6 +471,7 @@ class HotelHelper
             $product->price = $prod_price_arr[$key];
             $product->active = 1;
             $product->quantity = 999999999;
+            $product->booking_product = true;
             $product->is_virtual = 1;
             $product->indexed = 1;
             $product->save();
