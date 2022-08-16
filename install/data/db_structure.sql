@@ -1221,6 +1221,9 @@ CREATE TABLE `PREFIX_order_detail` (
   `reduction_amount_tax_excl` DECIMAL(20, 6) NOT NULL DEFAULT '0.000000',
   `group_reduction` DECIMAL(10, 2) NOT NULL DEFAULT '0.000000',
   `product_quantity_discount` decimal(20,6) NOT NULL DEFAULT '0.000000',
+  `is_booking_product` tinyint(1) NOT NULL DEFAULT '0',
+  `product_service_type` tinyint(1) NOT NULL DEFAULT '1',
+  `product_allow_multiple_quantity` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `product_ean13` varchar(13) DEFAULT NULL,
   `product_upc` varchar(12) DEFAULT NULL,
   `product_reference` varchar(32) DEFAULT NULL,
@@ -1471,6 +1474,7 @@ CREATE TABLE `PREFIX_product` (
   `ecotax` decimal(17,6) NOT NULL DEFAULT '0.00',
   `quantity` int(10) NOT NULL DEFAULT '0',
   `minimal_quantity` int(10) unsigned NOT NULL DEFAULT '1',
+  `allow_multiple_quantity` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `price` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `wholesale_price` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `unity` varchar(255) DEFAULT NULL,
@@ -1492,14 +1496,22 @@ CREATE TABLE `PREFIX_product` (
   `redirect_type` ENUM('', '404', '301', '302') NOT NULL DEFAULT '',
   `id_product_redirected` int(10) unsigned NOT NULL DEFAULT '0',
   `available_for_order` tinyint(1) NOT NULL DEFAULT '1',
+  `auto_add_to_cart` tinyint(1) NOT NULL DEFAULT '0',
+  `show_at_front` tinyint(1) NOT NULL DEFAULT '1',
+  `is_global_product` tinyint(1) NOT NULL DEFAULT '0',
+  `service_product_type` tinyint(1) NOT NULL DEFAULT '1',
+  `price_display_method` tinyint(1) NOT NULL DEFAULT '1',
   `available_date` date NOT NULL DEFAULT '0000-00-00',
   `condition` ENUM('new', 'used', 'refurbished') NOT NULL DEFAULT 'new',
+  `show_price` tinyint(1) NOT NULL DEFAULT '1',
   `show_price` tinyint(1) NOT NULL DEFAULT '1',
   `indexed` tinyint(1) NOT NULL DEFAULT '0',
   `visibility` ENUM('both', 'catalog', 'search', 'none') NOT NULL DEFAULT 'both',
   `cache_is_pack` tinyint(1) NOT NULL DEFAULT '0',
   `cache_has_attachments` tinyint(1) NOT NULL DEFAULT '0',
   `is_virtual` tinyint(1) NOT NULL DEFAULT '0',
+  `booking_product` tinyint(1) NOT NULL DEFAULT '1',
+  `is_invisible` tinyint(1) NOT NULL DEFAULT '0',
   `cache_default_attribute` int(10) unsigned DEFAULT NULL,
   `date_add` datetime NOT NULL,
   `date_upd` datetime NOT NULL,
@@ -1522,6 +1534,7 @@ CREATE TABLE IF NOT EXISTS `PREFIX_product_shop` (
   `online_only` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `ecotax` decimal(17,6) NOT NULL DEFAULT '0.000000',
   `minimal_quantity` int(10) unsigned NOT NULL DEFAULT '1',
+  `allow_multiple_quantity` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `price` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `wholesale_price` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `unity` varchar(255) DEFAULT NULL,
@@ -1534,6 +1547,9 @@ CREATE TABLE IF NOT EXISTS `PREFIX_product_shop` (
   `redirect_type` ENUM('', '404', '301', '302') NOT NULL DEFAULT '',
   `id_product_redirected` int(10) unsigned NOT NULL DEFAULT '0',
   `available_for_order` tinyint(1) NOT NULL DEFAULT '1',
+  `auto_add_to_cart` tinyint(1) NOT NULL DEFAULT '0',
+  `show_at_front` tinyint(1) NOT NULL DEFAULT '1',
+  `price_display_method` tinyint(1) NOT NULL DEFAULT '1',
   `available_date` date NOT NULL DEFAULT '0000-00-00',
   `condition` enum('new','used','refurbished') NOT NULL DEFAULT 'new',
   `show_price` tinyint(1) NOT NULL DEFAULT '1',
@@ -2506,6 +2522,15 @@ CREATE TABLE `PREFIX_product_supplier` (
   UNIQUE KEY `id_product` (`id_product`,`id_product_attribute`,`id_supplier`),
   KEY `id_supplier` (`id_supplier`,`id_product`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8 COLLATION;
+
+CREATE TABLE `PREFIX_product_display_position` (
+  `id_product_display_position` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_product` int(1) UNSIGNED NOT NULL,
+  `id_position` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id_product_display_position`),
+  KEY `id_product` (`id_product`)
+) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8 COLLATION;
+
 
 CREATE TABLE `PREFIX_order_carrier` (
   `id_order_carrier` int(11) NOT NULL AUTO_INCREMENT,

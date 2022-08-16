@@ -79,6 +79,10 @@
 			var product_type_virtual = {Product::PTYPE_VIRTUAL|intval};
 			var product_type_simple = {Product::PTYPE_SIMPLE|intval};
 
+			var with_room_type = {Product::SERVICE_PRODUCT_WITH_ROOMTYPE|intval};
+			var without_room_type = {Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE|intval};
+
+
 			var has_combinations = {$has_combinations|intval};
 
 			var empty_pack_msg = '{l s='This pack is empty. You will need to add at least one product to the pack before you can save.' js=1}';
@@ -107,24 +111,37 @@
 
 			$(document).ready(function()
 			{
-				if (product_type == product_type_pack)
+				{* if (product_type == product_type_pack)
 				{
 					$('a[id*="VirtualProduct"]').hide();
 					$('a[id*="Combinations"]').hide();
 				}
 				else if (product_type == product_type_virtual)
 				{
+					$('#hotel_selection').show();
+					$('a[id*="Quantities"]').hide();
+					$('a[id*="Configuration"]').show();
+					$('a[id*="Booking"]').show();
+					$('a[id*="Occupancy"]').show();
+					$('a[id*="ModuleHotelreservationsystem"]').show();
 					$('a[id*="Pack"]').hide();
 					$('a[id*="Shipping"]').hide();
 					$('a[id*="Combinations"]').hide();
 				}
 				else
 				{
+					$('#hotel_selection').hide();
+					$('a[id*="Quantities"]').show();
+					$('a[id*="Configuration"]').hide();
+					$('a[id*="Occupancy"]').hide();
+					$('a[id*="Booking"]').hide();
+					$('a[id*="ModuleHotelreservationsystem"]').hide();
 					$('a[id*="Pack"]').hide();
 					$('a[id*="VirtualProduct"]').hide();
 				}
+				updateTextInfo(product_type); *}
 
-				$('#desc-product-newCombination').hide();
+				{* $('#desc-product-newCombination').hide(); *}
 
 				{* submenu binding *}
 				$(".productTabs a").click(function(e){
@@ -287,10 +304,9 @@
 
 		<form id="product_form" class="form-horizontal col-lg-10 col-md-9" action="{$form_action|escape:'html':'UTF-8'}" method="post" enctype="multipart/form-data" name="product" novalidate>
 			<input type="hidden" name="id_product" value="{$id_product}" />
-			<!-- <input type="hidden" id="is_virtual" name="is_virtual" value="{$product->is_virtual|escape:'html':'UTF-8'}" /> -->
+			{* <input type="hidden" id="is_virtual" name="is_virtual" value="{$product->is_virtual|escape:'html':'UTF-8'}" /> *}
 			<!-- changed input field to make product virtual by default -->
 			<input type="hidden" id="is_virtual" name="is_virtual" value="1"/>
-
 
 			{if isset($smarty.request.page) && $smarty.request.page > 1}
 				<input type="hidden" id="page" name="page" value="{$smarty.request.page|intval}" />

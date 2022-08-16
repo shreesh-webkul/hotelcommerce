@@ -136,50 +136,71 @@
 
 	<div class="table_block table-responsive wk_booking_details_wrapper">
 		<table class="table table-bordered">
-			<thead>
-				<tr>
-					{if $refund_allowed}
-						<th class="standard_refund_fields"></th>
-					{/if}
-					<th class="cart_product">{l s='Room Image'}</th>
-					<th class="cart_description">{l s='Room Description'}</th>
-					<th>{l s='Hotel Name'}</th>
-					<th>{l s='Room Capacity'}</th>
-					<th class="cart_unit">{l s='Unit Price'}</th>
-					<th>{l s='Rooms'}</th>
-					<th>{l s='Check-in Date'}</th>
-					<th>{l s='Check-out Date'}</th>
-					<th class="cart_total">{l s='Total'}</th>
-				</tr>
-			</thead>
+
 			<tfoot>
-				{if $priceDisplay && $use_tax}
+				{assign var=room_price_tax_excl value=$order->getTotalProductsWithoutTaxes(false, true)}
+				{assign var=room_price_tax_incl value=$order->getTotalProductsWithTaxes(false, true)}
+				{assign var=service_products_price_tax_excl value=$order->getTotalProductsWithoutTaxes(false, false, Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE)}
+				{assign var=service_products_price_tax_incl value=$order->getTotalProductsWithTaxes(false, false, Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE)}
+				{assign var=additional_service_price_tax_excl value=($order->getTotalProductsWithoutTaxes(false, false, Product::SERVICE_PRODUCT_WITH_ROOMTYPE) + $total_demands_price_te)}
+				{assign var=additional_service_price_tax_incl value=($order->getTotalProductsWithTaxes(false, false, Product::SERVICE_PRODUCT_WITH_ROOMTYPE) + $total_demands_price_ti)}
+				{if $priceDisplay && $use_tax && $room_price_tax_excl}
 					<tr class="item">
 						{if $refund_allowed}
 							<td class="standard_refund_fields"></td>
 						{/if}
 						<td colspan="4"></td>
 						<td colspan="3">
-							<strong>{l s='Items (tax excl.)'}</strong>
+							<strong>{l s='Total rooms cost (tax excl.)'}</strong>
 						</td>
 						<td colspan="2" class="text-right">
-							<span class="price">{displayWtPriceWithCurrency price=$order->getTotalProductsWithoutTaxes() currency=$currency}</span>
+							<span class="price">{displayWtPriceWithCurrency price=$room_price_tax_excl currency=$currency}</span>
 						</td>
 					</tr>
 				{/if}
-				<tr class="item">
-					{if $refund_allowed}
-						<td class="standard_refund_fields"></td>
-					{/if}
-					<td colspan="4"></td>
-					<td colspan="3">
-						<strong>{l s='Items'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
-					</td>
-					<td colspan="2" class="text-right">
-						<span class="price">{displayWtPriceWithCurrency price=$order->getTotalProductsWithTaxes() currency=$currency}</span>
-					</td>
-				</tr>
-				{if $total_demands_price_te}
+				{if $room_price_tax_incl}
+					<tr class="item">
+						{if $refund_allowed}
+							<td class="standard_refund_fields"></td>
+						{/if}
+						<td colspan="4"></td>
+						<td colspan="3">
+							<strong>{l s='Total rooms cost'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
+						</td>
+						<td colspan="2" class="text-right">
+							<span class="price">{displayWtPriceWithCurrency price=$room_price_tax_incl currency=$currency}</span>
+						</td>
+					</tr>
+				{/if}
+				{if $priceDisplay && $use_tax && $service_products_price_tax_excl}
+					<tr class="item">
+						{if $refund_allowed}
+							<td class="standard_refund_fields"></td>
+						{/if}
+						<td colspan="4"></td>
+						<td colspan="3">
+							<strong>{l s='Total service products cost (tax excl.)'}</strong>
+						</td>
+						<td colspan="2" class="text-right">
+							<span class="price">{displayWtPriceWithCurrency price=$service_products_price_tax_excl currency=$currency}</span>
+						</td>
+					</tr>
+				{/if}
+				{if $service_products_price_tax_incl}
+					<tr class="item">
+						{if $refund_allowed}
+							<td class="standard_refund_fields"></td>
+						{/if}
+						<td colspan="4"></td>
+						<td colspan="3">
+							<strong>{l s='Total service products cost'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
+						</td>
+						<td colspan="2" class="text-right">
+							<span class="price">{displayWtPriceWithCurrency price=$service_products_price_tax_incl currency=$currency}</span>
+						</td>
+					</tr>
+				{/if}
+				{if $additional_service_price_tax_excl}
 					{if $priceDisplay && $use_tax}
 						<tr class="item">
 							{if $refund_allowed}
@@ -187,23 +208,25 @@
 							{/if}
 							<td colspan="4"></td>
 							<td colspan="3">
-								<strong>{l s='Additional facilities Cost (tax excl.)'}</strong>
+								<strong>{l s='Total additional services (tax excl.)'}</strong>
 							</td>
 							<td colspan="2" class="text-right">
-								<span>{displayWtPriceWithCurrency price=$total_demands_price_te currency=$currency}</span>
+								<span>{displayWtPriceWithCurrency price=$additional_service_price_tax_excl currency=$currency}</span>
 							</td>
 						</tr>
 					{/if}
+				{/if}
+				{if $additional_service_price_tax_incl}
 					<tr class="item">
 						{if $refund_allowed}
 							<td class="standard_refund_fields"></td>
 						{/if}
 						<td colspan="4"></td>
 						<td colspan="3">
-							<strong>{l s='Additional facilities Cost (tax incl.)'}</strong>
+							<strong>{l s='Total additional services (tax incl.)'}</strong>
 						</td>
 						<td colspan="2" class="text-right">
-							<span>{displayWtPriceWithCurrency price=$total_demands_price_ti currency=$currency convert=1}</span>
+							<span>{displayWtPriceWithCurrency price=$additional_service_price_tax_incl currency=$currency convert=1}</span>
 						</td>
 					</tr>
 				{/if}
@@ -305,8 +328,24 @@
 				{/if}
 			</tfoot>
 
-			<tbody>
-				{if isset($cart_htl_data)}
+			{if isset($cart_htl_data) && $cart_htl_data}
+				<thead>
+					<tr>
+						{if $refund_allowed}
+							<th class="standard_refund_fields"></th>
+						{/if}
+						<th class="cart_product">{l s='Room Image'}</th>
+						<th class="cart_description">{l s='Room Description'}</th>
+						<th>{l s='Hotel Name'}</th>
+						<th>{l s='Room Capacity'}</th>
+						<th class="cart_unit">{l s='Unit Price'}</th>
+						<th>{l s='Rooms'}</th>
+						<th>{l s='Check-in Date'}</th>
+						<th>{l s='Check-out Date'}</th>
+						<th class="cart_total">{l s='Total'}</th>
+					</tr>
+				</thead>
+				<tbody>
 					{foreach from=$cart_htl_data key=data_k item=data_v}
 						{foreach from=$data_v['date_diff'] key=rm_k item=rm_v}
 							<tr class="table_body">
@@ -334,17 +373,17 @@
 											{$data_v['name']|escape:'html':'UTF-8'}
 										</a>
 									</p>
-									{if isset($rm_v['extra_demands']) && $rm_v['extra_demands']}
+									{if (isset($rm_v['extra_demands']) && $rm_v['extra_demands']) || (isset($rm_v['additional_services']) && $rm_v['additional_services'])}
 										<p class="room_extra_demands">
-											<a date_from="{$rm_v['data_form']|escape:'html':'UTF-8'}" date_to="{$rm_v['data_to']|escape:'html':'UTF-8'}" id_product="{$data_v['id_product']|escape:'html':'UTF-8'}" id_order="{$order->id|escape:'html':'UTF-8'}" class="open_rooms_extra_demands" href="#rooms_type_extra_demands">
+											<a data-date_from="{$rm_v['data_form']|escape:'html':'UTF-8'}" data-date_to="{$rm_v['data_to']|escape:'html':'UTF-8'}" data-id_product="{$data_v['id_product']|escape:'html':'UTF-8'}" data-id_order="{$order->id|escape:'html':'UTF-8'}" data-action="{$link->getPageLink('order-detail')}" class="open_rooms_extra_services_panel" href="#rooms_type_extra_services_form">
 												{l s='Additional Facilities'}
 											</a>
 										</p>
 										<p>
 											{if $group_use_tax}
-												{displayWtPriceWithCurrency price=$rm_v['extra_demands_price_ti'] currency=$currency}
+												{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_ti'] + $rm_v['additional_services_price_ti']) currency=$currency}
 											{else}
-												{displayWtPriceWithCurrency price=$rm_v['extra_demands_price_te'] currency=$currency}
+												{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te']) currency=$currency}
 											{/if}
 										</p>
 									{/if}
@@ -393,7 +432,65 @@
 							</tr>
 						{/foreach}
 					{/foreach}
-				{/if}
+				</tbody>
+			{/if}
+
+
+			{if isset($cart_service_products) && $cart_service_products}
+				<thead>
+					<tr>
+						<th colspan="1">{l s='Image'}</th>
+						<th colspan="3">{l s='Name'}</th>
+						<th colspan="2">{l s='Unit Price'}</th>
+						<th colspan="1">{l s='Quantity'}</th>
+						<th colspan="2" class="cart_total">{l s='Total'}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{foreach from=$cart_service_products key=data_k item=data_v}
+						<tr class="table_body">
+							<td class="cart_product">
+								<a href="{$link->getProductLink($data_v['id_product'])}">
+									<img src="{$data_v['cover_img']}" class="img-responsive"/>
+								</a>
+							</td>
+							<td class="cart_product" colspan="3">
+								<p class="product-name">
+									<a href="{$link->getProductLink($data_v['id_product'])}">
+										{$data_v['product_name']}
+									</a>
+								</p>
+							</td>
+							<td class="cart_unit" colspan="2">
+								<p class="text-center">
+									{if $group_use_tax}
+										{displayWtPriceWithCurrency price=$data_v['unit_price_tax_incl'] currency=$currency}
+										{* {displayPrice price=$data_v['unit_price_tax_incl']|floatval|round:2} *}
+									{else}
+										{* {displayPrice price=$data_v['unit_price_tax_excl']|floatval|round:2} *}
+										{displayWtPriceWithCurrency price=$data_v['unit_price_tax_excl'] currency=$currency}
+									{/if}
+								</p>
+							</td>
+							<td>
+								<p class="text-center">
+									{$data_v['product_quantity']}
+								</p>
+							</td>
+							<td colspan="2">
+								<p class="text-left" colspan="2">
+									{if $group_use_tax}
+										{displayWtPriceWithCurrency price=$data_v['total_price_tax_incl'] currency=$currency}
+									{else}
+										{displayWtPriceWithCurrency price=$data_v['total_price_tax_excl'] currency=$currency}
+									{/if}
+								</p>
+							</td>
+						</tr>
+					{/foreach}
+				</tbody>
+			{/if}
+			<tbody>
 				{foreach from=$discounts item=discount}
 					<tr class="item">
 						{if $refund_allowed}
@@ -541,8 +638,8 @@
 
 
 {* Fancybox for extra demands*}
-<div style="display:none;" id="rooms_extra_demands">
-	<div id="rooms_type_extra_demands">
+<div style="display:none;" id="rooms_extra_services">
+	{* <div id="rooms_type_extra_demands">
 		<div class="panel">
 			<div class="rooms_extra_demands_head">
 				<h3>{l s='Additional Facilities'}</h3>
@@ -550,7 +647,7 @@
 			</div>
 			<div id="room_type_demands_desc"></div>
 		</div>
-	</div>
+	</div> *}
 </div>
 
 {* Fancybox *}

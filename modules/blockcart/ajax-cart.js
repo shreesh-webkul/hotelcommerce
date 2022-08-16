@@ -1071,7 +1071,7 @@ var ajaxCart = {
         $('.ajax_block_cart_total').attr('total_cart_price', jsonData.totalToPay);
 
         $('.ajax_block_products_total').text(jsonData.product_total);
-        $('.ajax_cart_extra_demands_cost').text(jsonData.total_extra_demands_format);
+        $('.ajax_cart_extra_demands_cost').text(jsonData.total_extra_services_format);
         $('.ajax_total_price_wt').text(jsonData.total_price_wt);
 
         if (parseFloat(jsonData.free_shipping_float) > 0) {

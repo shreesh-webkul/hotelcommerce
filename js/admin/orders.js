@@ -125,21 +125,7 @@ function populateWarehouseList(warehouse_list)
 		$('#add_product_warehouse').val(warehouse_selected);
 }
 
-function addProductRefreshTotal()
-{
-	var quantity = parseInt($('#add_product_product_quantity').val());
-	if (quantity < 1|| isNaN(quantity))
-		quantity = 1;
-	if (use_taxes)
-		var price = parseFloat($('#add_product_product_price_tax_incl').val());
-	else
-		var price = parseFloat($('#add_product_product_price_tax_excl').val());
 
-	if (price < 0 || isNaN(price))
-		price = 0;
-	var total = makeTotalProductCaculation(quantity, price);
-	$('#add_product_product_total').html(formatCurrency(total, currency_format, currency_sign, currency_blank));
-}
 
 function editProductRefreshTotal(element)
 {
@@ -278,18 +264,21 @@ function closeAddProduct()
 {
 	$('tr#new_invoice').hide();
 	$('tr#new_product').hide();
+	$('tr#new_room').hide();
 
 	// Initialize fields
-	$('tr#new_product select, tr#new_product input').each(function() {
+	$('tr#new_product select, tr#new_product input, tr#new_room select, tr#new_room input').each(function() {
 		if (!$(this).is('.button'))
 			$(this).val('')
 	});
 	$('tr#new_invoice select, tr#new_invoice input').val('');
 	$('#add_product_product_quantity').val('1');
+	$('#add_room_product_quantity').val('1');
 	$('#add_product_product_attribute_id option').remove();
 	$('#add_product_product_attribute_area').hide();
 	if (stock_management)
 		$('#add_product_product_stock').html('0');
+		$('#add_room_product_stock').html('0');
 	current_product = null;
 }
 
@@ -318,8 +307,113 @@ function init()
 		e.preventDefault();
 	});
 
-	$('#add_product').unbind('click').click(function(e) {
+	$('select#add_product_product_attribute_id').unbind('change');
+	$('select#add_product_product_attribute_id').change(function() {
+		$('#add_product_product_price_tax_incl').val(current_product.combinations[$(this).val()].price_tax_incl);
+		$('#add_product_product_price_tax_excl').val(current_product.combinations[$(this).val()].price_tax_excl);
+
+		populateWarehouseList(current_product.warehouse_list[$(this).val()]);
+
+		addProductRefreshTotal();
+		if (stock_management)
+			$('#add_product_product_stock').html(current_product.combinations[$(this).val()].qty_in_stock);
+	});
+
+	$('.edit_shipping_number_link').unbind('click').click(function(e) {
+		$(this).parent().parent().find('.shipping_number_show').hide();
+		$(this).parent().find('.shipping_number_edit').show();
+
+		$(this).parent().find('.edit_shipping_number_link').hide();
+		$(this).parent().find('.cancel_shipping_number_link').show();
+		e.preventDefault();
+	});
+
+	$('.cancel_shipping_number_link').unbind('click').click(function(e) {
+		$(this).parent().parent().find('.shipping_number_show').show();
+		$(this).parent().find('.shipping_number_edit').hide();
+
+		$(this).parent().find('.edit_shipping_number_link').show();
+		$(this).parent().find('.cancel_shipping_number_link').hide();
+		e.preventDefault();
+	});
+
+	$('#add_product_product_invoice').unbind('change').change(function() {
+		if ($(this).val() == '0')
+			$('#new_invoice').slideDown('slow');
+		else
+			$('#new_invoice').slideUp('slow');
+	});
+
+	$('.js-set-payment').unbind('click').click(function(e) {
+		var amount = $(this).attr('data-amount');
+		$('input[name=payment_amount]').val(amount);
+		var id_invoice = $(this).attr('data-id-invoice');
+		$('select[name=payment_invoice] option[value='+id_invoice+']').attr('selected', true);
+		e.preventDefault();
+	});
+
+	$('#add_voucher').unbind('click').click(function(e) {
+		$('.order_action').hide();
+		$('.panel-vouchers,#voucher_form').show();
+		e.preventDefault();
+	});
+
+	$('#cancel_add_voucher').unbind('click').click(function(e) {
+		$('#voucher_form').hide();
+		if (!has_voucher)
+			$('.panel-vouchers').hide();
+		$('.order_action').show();
+		e.preventDefault();
+	});
+
+	$('#discount_type').unbind('change').change(function() {
+		// Percent type
+		if ($(this).val() == 1)
+		{
+			$('#discount_value_field').show();
+			$('#discount_currency_sign').hide();
+			$('#discount_value_help').hide();
+			$('#discount_percent_symbol').show();
+		}
+		// Amount type
+		else if ($(this).val() == 2)
+		{
+			$('#discount_value_field').show();
+			$('#discount_percent_symbol').hide();
+			$('#discount_value_help').show();
+			$('#discount_currency_sign').show();
+		}
+		// Free shipping
+		else if ($(this).val() == 3)
+		{
+			$('#discount_value_field').hide();
+		}
+	});
+
+	$('#discount_all_invoices').unbind('change').change(function() {
+		if ($(this).is(':checked'))
+			$('select[name=discount_invoice]').attr('disabled', true);
+		else
+			$('select[name=discount_invoice]').attr('disabled', false);
+	});
+
+	$('.open_payment_information').unbind('click').click(function(e) {
+		if ($(this).parent().parent().next('tr').is(':visible'))
+			$(this).parent().parent().next('tr').hide();
+		else
+			$(this).parent().parent().next('tr').show();
+		e.preventDefault();
+	});
+
+	initRoomEvents();
+	initProductEvents();
+}
+
+function initProductEvents()
+{
+    $('#add_product').unbind('click').click(function(e) {
 		$('.cancel_product_change_link:visible').trigger('click');
+		$('.cancel_room_change_link:visible').trigger('click');
 		$('.add_product_fields').show();
 		//invoice field is hidden because has not to be edited by webkul
 		$('#add_product_product_invoice').hide();
@@ -362,6 +456,7 @@ function init()
 				ajax: true,
 				token: token,
 				action: 'searchProducts',
+				booking_product: 0,
 				id_lang: id_lang,
 				id_currency: id_currency,
 				id_address: id_address,
@@ -387,15 +482,6 @@ function init()
 			$('#add_product_product_name').val(data.name);
 			$('#add_product_product_price_tax_incl').val(data.price_tax_incl);
 			$('#add_product_product_price_tax_excl').val(data.price_tax_excl);
-
-			//Added by webkul to set curent date in the date fields by default
-			var date_in = $.datepicker.formatDate('dd-mm-yy', new Date());
-        	var date_out = $.datepicker.formatDate('dd-mm-yy', new Date(new Date().getTime()+24*60*60*1000));
-        	var tr_product = $(this).closest('#new_product');
-        	tr_product.find("input.add_product_date_from").val(date_in);
-        	tr_product.find("input.add_product_date_to").val(date_out);
-			//End
-
 			addProductRefreshTotal();
 			if (stock_management)
 				$('#add_product_product_stock').html(data.stock[0]);
@@ -431,18 +517,6 @@ function init()
 		}
 	});
 
-	$('select#add_product_product_attribute_id').unbind('change');
-	$('select#add_product_product_attribute_id').change(function() {
-		$('#add_product_product_price_tax_incl').val(current_product.combinations[$(this).val()].price_tax_incl);
-		$('#add_product_product_price_tax_excl').val(current_product.combinations[$(this).val()].price_tax_excl);
-
-		populateWarehouseList(current_product.warehouse_list[$(this).val()]);
-
-		addProductRefreshTotal();
-		if (stock_management)
-			$('#add_product_product_stock').html(current_product.combinations[$(this).val()].qty_in_stock);
-	});
-
 	$('input#add_product_product_quantity').unbind('keyup').keyup(function() {
 		if (stock_management)
 		{
@@ -460,7 +534,31 @@ function init()
 		addProductRefreshTotal();
 	});
 
-	$('#submitAddProduct').unbind('click').click(function(e) {
+    $('#add_product_product_price_tax_excl').unbind('keyup').keyup(function() {
+		var price_tax_excl = parseFloat($(this).val());
+		if (price_tax_excl < 0 || isNaN(price_tax_excl))
+			price_tax_excl = 0;
+
+		var tax_rate = current_product.tax_rate / 100 + 1;
+		$('#add_product_product_price_tax_incl').val(ps_round(price_tax_excl * tax_rate, 2));
+
+		// Update total product
+		addProductRefreshTotal();
+	});
+
+	$('#add_product_product_price_tax_incl').unbind('keyup').keyup(function() {
+		var price_tax_incl = parseFloat($(this).val());
+		if (price_tax_incl < 0 || isNaN(price_tax_incl))
+			price_tax_incl = 0;
+
+		var tax_rate = current_product.tax_rate / 100 + 1;
+		$('#add_product_product_price_tax_excl').val(ps_round(price_tax_incl / tax_rate, 2));
+
+		// Update total product
+		addProductRefreshTotal();
+	});
+
+    $('#submitAddProduct').unbind('click').click(function(e) {
 		e.preventDefault();
 		stopAjaxQuery();
 		var go = true;
@@ -539,7 +637,7 @@ function init()
 					error : function(XMLHttpRequest, textStatus, errorThrown) {
 						jAlert("Impossible to add the room to the cart.\n\ntextStatus: '" + textStatus + "'\nerrorThrown: '" + errorThrown + "'\nresponseText:\n" + XMLHttpRequest.responseText);
 					},
-					complete: function() { 
+					complete: function() {
 						$('#submitAddProduct').removeAttr('disabled');
 					}
 				});
@@ -548,66 +646,12 @@ function init()
 		}
 	});
 
-	$('.edit_shipping_number_link').unbind('click').click(function(e) {
-		$(this).parent().parent().find('.shipping_number_show').hide();
-		$(this).parent().find('.shipping_number_edit').show();
-
-		$(this).parent().find('.edit_shipping_number_link').hide();
-		$(this).parent().find('.cancel_shipping_number_link').show();
-		e.preventDefault();
-	});
-
-	$('.cancel_shipping_number_link').unbind('click').click(function(e) {
-		$(this).parent().parent().find('.shipping_number_show').show();
-		$(this).parent().find('.shipping_number_edit').hide();
-
-		$(this).parent().find('.edit_shipping_number_link').show();
-		$(this).parent().find('.cancel_shipping_number_link').hide();
-		e.preventDefault();
-	});
-
-	$('#add_product_product_invoice').unbind('change').change(function() {
-		if ($(this).val() == '0')
-			$('#new_invoice').slideDown('slow');
-		else
-			$('#new_invoice').slideUp('slow');
-	});
-
-	$('#add_product_product_price_tax_excl').unbind('keyup').keyup(function() {
-		var price_tax_excl = parseFloat($(this).val());
-		if (price_tax_excl < 0 || isNaN(price_tax_excl))
-			price_tax_excl = 0;
-
-		var tax_rate = current_product.tax_rate / 100 + 1;
-		$('#add_product_product_price_tax_incl').val(ps_round(price_tax_excl * tax_rate, 2));
-
-		// Update total product
-		addProductRefreshTotal();
-	});
-
-	$('#add_product_product_price_tax_incl').unbind('keyup').keyup(function() {
-		var price_tax_incl = parseFloat($(this).val());
-		if (price_tax_incl < 0 || isNaN(price_tax_incl))
-			price_tax_incl = 0;
-
-		var tax_rate = current_product.tax_rate / 100 + 1;
-		$('#add_product_product_price_tax_excl').val(ps_round(price_tax_incl / tax_rate, 2));
-
-		// Update total product
-		addProductRefreshTotal();
-	});
-
-	$('.edit_product_change_link').unbind('click').click(function(e) {
+    $('.edit_product_change_link').unbind('click').click(function(e) {
 		$('.add_product_fields, .standard_refund_fields, .order_action').hide();
 		$('.edit_product_fields').show();
 		$('.row-editing-warning').hide();
 		$('.cancel_product_change_link:visible').trigger('click');
 		closeAddProduct();
-
-		/*By webkul*/
-		var tr_product = $(this).closest('.product-line-row');
-		var id_product = tr_product.data('id_product');
-		/*End*/
 		var element = $(this);
 		$.ajax({
 			type: 'POST',
@@ -618,9 +662,8 @@ function init()
 				ajax: 1,
 				token: token,
 				action: 'loadProductInformation',
-				id_order_detail: element.closest('tr.product-line-row').find('input.edit_product_id_order_detail').val(),
+				id_order_detail: element.closest('tr.product-line-row').data('id_order_detail'),
 				id_address: id_address,
-				id_product : id_product,
 				id_order: id_order
 			},
 			success : function(data)
@@ -633,19 +676,19 @@ function init()
 					if (!element_list.length)
 					{
 						element_list = element.parents('.product-line-row');
-						element_list.find('td .booking_duration_show').hide();
-						element_list.find('td .booking_duration_edit').show();
+						element_list.find('td .product_quantity_show').hide();
+						element_list.find('td .product_quantity_edit').show();
 					}
 					else
 					{
-						element_list.find('td .booking_duration_show').hide();
-						element_list.find('td .booking_duration_edit').show();
+						element_list.find('td .product_quantity_show').hide();
+						element_list.find('td .product_quantity_edit').show();
 					}
-					//element_list.find('td .product_price_show').hide();
-					//element_list.find('td .product_price_edit').show();
+					element_list.find('td .product_price_show').hide();
+					element_list.find('td .product_price_edit').show();
 					element_list.find('td.cancelCheck').hide();
 					element_list.find('td.cancelQuantity').hide();
-					//element_list.find('td.product_invoice').show();
+					element_list.find('td.product_invoice').show();
 					$('td.product_action').attr('colspan', 3);
 					$('th.edit_product_fields').show();
 					$('th.edit_product_fields').attr('colspan',  2);
@@ -676,9 +719,9 @@ function init()
 		if (!element_list.length)
 			element_list = $($(this).parent().parent());
 		element_list.find('td .product_price_show').show();
-		element_list.find('td .booking_duration_show').show();
+		element_list.find('td .product_quantity_show').show();
 		element_list.find('td .product_price_edit').hide();
-		element_list.find('td .booking_duration_edit').hide();
+		element_list.find('td .product_quantity_edit').hide();
 		element_list.find('td.product_invoice').hide();
 		element_list.find('td.cancelCheck').show();
 		element_list.find('td.cancelQuantity').show();
@@ -690,7 +733,39 @@ function init()
 		e.preventDefault();
 	});
 
-	$('button.submitProductChange').unbind('click').click(function(e) {
+    $('.edit_product_price_tax_excl').unbind('keyup').keyup(function() {
+		var price_tax_excl = parseFloat($(this).val());
+		if (price_tax_excl < 0 || isNaN(price_tax_excl))
+			price_tax_excl = 0;
+		var tax_rate = current_product.tax_rate / 100 + 1;
+		$('.edit_product_price_tax_incl:visible').val(ps_round(price_tax_excl * tax_rate, 2));
+		// Update total product
+		editProductRefreshTotal($(this));
+	});
+
+	$('.edit_product_price_tax_incl').unbind('keyup');
+	$('.edit_product_price_tax_incl').keyup(function() {
+		var price_tax_incl = parseFloat($(this).val());
+		if (price_tax_incl < 0 || isNaN(price_tax_incl))
+			price_tax_incl = 0;
+
+		var tax_rate = current_product.tax_rate / 100 + 1;
+		$('.edit_product_price_tax_excl:visible').val(ps_round(price_tax_incl / tax_rate, 2));
+		// Update total product
+		editProductRefreshTotal($(this));
+	});
+
+	$('.edit_product_quantity').unbind('keyup');
+	$('.edit_product_quantity').keyup(function() {
+		var quantity = parseInt($(this).val());
+		if (quantity < 1 || isNaN(quantity))
+			quantity = 1;
+		var stock_available = parseInt($(this).parent().parent().parent().find('td.product_stock').html());
+		// total update
+		editProductRefreshTotal($(this));
+	});
+
+    $('button.submitProductChange').unbind('click').click(function(e) {
 		e.preventDefault();
 
 		if ($(this).closest('tr.product-line-row').find('td .edit_product_quantity').val() <= 0)
@@ -706,7 +781,429 @@ function init()
 		if (confirm(txt_confirm))
 		{
 			var element = $(this);
-			var element_list = $('.customized-' + $(this).parent().parent().find('.edit_product_id_order_detail').val());
+			var id_order_detail = element.closest('tr.product-line-row').data('id_order_detail');
+			var tr_product = $(this).closest('tr.product-line-row');
+
+			query = 'ajax=1&token='+token+'&action=editProductOnOrder&id_order='+id_order+'&product_id_order_detail='+id_order_detail+'&';
+			query += tr_product.find('input:visible, select:visible').serialize();
+			$.ajax({
+				type: 'POST',
+				url: admin_order_tab_link,
+				cache: false,
+				dataType: 'json',
+				data : query,
+				success : function(data)
+				{
+					if (data.result)
+					{
+						// refreshProductLineView(element, data.view);
+						// updateAmounts(data.order);
+						// updateInvoice(data.invoices);
+						// updateDocuments(data.documents_html);
+						// updateDiscountForm(data.discount_form_html);
+
+						// Initialize all events
+						init();
+						location.reload();
+
+						// $('.standard_refund_fields').hide();
+						// $('.partial_refund_fields').hide();
+						// $('.add_product_fields').hide();
+						// $('.row-editing-warning').hide();
+						// $('td.product_action').attr('colspan', 3);
+					}
+					else
+						jAlert(data.error);
+				}
+			});
+		}
+
+		return false;
+	});
+
+    $('.delete_product_line').unbind('click').click(function(e) {
+		if (!confirm(txt_confirm))
+			return false;
+		var tr_product = $(this).closest('.product-line-row');
+		var id_order_detail = $(this).closest('.product-line-row').data('id_order_detail');
+		var query = 'ajax=1&action=deleteProductLine&token='+token+'&id_order_detail='+id_order_detail+'&id_order='+id_order;
+
+		$.ajax({
+			type: 'POST',
+			url: admin_order_tab_link,
+			cache: false,
+			dataType: 'json',
+			data : query,
+			success : function(data)
+			{
+				if (data.result)
+				{
+					tr_product.fadeOut('slow', function() {
+						$(this).remove();
+					});
+					updateAmounts(data.order);
+					updateInvoice(data.invoices);
+					updateDocuments(data.documents_html);
+					updateDiscountForm(data.discount_form_html);
+				}
+				else
+					jAlert(data.error);
+			}
+		});
+		e.preventDefault();
+	});
+
+	function addProductRefreshTotal()
+	{
+		var quantity = parseInt($('#add_product_product_quantity').val());
+		if (quantity < 1|| isNaN(quantity))
+			quantity = 1;
+		if (use_taxes)
+			var price = parseFloat($('#add_product_product_price_tax_incl').val());
+		else
+			var price = parseFloat($('#add_product_product_price_tax_excl').val());
+
+		if (price < 0 || isNaN(price))
+			price = 0;
+		var total = makeTotalProductCaculation(quantity, price);
+		$('#add_product_product_total').html(formatCurrency(total, currency_format, currency_sign, currency_blank));
+	}
+}
+
+function initRoomEvents()
+{
+    $('#add_room').unbind('click').click(function(e) {
+		$('.cancel_product_change_link:visible').trigger('click');
+		$('.cancel_room_change_link:visible').trigger('click');
+		$('.add_product_fields').show();
+		//invoice field is hidden because has not to be edited by webkul
+		$('#add_room_product_invoice').hide();
+
+		$('.edit_product_fields, .standard_refund_fields, .partial_refund_fields, .order_action').hide();
+		$('tr#new_room').slideDown('fast', function () {
+			$('tr#new_room td').fadeIn('fast', function() {
+				$('#add_room_product_name').focus();
+				scroll_if_anchor('#new_room');
+			});
+		});
+		e.preventDefault();
+	});
+
+	$('#cancelAddRoom').unbind('click').click(function() {
+		$('.order_action').show();
+		$('tr#new_room td').fadeOut('fast');
+	});
+
+    $("#add_room_product_name").autocomplete(admin_order_tab_link,
+		{
+			minChars: 3,
+			max: 10,
+			width: 500,
+			selectFirst: false,
+			scroll: false,
+			dataType: "json",
+			highlightItem: true,
+			formatItem: function(data, i, max, value, term) {
+				return value;
+			},
+			parse: function(data) {
+				var products = new Array();
+				if (typeof(data.products) != 'undefined')
+					for (var i = 0; i < data.products.length; i++)
+						products[i] = { data: data.products[i], value: data.products[i].name };
+				return products;
+			},
+			extraParams: {
+				ajax: true,
+				token: token,
+				action: 'searchProducts',
+				booking_product: 1,
+				id_lang: id_lang,
+				id_currency: id_currency,
+				id_address: id_address,
+				id_customer: id_customer,
+				product_search: function() { return $('#add_room_product_name').val(); }
+			}
+		}
+	)
+	.result(function(event, data, formatted) {
+		if (!data)
+		{
+			$('tr#new_room input, tr#new_room select').each(function() {
+				if ($(this).attr('id') != 'add_room_product_name')
+					$('tr#new_room input, tr#new_room select, tr#new_room button').attr('disabled', true);
+			});
+		}
+		else
+		{
+			$('tr#new_room input, tr#new_room select, tr#new_room button').removeAttr('disabled');
+			// Keep product variable
+			current_product = data;
+			$('#add_room_product_id').val(data.id_product);
+			$('#add_room_product_name').val(data.name);
+			$('#add_room_product_price_tax_incl').val(data.price_tax_incl);
+			$('#add_room_product_price_tax_excl').val(data.price_tax_excl);
+
+			//Added by webkul to set curent date in the date fields by default
+			var date_in = $.datepicker.formatDate('dd-mm-yy', new Date());
+        	var date_out = $.datepicker.formatDate('dd-mm-yy', new Date(new Date().getTime()+24*60*60*1000));
+        	var tr_product = $(this).closest('#new_room');
+        	tr_product.find("input.add_room_date_from").val(date_in);
+        	tr_product.find("input.add_room_date_to").val(date_out);
+			//End
+
+			addRoomRefreshTotal();
+			if (stock_management)
+				$('#add_room_product_stock').html(data.stock[0]);
+
+			// if (current_product.combinations.length !== 0)
+			// {
+			// 	// Reset combinations list
+			// 	$('select#add_product_product_attribute_id').html('');
+			// 	var defaultAttribute = 0;
+			// 	$.each(current_product.combinations, function() {
+			// 		$('select#add_product_product_attribute_id').append('<option value="'+this.id_product_attribute+'"'+(this.default_on == 1 ? ' selected="selected"' : '')+'>'+this.attributes+'</option>');
+			// 		if (this.default_on == 1)
+			// 		{
+			// 			if (stock_management)
+			// 				$('#add_room_product_stock').html(this.qty_in_stock);
+			// 			defaultAttribute = this.id_product_attribute;
+			// 		}
+			// 	});
+			// 	// Show select list
+			// 	$('#add_product_product_attribute_area').show();
+
+			// 	populateWarehouseList(current_product.warehouse_list[defaultAttribute]);
+			// }
+			// else
+			// {
+			// 	// Reset combinations list
+			// 	$('select#add_product_product_attribute_id').html('');
+			// 	// Hide select list
+			// 	$('#add_product_product_attribute_area').hide();
+
+			// 	populateWarehouseList(current_product.warehouse_list[0]);
+			// }
+		}
+	});
+
+	$('input#add_product_product_id').unbind('keyup').keyup(function() {
+		if (stock_management)
+		{
+			var quantity = parseInt($(this).val());
+			if (quantity < 1 || isNaN(quantity))
+				quantity = 1;
+			var stock_available = parseInt($('#add_room_product_stock').html());
+			// stock status update
+			if (quantity > stock_available)
+				$('#add_room_product_stock').css('font-weight', 'bold').css('color', 'red').css('font-size', '1.2em');
+			else
+				$('#add_room_product_stock').css('font-weight', 'normal').css('color', 'black').css('font-size', '1em');
+		}
+		// total update
+		addRoomRefreshTotal();
+	});
+
+	$('#submitAddRoom').unbind('click').click(function(e) {
+		e.preventDefault();
+		stopAjaxQuery();
+		var go = true;
+
+		if ($('input#add_room_product_id').val() == 0)
+		{
+			jAlert(txt_add_product_no_product);
+			go = false;
+		}
+
+		if ($('input#add_room_product_quantity').val() == 0)
+		{
+			jAlert(txt_add_product_no_product_quantity);
+			go = false;
+		}
+
+		if ($('input#add_room_product_price_excl').val() == 0)
+		{
+			jAlert(txt_add_product_no_product_price);
+			go = false;
+		}
+
+		if (go)
+		{
+			if (parseInt($('input#add_room_product_quantity').val()) > parseInt($('#add_room_product_stock').html()))
+				go = confirm(txt_add_product_stock_issue);
+
+			if (go && $('select#add_room_product_invoice').val() == 0)
+				go = confirm(txt_add_product_new_invoice);
+
+			if (go)
+			{
+				$('#submitAddRoom').attr('disabled', true);
+				var query = 'ajax=1&token='+token+'&action=addRoomOnOrder&id_order='+id_order+'&';
+
+				query += $('#add_product_warehouse').serialize()+'&';
+				query += $('tr#new_room select, tr#new_room input').serialize();
+				if ($('select#add_room_product_invoice').val() == 0)
+					query += '&'+$('tr#new_invoice select, tr#new_invoice input').serialize();
+
+				var ajax_query = $.ajax({
+					type: 'POST',
+					url: admin_order_tab_link,
+					cache: false,
+					dataType: 'json',
+					data : query,
+					success : function(data) {
+						if (data.result)
+						{
+							if (data.refresh)
+							{
+								location.reload();
+								return;
+							}
+							go = false;
+							//commented by webkul
+							//addViewOrderDetailRow(data.view);
+							/*updateAmounts(data.order);
+							updateInvoice(data.invoices);
+							updateDocuments(data.documents_html);
+							updateShipping(data.shipping_html);
+							updateDiscountForm(data.discount_form_html);*/
+
+							// Initialize all events
+							init();
+							//Added by webkul
+							location.reload();
+							//End
+							/*$('.standard_refund_fields').hide();
+							$('.partial_refund_fields').hide();
+							$('.order_action').show();*/
+						}
+						else
+							jAlert(data.error);
+					},
+					error : function(XMLHttpRequest, textStatus, errorThrown) {
+						jAlert("Impossible to add the room to the cart.\n\ntextStatus: '" + textStatus + "'\nerrorThrown: '" + errorThrown + "'\nresponseText:\n" + XMLHttpRequest.responseText);
+					},
+					complete: function() {
+						$('#submitAddProduct').removeAttr('disabled');
+					}
+				});
+				ajaxQueries.push(ajax_query);
+			}
+		}
+	});
+
+    $('.edit_room_change_link').unbind('click').click(function(e) {
+		$('.add_product_fields, .standard_refund_fields, .order_action').hide();
+		$('.edit_product_fields').show();
+		$('.row-editing-warning').hide();
+		$('.cancel_product_change_link:visible').trigger('click');
+		$('.cancel_room_change_link:visible').trigger('click');
+		closeAddProduct();
+
+		/*By webkul*/
+		// var tr_product = $(this).closest('.product-line-row');
+		// var id_product = tr_product.data('id_product');
+		/*End*/
+		var element = $(this);
+		$.ajax({
+			type: 'POST',
+			url: admin_order_tab_link,
+			cache: false,
+			dataType: 'json',
+			data : {
+				ajax: 1,
+				token: token,
+				action: 'loadProductInformation',
+				id_order_detail: element.closest('tr.product-line-row').data('id_order_detail'),
+				id_address: id_address,
+				id_order: id_order
+			},
+			success : function(data)
+			{
+				if (data.result)
+				{
+					current_product = data;
+
+					var element_list = $('.customized-' + element.parents('.product-line-row').find('.edit_product_id_order_detail').val());
+					if (!element_list.length)
+					{
+						element_list = element.parents('.product-line-row');
+						element_list.find('td .booking_duration_show').hide();
+						element_list.find('td .booking_duration_edit').show();
+					}
+					else
+					{
+						element_list.find('td .booking_duration_show').hide();
+						element_list.find('td .booking_duration_edit').show();
+					}
+					//element_list.find('td .product_price_show').hide();
+					//element_list.find('td .product_price_edit').show();
+					element_list.find('td.cancelCheck').hide();
+					element_list.find('td.cancelQuantity').hide();
+					//element_list.find('td.product_invoice').show();
+					$('td.product_action').attr('colspan', 3);
+					$('th.edit_product_fields').show();
+					$('th.edit_product_fields').attr('colspan',  2);
+					element_list.find('td.product_action').attr('colspan', 1);
+					element.parent().children('.edit_room_change_link').parent().hide();
+					console.log(element.parent().parent());
+					element.parent().parent().find('button.submitRoomChange').show();
+					element.parent().parent().find('.cancel_room_change_link').show();
+
+					if (+data.reduction_percent != +0)
+						element_list.find('.row-editing-warning').show();
+
+					$('.standard_refund_fields').hide();
+					$('.partial_refund_fields').hide();
+				}
+				else
+					jAlert(data.error);
+			}
+		});
+		e.preventDefault();
+	});
+
+    $('.cancel_room_change_link').unbind('click').click(function(e)
+	{
+		current_product = null;
+		$('.edit_product_fields').show();
+		$('.row-editing-warning').hide();
+		var element_list = $('.customized-' + $(this).parent().parent().find('.edit_product_id_order_detail').val());
+		if (!element_list.length)
+			element_list = $($(this).parent().parent());
+		element_list.find('td .room_price_show').show();
+		element_list.find('td .booking_duration_show').show();
+		element_list.find('td .room_price_edit').hide();
+		element_list.find('td .booking_duration_edit').hide();
+		element_list.find('td.room_invoice').hide();
+		element_list.find('td.cancelCheck').show();
+		element_list.find('td.cancelQuantity').show();
+		element_list.find('.edit_room_change_link').parent().show();
+		element_list.find('button.submitRoomChange').hide();
+		element_list.find('.cancel_room_change_link').hide();
+		$('.order_action').show();
+		$('.standard_refund_fields').hide();
+		e.preventDefault();
+	});
+
+
+    $('button.submitRoomChange').unbind('click').click(function(e) {
+		e.preventDefault();
+
+		if ($(this).closest('tr.product-line-row').find('td .edit_room_quantity').val() <= 0)
+		{
+			jAlert(txt_add_product_no_product_quantity);
+			return false;
+		}
+		if ($(this).closest('tr.product-line-row').find('td .edit_room_price').val() <= 0)
+		{
+			jAlert(txt_add_product_no_product_price);
+			return false;
+		}
+		if (confirm(txt_confirm))
+		{
+			var element = $(this);
+			// var element_list = $('.customized-' + $(this).parent().parent().find('.edit_product_id_order_detail').val());
 			/*variables are added to the ajax By webkul*/
 			var tr_product = $(this).closest('.product-line-row');
 			var id_room = tr_product.data('id_room');
@@ -714,13 +1211,12 @@ function init()
 			var id_hotel = tr_product.data('id_hotel');
 			var date_from = tr_product.data('date_from');
 			var date_to = tr_product.data('date_to');
-			var order_detail_id = tr_product.data('order_detail_id');
-			var id_order_detail = $(this).closest('.product-line-row').find('td .edit_product_id_order_detail').val();
+			var id_order_detail = tr_product.data('id_order_detail');
 			//some vaues are added to the query by webkul
-			query = 'ajax=1&token='+token+'&action=editProductOnOrder&id_order='+id_order+'&id_room='+id_room+'&id_product='+id_product+'&id_hotel='+id_hotel+'&date_from='+date_from+'&date_to='+date_to+'&order_detail_id='+order_detail_id+'&';
-			if (element_list.length)
-				query += element_list.parent().parent().find('input, select, .edit_product_id_order_detail').serialize();
-			else
+			query = 'ajax=1&token='+token+'&action=editRoomOnOrder&id_order='+id_order+'&id_room='+id_room+'&id_product='+id_product+'&id_hotel='+id_hotel+'&date_from='+date_from+'&date_to='+date_to+'&id_order_detail='+id_order_detail+'&';
+			// if (element_list.length)
+			// 	query += element_list.parent().parent().find('input, select, .edit_product_id_order_detail').serialize();
+			// else
 				query += element.parent().parent().find('input, select, .edit_product_id_order_detail').serialize();
 
 			$.ajax({
@@ -760,39 +1256,7 @@ function init()
 		return false;
 	});
 
-	$('.edit_product_price_tax_excl').unbind('keyup').keyup(function() {
-		var price_tax_excl = parseFloat($(this).val());
-		if (price_tax_excl < 0 || isNaN(price_tax_excl))
-			price_tax_excl = 0;
-		var tax_rate = current_product.tax_rate / 100 + 1;
-		$('.edit_product_price_tax_incl:visible').val(ps_round(price_tax_excl * tax_rate, 2));
-		// Update total product
-		editProductRefreshTotal($(this));
-	});
-
-	$('.edit_product_price_tax_incl').unbind('keyup');
-	$('.edit_product_price_tax_incl').keyup(function() {
-		var price_tax_incl = parseFloat($(this).val());
-		if (price_tax_incl < 0 || isNaN(price_tax_incl))
-			price_tax_incl = 0;
-
-		var tax_rate = current_product.tax_rate / 100 + 1;
-		$('.edit_product_price_tax_excl:visible').val(ps_round(price_tax_incl / tax_rate, 2));
-		// Update total product
-		editProductRefreshTotal($(this));
-	});
-
-	$('.edit_product_quantity').unbind('keyup');
-	$('.edit_product_quantity').keyup(function() {
-		var quantity = parseInt($(this).val());
-		if (quantity < 1 || isNaN(quantity))
-			quantity = 1;
-		var stock_available = parseInt($(this).parent().parent().parent().find('td.product_stock').html());
-		// total update
-		editProductRefreshTotal($(this));
-	});
-
-	$('.delete_product_line').unbind('click').click(function(e) {
+    $('.delete_room_line').unbind('click').click(function(e) {
 		if (!confirm(txt_confirm))
 			return false;
 		var tr_product = $(this).closest('.product-line-row');
@@ -801,9 +1265,9 @@ function init()
 		var id_hotel = tr_product.data('id_hotel');
 		var date_from = tr_product.data('date_from');
 		var date_to = tr_product.data('date_to');
-		var order_detail_id = tr_product.data('order_detail_id');
+		var id_order_detail = tr_product.data('id_order_detail');
 		//var id_order_detail = $(this).closest('.product-line-row').find('td .edit_product_id_order_detail').val();
-		var query = 'ajax=1&action=deleteProductLine&token='+token+'&id_order='+id_order+'&id_room='+id_room+'&id_product='+id_product+'&id_hotel='+id_hotel+'&date_from='+date_from+'&date_to='+date_to+'&order_detail_id='+order_detail_id;
+		var query = 'ajax=1&action=deleteRoomLine&token='+token+'&id_order='+id_order+'&id_room='+id_room+'&id_product='+id_product+'&id_hotel='+id_hotel+'&date_from='+date_from+'&date_to='+date_to+'&id_order_detail='+id_order_detail;
 		query += $(this).parent().parent().find('input, select:visible, .edit_product_id_order_detail').serialize();
 		$.ajax({
 			type: 'POST',
@@ -831,70 +1295,8 @@ function init()
 		e.preventDefault();
 	});
 
-
-	$('.js-set-payment').unbind('click').click(function(e) {
-		var amount = $(this).attr('data-amount');
-		$('input[name=payment_amount]').val(amount);
-		var id_invoice = $(this).attr('data-id-invoice');
-		$('select[name=payment_invoice] option[value='+id_invoice+']').attr('selected', true);
-		e.preventDefault();
-	});
-
-	$('#add_voucher').unbind('click').click(function(e) {
-		$('.order_action').hide();
-		$('.panel-vouchers,#voucher_form').show();
-		e.preventDefault();
-	});
-
-	$('#cancel_add_voucher').unbind('click').click(function(e) {
-		$('#voucher_form').hide();
-		if (!has_voucher)
-			$('.panel-vouchers').hide();
-		$('.order_action').show();
-		e.preventDefault();
-	});
-
-	$('#discount_type').unbind('change').change(function() {
-		// Percent type
-		if ($(this).val() == 1)
-		{
-			$('#discount_value_field').show();
-			$('#discount_currency_sign').hide();
-			$('#discount_value_help').hide();
-			$('#discount_percent_symbol').show();
-		}
-		// Amount type
-		else if ($(this).val() == 2)
-		{
-			$('#discount_value_field').show();
-			$('#discount_percent_symbol').hide();
-			$('#discount_value_help').show();
-			$('#discount_currency_sign').show();
-		}
-		// Free shipping
-		else if ($(this).val() == 3)
-		{
-			$('#discount_value_field').hide();
-		}
-	});
-
-	$('#discount_all_invoices').unbind('change').change(function() {
-		if ($(this).is(':checked'))
-			$('select[name=discount_invoice]').attr('disabled', true);
-		else
-			$('select[name=discount_invoice]').attr('disabled', false);
-	});
-
-	$('.open_payment_information').unbind('click').click(function(e) {
-		if ($(this).parent().parent().next('tr').is(':visible'))
-			$(this).parent().parent().next('tr').hide();
-		else
-			$(this).parent().parent().next('tr').show();
-		e.preventDefault();
-	});
-
-	/*By webkul Code for the datepicker*/
-	$(".add_product_date_from").datepicker(
+    /*By webkul Code for the datepicker*/
+    $(".add_room_date_from").datepicker(
     {
     	showOtherMonths: true,
         dateFormat: 'dd-mm-yy',
@@ -902,11 +1304,11 @@ function init()
             var date_format = selectedDate.split("-");
             var selectedDate = new Date($.datepicker.formatDate('yy-mm-dd', new Date(date_format[2], date_format[1] - 1, date_format[0])));
             selectedDate.setDate(selectedDate.getDate() + 1);
-            $(".add_product_date_to").datepicker("option", "minDate", selectedDate);
+            $(".add_room_date_to").datepicker("option", "minDate", selectedDate);
         },
     });
 
-    $(".add_product_date_to").datepicker(
+    $(".add_room_date_to").datepicker(
     {
     	showOtherMonths: true,
         dateFormat: 'dd-mm-yy',
@@ -914,10 +1316,26 @@ function init()
             var date_format = selectedDate.split("-");
             var selectedDate = new Date($.datepicker.formatDate('yy-mm-dd', new Date(date_format[2], date_format[1] - 1, date_format[0])));
             selectedDate.setDate(selectedDate.getDate() - 1);
-            $(".add_product_date_from").datepicker("option", "maxDate", selectedDate);
+            $(".add_room_date_from").datepicker("option", "maxDate", selectedDate);
         }
     });
 	/*End*/
+
+	function addRoomRefreshTotal()
+	{
+		var quantity = parseInt($('#add_room_product_quantity').val());
+		if (quantity < 1|| isNaN(quantity))
+			quantity = 1;
+		if (use_taxes)
+			var price = parseFloat($('#add_room_product_price_tax_incl').val());
+		else
+			var price = parseFloat($('#add_room_product_price_tax_excl').val());
+
+		if (price < 0 || isNaN(price))
+			price = 0;
+		var total = makeTotalProductCaculation(quantity, price);
+		$('#add_room_product_total').html(formatCurrency(total, currency_format, currency_sign, currency_blank));
+	}
 }
 
 

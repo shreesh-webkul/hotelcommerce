@@ -1003,12 +1003,15 @@ product_tabs['Informations'] = new function(){
 		{
 			if ($(this).is(':checked') || ($('input[name=\'multishop_check[show_price]\']').length && !$('input[name=\'multishop_check[show_price]\']').prop('checked')))
 			{
-				$('#show_price').attr('checked', true);
-				$('#show_price').attr('disabled', true);
+				$('#show_price').attr('checked', true).attr('disabled', true).closest('.checkbox').hide();
+					// $('#auto_add_to_cart').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
+					// $('#auto_add_to_cart_info').show('slow');
 			}
 			else
 			{
-				$('#show_price').attr('disabled', false);
+				$('#show_price').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
+				// $('#auto_add_to_cart').attr('checked', false).attr('disabled', true).closest('.checkbox').hide();
+				// $('#auto_add_to_cart_info').hide('slow');
 			}
 		});
 
@@ -1023,6 +1026,51 @@ product_tabs['Informations'] = new function(){
 		$('#redirect_type').change(function () {
 			redirectSelectChange();
 		});
+
+		$('input[name="show_at_front"]').on('change', function(){
+			if (parseInt($(this).val())) {
+				$("#product_positions").show('slow');
+			} else {
+				$("#product_positions").hide('slow');
+			}
+		});
+
+		$('#service_product_type').on('change',function(){
+			if (parseInt($(this).val()) == with_room_type) {
+				$('#associated_hotel_rooms_tree').show('slow');
+			} else {
+				$('#associated_hotel_rooms_tree').hide('slow');
+			}
+		});
+
+		// function updateTextInfo(product_type){
+		// 	if (product_type == with_room_type) {
+		// 		$('input#auto_add_to_cart').closest('label').find('span').text(with_room_type_txt.autoadd_label);
+		// 	} else {
+		// 		$('input#auto_add_to_cart').closest('label').find('span').text(without_room_type_txt.autoadd_label);
+		// 	}
+		// }
+
+		// $('input[name="is_global_product"]').on('change', function(){
+		// 	if (parseInt($(this).val())) {
+		// 		// $("#global_product_type_container").show('slow');
+		// 		$("#price_display_method_container").hide('slow');
+		// 		$("#allow_multiple_quantity_container").hide('slow');
+		// 		$('#auto_add_to_cart').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
+		// 	} else {
+		// 		$('#auto_add_to_cart').attr('checked', false).attr('disabled', true).closest('.checkbox').hide();
+
+		// 		// $("#global_product_type_container").hide('slow');
+		// 		$("#price_display_method_container").show('slow');
+		// 		$("#allow_multiple_quantity_container").show('slow');
+		// 		// if ($('#available_for_order').is(':checked') || ($('input[name=\'multishop_check[show_price]\']').length && !$('input[name=\'multishop_check[show_price]\']').prop('checked')))
+		// 		// {
+		// 		// }
+		// 	}
+		// });
+
+
+
 
 		$('#related_product_autocomplete_input')
 			.autocomplete('ajax_products_list.php?exclude_packs=0&excludeVirtuals=0&excludeIds='+id_product, {
@@ -1074,112 +1122,124 @@ product_tabs['Informations'] = new function(){
 	};
 
 	this.switchProductType = function(){
-		if (product_type == product_type_pack)
-		{
-			$('#pack_product').attr('checked', true);
-		}
-		else if (product_type == product_type_virtual)
-		{
-			$('#virtual_product').attr('checked', true);
-			$('#condition').attr('disabled', true);
-			$('#condition option[value=new]').attr('selected', true);
-		}
-		else
-		{
-			$('#simple_product').attr('checked', true);
-		}
+		// if (product_type == product_type_pack)
+		// {
+		// 	$('#pack_product').attr('checked', true);
+		// }
+		// else if (product_type == product_type_virtual)
+		// {
+		// 	$('#virtual_product').attr('checked', true);
+		// 	$('#condition').attr('disabled', true);
+		// 	$('#condition option[value=new]').attr('selected', true);
+		// }
+		// else
+		// {
+		// }
+		$('#simple_product').attr('checked', true);
 
 		$('input[name="type_product"]').on('click', function(e)
 		{
-			// Reset settings
-			$('a[id*="VirtualProduct"]').hide();
+			// // Reset settings
+			// $('a[id*="VirtualProduct"]').hide();
 
-			$('#product-pack-container').hide();
+			// $('#product-pack-container').hide();
 
-			$('div.is_virtual_good').hide();
-			$('#is_virtual').val(0);
-			tabs_manager.onLoad('VirtualProduct', function(){
-				$('#is_virtual_good').removeAttr('checked');
-			});
+			// $('div.is_virtual_good').hide();
+			// $('#is_virtual').val(0);
+			// tabs_manager.onLoad('VirtualProduct', function(){
+			// 	$('#is_virtual_good').removeAttr('checked');
+			// });
 
-			product_type = $(this).val();
-			$('#warn_virtual_combinations').hide();
-			$('#warn_pack_combinations').hide();
-			// until a product is added in the pack
-			// if product is PTYPE_PACK, save buttons will be disabled
-			if (product_type == product_type_pack)
-			{
-				if (has_combinations)
-				{
-					$('#simple_product').attr('checked', true);
-					$('#warn_pack_combinations').show();
-				}
-				else
-				{
-					$('#product-pack-container').show();
-					// If the pack tab has not finished loaded the changes will be made when the loading event is triggered
-					$("#product-tab-content-Pack").bind('loaded', function(){
-						$('#ppack').val(1).attr('checked', true).attr('disabled', true);
-					});
-					$("#product-tab-content-Quantities").bind('loaded', function(){
-						$('.stockForVirtualProduct').show();
-					});
+			// product_type = $(this).val();
+			// $('#warn_virtual_combinations').hide();
+			// $('#warn_pack_combinations').hide();
+			// // until a product is added in the pack
+			// // if product is PTYPE_PACK, save buttons will be disabled
+			// if (product_type == product_type_pack)
+			// {
+			// 	if (has_combinations)
+			// 	{
+			// 		$('#simple_product').attr('checked', true);
+			// 		$('#warn_pack_combinations').show();
+			// 	}
+			// 	else
+			// 	{
+			// 		$('#product-pack-container').show();
+			// 		// If the pack tab has not finished loaded the changes will be made when the loading event is triggered
+			// 		$("#product-tab-content-Pack").bind('loaded', function(){
+			// 			$('#ppack').val(1).attr('checked', true).attr('disabled', true);
+			// 		});
+			// 		$("#product-tab-content-Quantities").bind('loaded', function(){
+			// 			$('.stockForVirtualProduct').show();
+			// 		});
 
-					$('a[id*="Combinations"]').hide();
-					$('a[id*="Shipping"]').show();
+			// 		$('a[id*="Combinations"]').hide();
+			// 		$('a[id*="Shipping"]').show();
 
-					$('#condition').removeAttr('disabled');
-					$('#condition option[value=new]').removeAttr('selected');
-					$('.stockForVirtualProduct').show();
-					// if pack is enabled, if you choose pack, automatically switch to pack page
-				}
-			}
-			else if (product_type == product_type_virtual)
-			{
-				if (has_combinations)
-				{
-					$('#simple_product').attr('checked', true);
-					$('#warn_virtual_combinations').show();
-				}
-				else
-				{
-					$('a[id*="VirtualProduct"]').show();
-					$('#is_virtual').val(1);
+			// 		$('#condition').removeAttr('disabled');
+			// 		$('#condition option[value=new]').removeAttr('selected');
+			// 		$('.stockForVirtualProduct').show();
+			// 		// if pack is enabled, if you choose pack, automatically switch to pack page
+			// 	}
+			// }
+			// else if (product_type == product_type_virtual)
+			// {
+			// 	if (has_combinations)
+			// 	{
+			// 		$('#simple_product').attr('checked', true);
+			// 		$('#warn_virtual_combinations').show();
+			// 	}
+			// 	else
+			// 	{
+			// 		$('a[id*="VirtualProduct"]').show();
+			// 		$('#is_virtual').val(1);
 
-					tabs_manager.onLoad('VirtualProduct', function(){
-						$('#is_virtual_good').attr('checked', true);
-						$('#virtual_good').show();
-					});
+			// 		tabs_manager.onLoad('VirtualProduct', function(){
+			// 			$('#is_virtual_good').attr('checked', true);
+			// 			$('#virtual_good').show();
+			// 		});
 
-					tabs_manager.onLoad('Quantities', function(){
-						$('.stockForVirtualProduct').hide();
-					});
+			// 		tabs_manager.onLoad('Quantities', function(){
+			// 			$('.stockForVirtualProduct').hide();
+			// 		});
 
-					$('a[id*="Combinations"]').hide();
-					$('a[id*="Shipping"]').hide();
+			// 		$('#hotel_selection').show();
 
-					tabs_manager.onLoad('Informations', function(){
-						$('#condition').attr('disabled', true);
-						$('#condition option[value=refurbished]').removeAttr('selected');
-						$('#condition option[value=used]').removeAttr('selected');
-					});
-				}
-			}
-			else
-			{
-				// 3rd case : product_type is PTYPE_SIMPLE (0)
-				$('a[id*="Combinations"]').show();
-				$('a[id*="Shipping"]').show();
-				$('#condition').removeAttr('disabled');
-				$('#condition option[value=new]').removeAttr('selected');
-				$('.stockForVirtualProduct').show();
-			}
+			// 		$('a[id*="Quantities"]').hide();
+			// 		$('a[id*="Occupancy"]').show();
+			// 		$('a[id*="Configuration"]').show();
+			// 		$('a[id*="Booking"]').show();
+			// 		$('a[id*="ModuleHotelreservationsystem"]').show();
+			// 		$('a[id*="Shipping"]').hide();
+
+			// 		tabs_manager.onLoad('Informations', function(){
+			// 			$('#condition').attr('disabled', true);
+			// 			$('#condition option[value=refurbished]').removeAttr('selected');
+			// 			$('#condition option[value=used]').removeAttr('selected');
+			// 		});
+			// 	}
+			// }
+			// else
+			// {
+			// 	// 3rd case : product_type is PTYPE_SIMPLE (0)
+			// 	$('#hotel_selection').hide();
+			// 	$('a[id*="Quantities"]').show();
+			// 	$('a[id*="Occupancy"]').hide();
+			// 	$('a[id*="Configuration"]').hide();
+			// 	$('a[id*="Booking"]').hide();
+			// 	$('a[id*="ModuleHotelreservationsystem"]').hide();
+			// 	$('a[id*="Combinations"]').show();
+			// 	$('a[id*="Shipping"]').show();
+			// 	$('#condition').removeAttr('disabled');
+			// 	$('#condition option[value=new]').removeAttr('selected');
+			// 	$('.stockForVirtualProduct').show();
+			// }
 			// this handle the save button displays and warnings
 			handleSaveButtons();
 		});
 	};
 	this.onReady = function(){
-		loadPack();
+		// loadPack();
 		self.bindAvailableForOrder();
 		self.bindTagImage();
 		self.switchProductType();
@@ -1205,6 +1265,8 @@ product_tabs['Informations'] = new function(){
 			active_click();
 		}
 	};
+
+
 }
 
 product_tabs['Pack'] = new function() {
@@ -1908,7 +1970,6 @@ $(document).ready(function() {
 	id_lang_default = default_language;
 	// The manager schedules the onReady() methods of each tab to be called when the tab is loaded
 	tabs_manager.init();
-	updateCurrentText();
 	$("#name_" + id_lang_default + ",#link_rewrite_" + id_lang_default)
 		.on("change", function(e) {
 			$(this).trigger("handleSaveButtons");

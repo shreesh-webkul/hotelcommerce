@@ -169,6 +169,27 @@
 						</table>
 					</div>
 				</div>
+
+				<div class="form-group">
+					<label class="control-label col-lg-3">
+						<span class="label-tooltip" data-toggle="tooltip" title="{l s='Allow customers to choose quantites while ordering product'}">
+							{l s='Allow ordering of multiple quantities'}
+						</span>
+					</label>
+					<div class="col-lg-9">
+						<span class="switch prestashop-switch fixed-width-lg">
+							<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_on"{if $product->allow_multiple_quantity}checked="checked"{/if} value="1"/>
+							<label for="allow_multiple_quantity_on" class="radioCheck">
+								{l s='Yes'}
+							</label>
+							<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_off"{if !$product->allow_multiple_quantity}checked="checked"{/if} value="0"/>
+							<label for="allow_multiple_quantity_off" class="radioCheck">
+								{l s='No'}
+							</label>
+							<a class="slide-button btn"></a>
+						</span>
+					</div>
+				</div>
 				<div id="when_out_of_stock" class="form-group">
 					<label class="control-label col-lg-3">{l s='When out of stock'}</label>
 					<div class="col-lg-9">

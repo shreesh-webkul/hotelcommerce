@@ -32,7 +32,7 @@
 						<th><span class="title_box">{l s='Room Type'}</span></th>
 						<th><span class="title_box">{l s='Duration'}</span></th>
 						<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
-						<th><span class="title_box">{l s='Additinal Facilities (tax excl)'}</span></th>
+						<th><span class="title_box">{l s='Additinal Services (tax excl)'}</span></th>
 						<th><span class="title_box">{l s='Total Rooms Price (tax excl)'}</span></th>
 						<th><span class="title_box">{l s='Total Price (tax excl)'}</span></th>
 						<th></th>
@@ -67,8 +67,8 @@
 								</span>
 							</td>
 							<td>
-								{if isset($data.extra_demands) && $data.extra_demands}
-									{displayPrice price=$data.demand_price|escape:'html':'UTF-8'}
+								{if (isset($data.extra_demands) && $data.extra_demands) || (isset($data.additional_service) && $data.additional_service)}
+									{displayPrice price=($data.demand_price + $data.additional_service_price)|escape:'html':'UTF-8'}
 								{else}
 									{displayPrice price=0}
 								{/if}
@@ -85,7 +85,7 @@
 								<button class="delete_hotel_cart_data btn btn-danger" data-id_room={$data.id_room|escape:'html':'UTF-8'} data-id_product={$data.id_product|escape:'html':'UTF-8'} data-id = {$data.id|escape:'html':'UTF-8'} data-id_cart = {$data.id_cart|escape:'html':'UTF-8'} data-date_to = {$data.date_to|escape:'html':'UTF-8'} data-date_from = {$data.date_from|escape:'html':'UTF-8'}>
 									<i class="icon-trash"></i>&nbsp;{l s='Delete'}
 								</button>
-								{if isset($data.extra_demands) && $data.extra_demands}
+								{if (isset($data.extra_demands) && $data.extra_demands) || isset($data.additional_service) && $data.additional_service}
 									<br />
 									<a href="#" id_room={$data.id_room|escape:'html':'UTF-8'} date_from="{$data.date_from|escape:'html':'UTF-8'}" date_to="{$data.date_to|escape:'html':'UTF-8'}" id_product="{$data.id_product|escape:'html':'UTF-8'}" id_cart="{$data.id_cart|escape:'html':'UTF-8'}" class="open_rooms_extra_demands btn btn-success" title="{l s='Click here to add or remove the additinal facilities of this room type.'}">
 										<i class="icon-plus"></i>&nbsp;{l s='Facilities'}
@@ -96,37 +96,49 @@
 					{/foreach}
 				{else}
 					<tr>
-						<td>{l s='No Room Found in the cart.'}</td>
+						<td colspan="9">{l s='No Room Found in the cart.'}</td>
 					</tr>
 				{/if}
 				</tbody>
+				{if isset($cart_normal_data) && $cart_normal_data}
+					<thead>
+						<tr>
+							<th><span class="title_box">{l s='Image'}</th>
+							<th colspan="2"><span class="title_box">{l s='Name'}</span></th>
+							<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Quantity'}</span></th>
+							<th></th>
+							<th colspan="2"><span class="title_box">{l s='Total Price (Tax incl.)'}</span></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{foreach $cart_normal_data as $product}
+							<tr>
+								<td><img src="{$product.cover_img|escape:'html':'UTF-8'}" class="img-responsive" /></td>
+								<td colspan="2"><p>{$product.name|escape:'html':'UTF-8'}</p></td>
+								<td>{displayPrice price=$product.price}</td>
+								<td>{$product.cart_quantity|escape:'htmlall':'UTF-8'}</td>
+								<td></td>
+								<td colspan="2">{displayPrice price=$product.total}</td>
+								<td>
+									<button class="delete_service_product btn btn-danger" data-id_product={$product.id_product|escape:'html':'UTF-8'} data-id_cart = {$cart->id|escape:'html':'UTF-8'}>
+										<i class="icon-trash"></i>&nbsp;{l s='Delete'}
+									</button>
+								</td>
+							</tr>
+						{/foreach}
+					</tbody>
+				{/if}
 			</table>
 		</div>
 	</div>
 </div>
 
 {* Modal for extra demands *}
-<div class="modal" tabindex="-1" role="dialog" id="rooms_type_extra_demands">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-				</button>
-				<h3 class="modal-title">{l s='Additional Facilities'}</h3>
-			</div>
-			<div class="modal-body" id="rooms_extra_demands">
-				<div class="rooms_extra_demands_head">
-					<p class="rooms_extra_demands_text">{l s='Add below additional facilities to the room for better hotel experience'}</p>
-				</div>
-				<div id="room_type_demands_desc"></div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">{l s='Close'}</button>
-			</div>
-		</div>
-	</div>
-</div>
+{* <div class="modal" tabindex="-1" role="dialog" id="rooms_type_extra_demands">
+
+</div> *}
 
 {strip}
 	{addJsDefL name=txtExtraDemandSucc}{l s='Updated Successfully' js=1}{/addJsDefL}
@@ -144,6 +156,8 @@
 		color:#979797;
 		font-size:12px;}
 	/*Extra demands CSS*/
+	#rooms_type_extra_demands .modal-header {
+		padding-bottom: 0px}
 	#rooms_extra_demands {
 		font-size: 16px;}
 	#rooms_extra_demands .room_demands_container {
@@ -189,13 +203,14 @@
 					ajax: true
 				},
 				success: function(result) {
-					$('#rooms_type_extra_demands').find('#room_type_demands_desc').html('');
-					$('#rooms_type_extra_demands').find('#room_type_demands_desc').append(result);
+					$('#customer_cart_details').after(result);
+					{* $('#rooms_type_extra_demands').html('');
+					$('#rooms_type_extra_demands').append(result); *}
 					$('#rooms_type_extra_demands').modal('show');
 				},
 			});
 		});
-		$('#rooms_type_extra_demands').on('hidden.bs.modal', function (e) {
+		$(document).on('hidden.bs.modal', '#rooms_type_extra_demands', function (e) {
 			// reload so that changes prices will reflect everywhere
 			location.reload();
 		});
@@ -274,5 +289,74 @@
 				}
 			});
 		});
+
+		$(document).on('click', '.change_room_type_standard_product', function() {
+			updateStandardProducts(this);
+		});
+
+		$(document).on('click', '#rooms_type_extra_demands .qty_up', function(e) {
+			e.preventDefault();
+			qtyfield = $(this).closest('.qty_container').find('input.qty');
+			var currentVal = parseInt(qtyfield.val());
+			qtyfield.val(currentVal + 1).trigger('focusout');
+		});
+
+		$(document).on('click', '#rooms_type_extra_demands .qty_down', function(e) {
+			e.preventDefault();
+			qtyfield = $(this).closest('.qty_container').find('input.qty');
+			var currentVal = parseInt(qtyfield.val());
+			if (!isNaN(currentVal) && currentVal > 1) {
+				qtyfield.val(currentVal - 1).trigger('focusout');
+			} else {
+				qtyfield.val(1).trigger('focusout');
+			}
+		});
+
+		$(document).on('focusout', '#rooms_type_extra_demands .qty', function(e) {
+			var qty_wntd = $(this).val();
+			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
+				$(this).val(1);
+			}
+			if ($(this).closest('.room_demand_block').find('.change_room_type_standard_product').is(':checked')) {
+				updateStandardProducts($(this).closest('.room_demand_block').find('.change_room_type_standard_product'));
+			}
+		});
+
+		function updateStandardProducts(element)
+		{
+			var operator = $(element).is(':checked') ? 'up' : 'down';
+			var id_product = $(element).val();
+			var id_cart_booking = $(element).data('id_cart_booking');
+			var qty = $(element).closest('.room_demand_block').find('input.qty').val();
+			if (typeof(qty) == 'undefined') {
+				qty = 1;
+			}
+			$.ajax({
+				type: 'POST',
+				headers: {
+					"cache-control": "no-cache"
+				},
+				url: "{$link->getAdminLink('AdminOrders')|addslashes}",
+				dataType: 'JSON',
+				cache: false,
+				data: {
+					operator: operator,
+					id_product: id_product,
+					id_cart_booking: id_cart_booking,
+					qty: qty,
+					action: 'updateStandardProduct',
+					ajax: true
+				},
+				success: function(jsonData) {
+					if (!jsonData.hasError) {
+						showSuccessMessage(txtExtraDemandSucc);
+					} else {
+						showErrorMessage(jsonData.errors);
+
+					}
+				}
+			});
+
+		}
 	});
 </script>

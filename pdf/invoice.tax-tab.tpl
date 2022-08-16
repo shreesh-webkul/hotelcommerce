@@ -69,8 +69,12 @@
 						<td class="white" rowspan="{$bd|count}">
 							{if $label == 'product_tax'}
 								{l s='Rooms' pdf='true'}
+							{elseif $label == 'room_tax'}
+								{l s='Rooms' pdf='true'}
 							{elseif $label == 'extra_demands_tax'}
-								{l s='Extra Demands' pdf='true'}
+								{l s='Extra Service' pdf='true'}
+							{elseif $label == 'service_products_tax'}
+								{l s='Service Products' pdf='true'}
 							{elseif $label == 'shipping_tax'}
 								{l s='Shipping' pdf='true'}
 							{elseif $label == 'ecotax_tax'}

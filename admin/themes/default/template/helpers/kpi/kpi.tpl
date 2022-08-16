@@ -40,7 +40,7 @@
 		<span cLass="subtitle">{$subtitle|escape}</span>
 		<span class="value">{$value|escape|replace:'&amp;':'&'}</span>
 	</div>
-	
+
 </{if isset($href) && $href}a{else}div{/if}>
 
 {if isset($source) && $source != '' && isset($refresh) && $refresh != ''}

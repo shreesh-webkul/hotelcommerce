@@ -180,6 +180,41 @@
 				$(this).closest("tr").remove();
 			}
 		});
+
+		$('body').on('click', '.delete_service_product', function(){
+			if (confirm("{l s='Are you sure?'}"))
+        	{
+
+				$.ajax({
+					type:"POST",
+					url: "{$link->getAdminLink('AdminOrders')|addslashes}",
+					data : {
+						ajax: true,
+						action: "deleteProductProcess",
+						id_product: $(this).data('id_product'),
+						id_cart: $(this).data('id_cart'),
+					},
+					dataType:"json",
+					success : function(data)
+					{
+						if (data.status == 'deleted')
+						{
+							showSuccessMessage("{l s='Remove successful'}");
+							location.reload();
+							{* if (data.cart_rooms)
+								location.reload();
+							else
+								window.location.href = "{$link->getAdminLink('AdminHotelRoomsBooking',true)}"; *}
+						}
+						else
+						{
+							alert("l s='Some error occured.please try again.'}");
+						}
+					}
+				});
+				$(this).closest("tr").remove();
+			}
+		});
 		/*END*/
 
 		$('input:radio[name="free_shipping"]').on('change',function() {
@@ -912,8 +947,10 @@
 		$('#total_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_tax), currency_format, currency_sign, currency_blank));
 		$('#total_without_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_price_without_tax), currency_format, currency_sign, currency_blank));
 		$('#total_with_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_price), currency_format, currency_sign, currency_blank));
-		$('#total_extra_demands').html(formatCurrency(parseFloat(jsonSummary.summary.total_extra_demands_tax_exc), currency_format, currency_sign, currency_blank));
-		$('#total_products').html(formatCurrency(parseFloat(jsonSummary.summary.total_products), currency_format, currency_sign, currency_blank));
+		$('#total_extra_services').html(formatCurrency(parseFloat(jsonSummary.summary.total_extra_demands + jsonSummary.summary.total_additional_services), currency_format, currency_sign, currency_blank));
+		$('#total_rooms').html(formatCurrency(parseFloat(jsonSummary.summary.total_rooms), currency_format, currency_sign, currency_blank));
+		$('#total_service_products').html(formatCurrency(parseFloat(jsonSummary.summary.total_service_products), currency_format, currency_sign, currency_blank));
+
 		id_currency = jsonSummary.cart.id_currency;
 		$('#id_currency option').removeAttr('selected');
 		$('#id_currency option[value="'+id_currency+'"]').attr('selected', true);
@@ -1573,13 +1610,19 @@
 				<div class="col-lg-2">
 					<div class="data-focus">
 						<span>{l s='Total rooms (Tax excl.)'}</span><br/>
-						<span id="total_products" class="size_l text-success"></span>
+						<span id="total_rooms" class="size_l text-success"></span>
 					</div>
 				</div>
 				<div class="col-lg-2">
 					<div class="data-focus">
-						<span>{l s='Total additinal facilties (Tax excl.)'}</span><br/>
-						<span id="total_extra_demands" class="size_l text-success"></span>
+						<span>{l s='Total additinal services (Tax excl.)'}</span><br/>
+						<span id="total_extra_services" class="size_l text-success"></span>
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<div class="data-focus">
+						<span>{l s='Total Total service products (Tax excl.)'}</span><br/>
+						<span id="total_service_products" class="size_l text-success"></span>
 					</div>
 				</div>
 				<div class="col-lg-2">
@@ -1600,7 +1643,9 @@
 						<span id="total_taxes" class="size_l"></span>
 					</div>
 				</div>
-				<div class="col-lg-2">
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-lg-offset-10">
 					<div class="data-focus data-focus-primary">
 						<span>{l s='Total (Tax incl.)'}</span><br/>
 						<span id="total_with_taxes" class="size_l"></span>

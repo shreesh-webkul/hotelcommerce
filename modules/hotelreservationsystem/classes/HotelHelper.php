@@ -622,7 +622,7 @@ class HotelHelper
     public function addCategory($name, $parent_cat = false, $group_ids, $ishotel = false, $hotel_id = false)
     {
         if (!$parent_cat) {
-            $parent_cat = Category::getRootCategory()->id;
+            $parent_cat = Configuration::get('PS_LOCATIONS_CATEGORY');
         }
 
         if ($ishotel && $hotel_id) {

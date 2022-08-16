@@ -46,6 +46,14 @@ require_once 'classes/QloRoomType.php';
 require_once 'classes/HotelRoomDisableDates.php';
 require_once 'classes/HotelBranchRefundRules.php';
 
+// linked products
+require_once 'classes/HotelRoomTypeStandardProduct.php';
+require_once 'classes/HotelRoomTypeStandardProductPrice.php';
+require_once 'classes/StandardProductCartDetail.php';
+require_once 'classes/StandardProductOrderDetail.php';
+
+
+
 // Web services classes
 require_once 'classes/WebserviceSpecificManagementQlo.php';
 require_once 'classes/WebserviceSpecificManagementHotelImages.php';

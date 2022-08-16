@@ -78,52 +78,57 @@ class WkRoomSearchHelper
                 if (Validate::isLoadedObject($objHotelInfo = new HotelBranchInformation((int) $roomTypeInfo['id_hotel']))) {
                     $idHotelCategory = $objHotelInfo->id_category;
                 }
+            } else {
+                $idHotelCategory = false;
             }
         } else {
             // if category page
             $idHotelCategory = Tools::getValue('id_category');
         }
         if ($idHotelCategory) {
-            if (!$dateFrom = Tools::getValue('date_from')) {
-                $dateFrom = date('Y-m-d');
-                $dateTo = date('Y-m-d', strtotime('+1 day', strtotime($dateFrom)));
-            }
-            if (!$dateTo = Tools::getValue('date_to')) {
-                $dateTo = date('Y-m-d', strtotime('+1 day', strtotime($dateFrom)));
-            }
-            $smartyVars['date_from'] = $dateFrom;
-            $smartyVars['date_to'] = $dateTo;
-
             if (Validate::isLoadedObject($objCategory = new Category((int) $idHotelCategory))) {
-                $idHotel = HotelBranchInformation::getHotelIdByIdCategory($idHotelCategory);
-                $htlCategoryInfo = $objHotelInfo->getCategoryDataByIdCategory((int) $objCategory->id_parent);
+                if ($objCategory->hasParent(Configuration::get('PS_LOCATIONS_CATEGORY'))) {
 
-                $objBookingDetail = new HotelBookingDetail();
-                $searchedData['num_days'] = $objBookingDetail->getNumberOfDays($dateFrom, $dateTo);
-
-                $searchedData['parent_data'] = $htlCategoryInfo;
-                $searchedData['date_from'] = date('d-m-Y', strtotime($dateFrom));
-                $searchedData['date_to'] = date('d-m-Y', strtotime($dateTo));
-                $searchedData['htl_dtl'] = $objHotelInfo->hotelBranchesInfo(0, 1, 1, $idHotel);
-
-                $searchedData['location'] = $searchedData['htl_dtl']['city'];
-                if (isset($searchedData['htl_dtl']['state_name'])) {
-                    $searchedData['location'] .= ', '.$searchedData['htl_dtl']['state_name'];
-                }
-                $searchedData['location'] .= ', '.$searchedData['htl_dtl']['country_name'];
-
-                $searchedData['order_date_restrict'] = false;
-                $max_order_date = HotelOrderRestrictDate::getMaxOrderDate($idHotel);
-                $searchedData['max_order_date'] = date('Y-m-d', strtotime($max_order_date));
-                if ($max_order_date) {
-                    if (strtotime('-1 day', strtotime($max_order_date)) < strtotime($dateFrom)
-                        || strtotime($max_order_date) < strtotime($dateTo)
-                    ) {
-                        $searchedData['order_date_restrict'] = true;
+                    if (!$dateFrom = Tools::getValue('date_from')) {
+                        $dateFrom = date('Y-m-d');
+                        $dateTo = date('Y-m-d', strtotime('+1 day', strtotime($dateFrom)));
                     }
-                }
+                    if (!$dateTo = Tools::getValue('date_to')) {
+                        $dateTo = date('Y-m-d', strtotime('+1 day', strtotime($dateFrom)));
+                    }
+                    $smartyVars['date_from'] = $dateFrom;
+                    $smartyVars['date_to'] = $dateTo;
 
-                $smartyVars['search_data'] = $searchedData;
+                    $idHotel = HotelBranchInformation::getHotelIdByIdCategory($idHotelCategory);
+                    $htlCategoryInfo = $objHotelInfo->getCategoryDataByIdCategory((int) $objCategory->id_parent);
+
+                    $objBookingDetail = new HotelBookingDetail();
+                    $searchedData['num_days'] = $objBookingDetail->getNumberOfDays($dateFrom, $dateTo);
+
+                    $searchedData['parent_data'] = $htlCategoryInfo;
+                    $searchedData['date_from'] = date('d-m-Y', strtotime($dateFrom));
+                    $searchedData['date_to'] = date('d-m-Y', strtotime($dateTo));
+                    $searchedData['htl_dtl'] = $objHotelInfo->hotelBranchesInfo(0, 1, 1, $idHotel);
+
+                    $searchedData['location'] = $searchedData['htl_dtl']['city'];
+                    if (isset($searchedData['htl_dtl']['state_name'])) {
+                        $searchedData['location'] .= ', '.$searchedData['htl_dtl']['state_name'];
+                    }
+                    $searchedData['location'] .= ', '.$searchedData['htl_dtl']['country_name'];
+
+                    $searchedData['order_date_restrict'] = false;
+                    $max_order_date = HotelOrderRestrictDate::getMaxOrderDate($idHotel);
+                    $searchedData['max_order_date'] = date('Y-m-d', strtotime($max_order_date));
+                    if ($max_order_date) {
+                        if (strtotime('-1 day', strtotime($max_order_date)) < strtotime($dateFrom)
+                            || strtotime($max_order_date) < strtotime($dateTo)
+                        ) {
+                            $searchedData['order_date_restrict'] = true;
+                        }
+                    }
+
+                    $smartyVars['search_data'] = $searchedData;
+                }
             }
 
             // if location is enabled the send hotels of the selected location only

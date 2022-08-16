@@ -45,10 +45,7 @@ class AdminCategoriesControllerCore extends AdminController
 
     public function __construct()
     {
-        // redirect to admin dashboard as no entry allowed in category controller. It will be managed solely from
-        // hotel creation , updation and deletion
         $this->context = Context::getContext();
-        // Tools::redirectAdmin($this->context->link->getAdminLink('AdminDashboard'));
 
         $this->bootstrap = true;
         $this->table = 'category';
@@ -116,13 +113,18 @@ class AdminCategoriesControllerCore extends AdminController
         // context->shop is set in the init() function, so we move the _category instanciation after that
         if (($id_category = Tools::getvalue('id_category')) && $this->action != 'select_delete') {
             $this->_category = new Category($id_category);
+            // check if this category lies in location, if true then set category to products category.
+            if (!$this->_category->hasParent(Configuration::get('PS_PRODUCTS_CATEGORY'))) {
+                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
+            }
         } else {
             if (Shop::getContext() == Shop::CONTEXT_SHOP) {
-                $this->_category = new Category($this->context->shop->id_category);
+
+                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
             } elseif (count(Category::getCategoriesWithoutParent()) > 1 && Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE') && count(Shop::getShops(true, null, true)) != 1) {
                 $this->_category = Category::getTopCategory();
             } else {
-                $this->_category = new Category(Configuration::get('PS_HOME_CATEGORY'));
+                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
             }
         }
 
@@ -141,7 +143,7 @@ class AdminCategoriesControllerCore extends AdminController
                 $id_parent = (int)Configuration::get('PS_ROOT_CATEGORY');
             }
         } else {
-            $id_parent = $this->context->shop->id_category;
+            $id_parent = Configuration::get('PS_PRODUCTS_CATEGORY');
         }
         $this->_select = 'sa.position position';
         $this->original_filter = $this->_filter .= ' AND `id_parent` = '.(int)$id_parent.' ';
@@ -334,7 +336,7 @@ class AdminCategoriesControllerCore extends AdminController
             }
         }
         if (!$this->lite_display && isset($this->toolbar_btn['back']['href']) && $this->_category->level_depth > 1
-            && $this->_category->id_parent && $this->_category->id_parent != (int)Configuration::get('PS_ROOT_CATEGORY')) {
+            && $this->_category->id_parent && $this->_category->id_parent != (int)Configuration::get('PS_PRODUCTS_CATEGORY')) {
             $this->toolbar_btn['back']['href'] .= '&id_category='.(int)$this->_category->id_parent;
         }
     }
@@ -523,7 +525,7 @@ class AdminCategoriesControllerCore extends AdminController
                         'id'                  => 'categories-tree',
                         'selected_categories' => $selected_categories,
                         'disabled_categories' => (!Tools::isSubmit('add'.$this->table) && !Tools::isSubmit('submitAdd'.$this->table)) ? array($this->_category->id) : null,
-                        'root_category'       => $context->shop->getCategory()
+                        'root_category'       => Configuration::get('PS_PRODUCTS_CATEGORY')
                     )
                 ),
                 array(
