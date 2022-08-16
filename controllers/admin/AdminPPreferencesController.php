@@ -298,6 +298,26 @@ class AdminPPreferencesControllerCore extends AdminController
                         'required' => false,
                         'type' => 'bool'
                     ),
+
+                    'PS_STANDARD_PRODUCT_DISPLAY_TYPE' => array(
+                        'title' => $this->l('Standard Products display type'),
+                        'hint' => $this->l('Display style for standard products on room type page.'),
+                        'type' => 'select',
+                        'list' => array(
+                            array('id' => '1', 'name' => $this->l('List'), 'value' => 'list'),
+                            array('id' => '2', 'name' => $this->l('Slider'), 'value' => 'slider'),
+                        ),
+                        'identifier' => 'value'
+                    ),
+
+                    'PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER' => array(
+                        'title' => $this->l('Show category filter for standard products'),
+                        'validation' => 'isBool',
+                        'cast' => 'intval',
+                        'required' => false,
+                        'type' => 'bool'
+                    ),
+
                     'PS_HOTEL_IMAGES_PER_PAGE' => array(
                         'title' => $this->l('Number of hotel images per page'),
                         'hint' => $this->l('Number of hotel images displayed per page. Default is 9.'),

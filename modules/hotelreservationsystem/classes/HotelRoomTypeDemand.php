@@ -217,7 +217,7 @@ class HotelRoomTypeDemand extends ObjectModel
         if ($id_address) {
             $addressInfos = Address::getCountryAndState($id_address);
         } else {
-            $addressInfos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($idProduct));
+            $addressInfos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($idProduct));
         }
         if ($addressInfos['id_country']) {
             $idCountry = (int)$addressInfos['id_country'];

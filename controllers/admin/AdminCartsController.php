@@ -350,7 +350,6 @@ class AdminCartsControllerCore extends AdminController
                 $this->context->cart->recyclable = 0;
                 $this->context->cart->gift = 0;
             }
-
             /*if (!$this->context->cart->id_customer)
                 $this->context->cart->id_customer = $id_customer;*/
             if (Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists()) {
@@ -1065,14 +1064,46 @@ class AdminCartsControllerCore extends AdminController
                         }
                         $this->context->smarty->assign('roomTypeDemands', $roomTypeDemands);
                         $this->context->smarty->assign('selectedRoomDemands', $selectedRoomDemands);
-                        $response['status'] = true;
-                        $response['html_exta_demands'] = $this->context->smarty->fetch(
-                            _PS_ADMIN_DIR_.'/themes/default/template/controllers/orders/_cart_booking_demands.tpl'
-                        );
                     }
+                }
+                $htlCartBoookingata =  $objCartBookingData->getRoomRowByIdProductIdRoomInDateRange(
+                    $idCart,
+                    $idProduct,
+                    $dateFrom,
+                    $dateTo,
+                    $idRoom
+                );
+
+                $objStandardProductCartDetail = new StandardProductCartDetail();
+                if ($selectedRoomStandardProduct = $objStandardProductCartDetail->getStandardProductsInCart(
+                    $idCart,
+                    0,
+                    0,
+                    $idProduct,
+                    $dateFrom,
+                    $dateTo,
+                    $htlCartBoookingata['id']
+                )) {
+                    $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
+                    $roomTypeStandardProducts = $objHotelRoomTypeStandardProduct->getStandardProductsData($idProduct);
+                        foreach ($selectedRoomStandardProduct as $key => $selectedProducts) {
+                            $objRoom = new HotelRoomInformation($selectedProducts['id_room']);
+                            $selectedRoomStandardProduct[$key]['room_num'] = $objRoom->room_num;
+                            foreach ($selectedProducts['selected_products_info'] as $product) {
+                                $selectedRoomStandardProduct[$key]['selected_products'][] = $product['id_product'];
+                            }
+                        }
+                    $this->context->smarty->assign(array(
+                        'roomTypeStandardProducts' => $roomTypeStandardProducts,
+                        'selectedRoomStandardProduct' => $selectedRoomStandardProduct
+                    ));
                 }
             }
         }
+        $response['status'] = true;
+        $response['html_exta_demands'] = $this->context->smarty->fetch(
+            _PS_ADMIN_DIR_.'/themes/default/template/controllers/orders/_cart_booking_demands.tpl'
+        );
         $this->ajaxDie(json_encode($response));
     }
 

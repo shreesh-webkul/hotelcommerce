@@ -7,5 +7,7 @@
   <entities>
     <category id="Root" id_parent="" active="1"/>
     <category id="Home" id_parent="Root" active="1" is_root_category="1" />
+    <category id="Locations" id_parent="Home" active="1"/>
+    <category id="Products" id_parent="Home" active="1"/>
   </entities>
 </entity_category>

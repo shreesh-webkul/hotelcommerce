@@ -239,7 +239,7 @@
 .order-detail-content .room_total_price_detial {
 	font-size: 14px;
 	color: #777777;}
-.room_price_detail_block .open_rooms_extra_demands {
+.room_price_detail_block .open_rooms_extra_services_panel {
 	font-weight: 600;
 	color: #0000FF;}
 .order-detail-content .total_price_block {
@@ -618,60 +618,10 @@
 
 
 /* Fancy-box for extra demands Css */
-#rooms_extra_demands {
-	font-size: 16px;}
-.room_extra_demands .open_rooms_extra_demands {
+.room_extra_demands .open_rooms_extra_services_panel {
 	font-size:12px;
 	font-weight: 600;
 	color: #0000FF;}
-#rooms_extra_demands .demand_header {
-	padding-bottom: 15px;}
-#rooms_extra_demands .room_demand_detail .demand_detail_price_block {
-	font-size: 14px;
-	margin-bottom: 15px;}
-#rooms_extra_demands .rooms_extra_demands_head {
-	margin-bottom: 18px;}
-#rooms_extra_demands .card {
-	padding-bottom: 0px;}
-#rooms_extra_demands .room_demand_block {
-	margin-bottom: 15px;
-	color: #333;
-	font-size: 14px;}
-#rooms_extra_demands .checkbox {
-	margin-top: 3px;}
-#rooms_extra_demands label {
-	opacity: 0.5;
-	margin-bottom: 15px;
-	text-transform: uppercase;}
-
-/* fancybox accordian css */
-#rooms_extra_demands .accordion, #rooms_extra_demands .accordion * {
-	-webkit-box-sizing:border-box;
-	-moz-box-sizing:border-box;
-	box-sizing:border-box;}
-#rooms_extra_demands .accordion {
-	overflow:hidden;
-	border-bottom: 1px solid #CCCCCC;}
-#rooms_extra_demands .accordion-section-title {
-	width:100%;
-	display:inline-block;
-	transition:all linear 0.15s;
-	color:#252525 !important;
-	text-decoration:none !important;}
-#rooms_extra_demands .accordion-section-content {
-	display:none;
-	border-top: 1px solid #eee;
-	padding: 15px;}
-
-/* fancybox changes */
-#order-opc .fancybox-overlay {
-	background: rgba(255, 255, 255, 0.95)!important;}
-	#order-opc .fancybox-skin {
-	box-shadow: none!important;}
-	#order-opc .fancybox-skin .fancybox-close:after {
-	content: "";}
-	#order-opc .fancybox-skin .fancybox-close {
-	background-image: url(../img/icon/icon-close.svg);}
 
 .btn-edit-guest-info {
 	padding: 0px 50px;

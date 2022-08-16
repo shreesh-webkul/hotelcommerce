@@ -372,7 +372,7 @@ class HotelBranchInformation extends ObjectModel
      * @param int $id_lang
      * @return array
      */
-    public function getAddress($id_hotel, $id_lang = false)
+    public static function getAddress($id_hotel, $id_lang = false)
     {
         if (!$id_lang)
             $id_lang = Context::getContext()->language->id;
@@ -515,12 +515,16 @@ class HotelBranchInformation extends ObjectModel
     public function getHotelCategoryTree($searchData)
     {
         $context = Context::getContext();
+
+        $locationCategory = new Category(Configuration::get('PS_LOCATIONS_CATEGORY'));
+
         return Db::getInstance()->executeS(
             'SELECT cl.`id_category` , cl.`name`
             FROM `'._DB_PREFIX_.'category_lang` AS cl
             INNER JOIN `'._DB_PREFIX_.'category` AS c ON (cl.`id_category` = c.`id_category`)
             WHERE cl.`name` LIKE \'%'.pSQL($searchData).'%\'
             AND c.`level_depth` NOT IN (0, 1, 5) and cl.`id_lang`='.(int)$context->language->id.'
+            AND c.`nleft` > '.(int)$locationCategory->nleft.' AND c.`nright` < '.(int)$locationCategory->nright.'
             GROUP BY cl.`name`'
         );
     }
@@ -595,7 +599,7 @@ class HotelBranchInformation extends ObjectModel
     {
         $context = Context::getContext();
         if (!$parent_cat) {
-            $parent_cat = Category::getRootCategory()->id;
+            $parent_cat = Configuration::get('PS_LOCATIONS_CATEGORY');
         }
         if (is_array($name) && isset($name[Configuration::get('PS_LANG_DEFAULT')])) {
             $catName = $name[Configuration::get('PS_LANG_DEFAULT')];

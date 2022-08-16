@@ -212,10 +212,10 @@
 									<span>{l s='Tax' mod='blockcart'}</span>
 								</div>
 							{/if}
-							{if isset($total_extra_demands)}
+							{if isset($total_extra_services)}
 								<div class="cart-prices-line">
-									<span class="price cart_block_additional_facilities_cost ajax_cart_extra_demands_cost">{convertPrice price=$total_extra_demands}</span>
-									<span class="price">{l s='Additional Facilities Cost' mod='blockcart'}</strong>
+									<span class="price cart_block_additional_facilities_cost ajax_cart_extra_demands_cost">{convertPrice price=$total_extra_services}</span>
+									<span class="price">{l s='Extra Services Cost' mod='blockcart'}</strong>
 								</div>
 							{/if}
 							<div class="cart-prices-line last-line">
@@ -339,10 +339,10 @@
 						{/if}
 					</span>
 				</div> -->
-				{if isset($total_extra_demands)}
+				{if isset($total_extra_services)}
 					<div class="layer_cart_row">
-						<strong class="dark">{l s='Total Additional Facilities Cost' mod='blockcart'}</strong>
-						<span class="price ajax_cart_extra_demands_cost">{convertPrice price=$total_extra_demands}</span>
+						<strong class="dark">{l s='Total Extra Services Cost' mod='blockcart'}</strong>
+						<span class="price ajax_cart_extra_demands_cost">{convertPrice price=$total_extra_services}</span>
 					</div>
 				{/if}
 				{if $show_tax && isset($tax_cost)}

@@ -363,44 +363,54 @@ $(document).ready(function()
 		$('#link_multishipping_form').click();
 
 	// fancybox for extra bed requirement edit on checkout page
-	$('body').on('click', '.open_rooms_extra_demands', function() {
-		var idProduct = $(this).attr('id_product');
-		var dateFrom = $(this).attr('date_from');
-		var dateTo = $(this).attr('date_to');
-		$.fancybox({
-			href: "#rooms_extra_demands",
-		    autoSize : true,
-		    autoScale : true,
-			maxWidth : '100%',
-			'hideOnContentClick': false,
-			beforeLoad: function () {
-				$.ajax({
-					type: 'POST',
-					headers: {
-						"cache-control": "no-cache"
-					},
-					url: orderOpcUrl,
-					dataType: 'html',
-					cache: false,
-					data: {
-						date_from: dateFrom,
-						date_to: dateTo,
-						id_product: idProduct,
-						method: 'getRoomTypeBookingDemands',
-						ajax: true
-					},
-					success: function(result) {
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').html('');
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').append(result);
-					},
-				});
-			},
-			afterClose: function() {
-				// reload so that changes prices will reflect everywhere
-				location.reload();
-			},
-		});
-	});
+	// $('body').on('click', '.open_rooms_extra_services_panel', function() {
+	// 	var idProduct = $(this).data('id_product');
+	// 	var idOrder = $(this).data('id_order');
+	// 	var dateFrom = $(this).data('date_from');
+	// 	var dateTo = $(this).data('date_to');
+	// 	var action = $(this).data('action');
+	// 	$.ajax({
+	// 		type: 'POST',
+	// 		headers: {
+	// 			"cache-control": "no-cache"
+	// 		},
+	// 		url: action,
+	// 		dataType: 'html',
+	// 		cache: false,
+	// 		data: {
+	// 			date_from: dateFrom,
+	// 			date_to: dateTo,
+	// 			id_product: idProduct,
+	// 			id_order: idOrder,
+	// 			method: 'getRoomTypeBookingDemands',
+	// 			ajax: true,
+	// 			token: static_token
+	// 		},
+	// 		success: function(result) {
+	// 			$('#rooms_extra_services').html('');
+	// 			$('#rooms_extra_services').append(result);
+	// 			$.fancybox({
+	// 				href: "#rooms_extra_services",
+	// 				autoSize : true,
+	// 				autoScale : true,
+	// 				maxWidth : '100%',
+	// 				'hideOnContentClick': false,
+	// 				helpers: {
+	// 					overlay: {
+	// 						css: {
+	// 							'background': 'rgba(255, 255, 255, 0.95)'
+	// 						},
+	// 					},
+	// 				},
+	// 				afterClose: function() {
+	// 					// reload so that changes prices will reflect everywhere
+	// 					location.reload();
+	// 				},
+	// 			});
+	// 		},
+	// 	});
+
+	// });
 
 	function close_accordion_section() {
         $('.accordion .accordion-section-title').removeClass('active');
@@ -499,6 +509,77 @@ $(document).ready(function()
 			}
 		});
     });
+
+	$(document).on('click', '.change_room_type_standard_product', function() {
+		updateStandardProducts(this);
+	});
+
+	$(document).on('click', '#rooms_extra_services .qty_up', function(e) {
+        e.preventDefault();
+        qtyfield = $(this).closest('.qty_container').find('input.qty');
+        var currentVal = parseInt(qtyfield.val());
+        qtyfield.val(currentVal + 1).trigger('focusout');
+    });
+
+    $(document).on('click', '#rooms_extra_services .qty_down', function(e) {
+        e.preventDefault();
+        qtyfield = $(this).closest('.qty_container').find('input.qty');
+        var currentVal = parseInt(qtyfield.val());
+        if (!isNaN(currentVal) && currentVal > 1) {
+            qtyfield.val(currentVal - 1).trigger('focusout');
+        } else {
+            qtyfield.val(1).trigger('focusout');
+        }
+    });
+
+    $(document).on('focusout', '#rooms_extra_services .qty', function(e) {
+        var qty_wntd = $(this).val();
+        if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
+            $(this).val(1);
+        }
+		if ($(this).closest('.room_demand_block').find('.change_room_type_standard_product').is(':checked')) {
+			updateStandardProducts($(this).closest('.room_demand_block').find('.change_room_type_standard_product'));
+		}
+    });
+
+	function updateStandardProducts(element)
+	{
+		var operator = $(element).is(':checked') ? 'up' : 'down';
+		var id_product = $(element).val();
+		var id_cart_booking = $(element).data('id_cart_booking');
+		var qty = $(element).closest('.room_demand_block').find('input.qty').val();
+		if (typeof(qty) == 'undefined') {
+			qty = 1;
+		}
+		$.ajax({
+			type: 'POST',
+			headers: {
+				"cache-control": "no-cache"
+			},
+			url: baseUri + '?rand=' + new Date().getTime(),
+			dataType: 'JSON',
+			cache: false,
+			data: {
+				operator: operator,
+				id_product: id_product,
+				id_cart_booking: id_cart_booking,
+				qty: qty,
+				updateStandardProduct: true,
+				controller: 'cart',
+				ajax: true,
+				token: static_token
+			},
+			success: function(jsonData) {
+				if (!jsonData.hasError) {
+					showSuccessMessage(txtExtraDemandSucc);
+				} else {
+					showErrorMessage(jsonData.errors);
+
+				}
+			}
+		});
+
+	}
 });
 
 function updateCarrierList(json)

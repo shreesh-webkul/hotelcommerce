@@ -169,6 +169,27 @@
 						</table>
 					</div>
 				</div>
+
+				<div class="form-group">
+					<label class="control-label col-lg-3">
+						<span class="label-tooltip" data-toggle="tooltip" title="{l s='Allow customers to choose quantites while ordering product'}">
+							{l s='Allow ordering of multiple quantities'}
+						</span>
+					</label>
+					<div class="col-lg-9">
+						<span class="switch prestashop-switch fixed-width-lg">
+							<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_on"{if $product->allow_multiple_quantity}checked="checked"{/if} value="1"/>
+							<label for="allow_multiple_quantity_on" class="radioCheck">
+								{l s='Yes'}
+							</label>
+							<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_off"{if !$product->allow_multiple_quantity}checked="checked"{/if} value="0"/>
+							<label for="allow_multiple_quantity_off" class="radioCheck">
+								{l s='No'}
+							</label>
+							<a class="slide-button btn"></a>
+						</span>
+					</div>
+				</div>
 				<div id="when_out_of_stock" class="form-group">
 					<label class="control-label col-lg-3">{l s='When out of stock'}</label>
 					<div class="col-lg-9">
@@ -213,7 +234,7 @@
 			{/if}
 		{/if}
 		<div class="panel-footer">
-			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
+			<a href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
 			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i></i> {l s='Save'}</button>
 			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 		</div>
@@ -285,7 +306,7 @@
 			{/if}
 		{/if}
 		<div class="panel-footer">
-			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
+			<a href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
 			<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save'}</button>
 			<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 		</div>

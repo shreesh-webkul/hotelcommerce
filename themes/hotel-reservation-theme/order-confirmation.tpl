@@ -57,20 +57,20 @@
 			<p><strong>{l s='Order Details -'}</strong></p>
 			<div id="order-detail-content" class="">
 				<table class="table table-bordered">
-					<thead>
-						<tr>
-							<th class="cart_product">{l s='Room Image'}</th>
-							<th class="cart_description">{l s='Room Description'}</th>
-							<th>{l s='Hotel Name'}</th>
-							<th class="cart_unit">{l s='Unit Price'}</th>
-							<th>{l s='Rooms'}</th>
-							<th>{l s='Check-in Date'}</th>
-							<th>{l s='Check-out Date'}</th>
-							<th class="cart_total">{l s='Total'}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{if isset($cart_htl_data)}
+					{if isset($cart_htl_data)}
+						<thead>
+							<tr>
+								<th class="cart_product">{l s='Room Image'}</th>
+								<th class="cart_description">{l s='Room Description'}</th>
+								<th>{l s='Hotel Name'}</th>
+								<th class="cart_unit">{l s='Unit Price'}</th>
+								<th>{l s='Rooms'}</th>
+								<th>{l s='Check-in Date'}</th>
+								<th>{l s='Check-out Date'}</th>
+								<th class="cart_total">{l s='Total'}</th>
+							</tr>
+						</thead>
+						<tbody>
 							{foreach from=$cart_htl_data key=data_k item=data_v}
 								{foreach from=$data_v['date_diff'] key=rm_k item=rm_v}
 									<tr class="table_body">
@@ -85,17 +85,17 @@
 													{$data_v['name']}
 												</a>
 											</p>
-											{if isset($rm_v['extra_demands']) && $rm_v['extra_demands']}
+											{if (isset($rm_v['extra_demands']) && $rm_v['extra_demands']) || isset($rm_v['additional_services']) && $rm_v['additional_services']}
 												<p class="room_extra_demands">
-													<a date_from="{$rm_v['data_form']}" date_to="{$rm_v['data_to']}" id_product="{$data_v['id_product']}" id_order="{$order->id}" class="open_rooms_extra_demands" href="#rooms_type_extra_demands">
-														{l s='Additional Facilities'}
+													<a data-date_from="{$rm_v['data_form']}" data-date_to="{$rm_v['data_to']}" data-id_product="{$data_v['id_product']}" data-id_order="{$order->id}" data-action="{$link->getPageLink('order-detail')}" class="open_rooms_extra_services_panel" href="#rooms_type_extra_services_form">
+														{l s='Extra Services'}
 													</a>
 												</p>
 												<p>
 													{if $group_use_tax}
-														{displayWtPriceWithCurrency price=$rm_v['extra_demands_price_ti'] currency=$currency}
+														{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_ti'] + $rm_v['additional_services_price_ti'])  currency=$currency}
 													{else}
-														{displayWtPriceWithCurrency price=$rm_v['extra_demands_price_te'] currency=$currency}
+														{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te']) currency=$currency}
 													{/if}
 												</p>
 											{/if}
@@ -163,48 +163,126 @@
 									</tr>
 								{/foreach}
 							{/foreach}
-						{/if}
-					</tbody>
-					<tfoot>
-						{if $priceDisplay && $use_tax}
-							<tr class="item">
-								<td colspan="3"></td>
-								<td colspan="3">
-									<strong>{l s='Rooms (tax excl.)'}</strong>
-								</td>
-								<td colspan="2">
-									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_products_te'] currency=$currency}</span>
-								</td>
+						</tbody>
+					{/if}
+					{if isset($cart_service_products)}
+						<thead>
+							<tr>
+								<th colspan="1">{l s='Image'}</th>
+								<th colspan="2">{l s='Name'}</th>
+								<th colspan="2">{l s='Unit Price'}</th>
+								<th colspan="1">{l s='Quantity'}</th>
+								<th colspan="2" class="cart_total">{l s='Total'}</th>
 							</tr>
-						{/if}
-						<tr class="item">
-							<td colspan="3"></td>
-							<td colspan="3">
-								<strong>{l s='Rooms'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
-							</td>
-							<td colspan="2">
-								<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_products_ti'] currency=$currency}</span>
-							</td>
-						</tr>
-						{if $orderTotalInfo['total_demands_price_te'] > 0}
+						</thead>
+						<tbody>
+							{foreach from=$cart_service_products key=data_k item=data_v}
+								<tr class="table_body">
+									<td class="cart_product">
+										<a href="{$link->getProductLink($data_v['id_product'])}">
+											<img src="{$data_v['cover_img']}" class="img-responsive"/>
+										</a>
+									</td>
+									<td class="cart_product" colspan="2">
+										<p class="product-name">
+											<a href="{$link->getProductLink($data_v['id_product'])}">
+												{$data_v['product_name']}
+											</a>
+										</p>
+									</td>
+									<td class="cart_unit" colspan="2">
+										<p class="text-center">
+											{if $group_use_tax}
+												{displayWtPriceWithCurrency price=$data_v['unit_price_tax_incl'] currency=$currency}
+												{* {displayPrice price=$data_v['unit_price_tax_incl']|floatval|round:2} *}
+											{else}
+												{* {displayPrice price=$data_v['unit_price_tax_excl']|floatval|round:2} *}
+												{displayWtPriceWithCurrency price=$data_v['unit_price_tax_excl'] currency=$currency}
+											{/if}
+										</p>
+									</td>
+									<td>
+										<p class="text-center">
+											{$data_v['product_quantity']}
+										</p>
+									</td>
+									<td>
+										<p class="text-left" colspan="2">
+											{if $group_use_tax}
+												{displayWtPriceWithCurrency price=$data_v['total_price_tax_incl'] currency=$currency}
+											{else}
+												{displayWtPriceWithCurrency price=$data_v['total_price_tax_excl'] currency=$currency}
+											{/if}
+										</p>
+									</td>
+								</tr>
+							{/foreach}
+						</tbody>
+					{/if}
+					<tfoot>
+						{if isset($cart_htl_data)}
 							{if $priceDisplay && $use_tax}
 								<tr class="item">
 									<td colspan="3"></td>
 									<td colspan="3">
-										<strong>{l s='Additional facilities Cost (tax excl.)'}</strong>
+										<strong>{l s='Total rooms cost(tax excl.)'}</strong>
 									</td>
 									<td colspan="2">
-										<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_demands_price_te'] currency=$currency}</span>
+										<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_rooms_te'] currency=$currency}</span>
 									</td>
 								</tr>
 							{/if}
 							<tr class="item">
 								<td colspan="3"></td>
 								<td colspan="3">
-									<strong>{l s='Additional facilities Cost (tax incl.)'}</strong>
+									<strong>{l s='Total rooms cost'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
 								</td>
 								<td colspan="2">
-									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_demands_price_ti'] currency=$currency convert=1}</span>
+									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_rooms_ti'] currency=$currency}</span>
+								</td>
+							</tr>
+						{/if}
+						{if isset($cart_service_products) && $cart_service_products}
+							{if $priceDisplay && $use_tax}
+								<tr class="item">
+									<td colspan="3"></td>
+									<td colspan="3">
+										<strong>{l s='Total service products cost (tax excl.)'}</strong>
+									</td>
+									<td colspan="2">
+										<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_service_products_te'] currency=$currency}</span>
+									</td>
+								</tr>
+							{/if}
+							<tr class="item">
+								<td colspan="3"></td>
+								<td colspan="3">
+									<strong>{l s='Total service products cost'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
+								</td>
+								<td colspan="2">
+									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['total_service_products_ti'] currency=$currency}</span>
+								</td>
+							</tr>
+						{/if}
+						{if $orderTotalInfo['additional_service_te'] > 0}
+							{if $priceDisplay && $use_tax}
+								<tr class="item">
+									<td colspan="3"></td>
+									<td colspan="3">
+										<strong>{l s='Total service products cost (tax excl.)'}</strong>
+									</td>
+									<td colspan="2">
+										<span>{displayWtPriceWithCurrency price=$orderTotalInfo['additional_service_te'] currency=$currency}</span>
+									</td>
+								</tr>
+							{/if}
+							<tr class="item">
+								<td colspan="3"></td>
+								<td colspan="3">
+									<strong>{l s='Total service products cost'} {if $use_tax}{l s='(tax incl.)'}{/if}</strong>
+								</td>
+								<td colspan="2">
+									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['additional_service_ti'] currency=$currency convert=1}</span>
 								</td>
 							</tr>
 						{/if}
@@ -265,8 +343,8 @@
 {/if}
 
 {* Fancybox for extra demands*}
-<div style="display:none;" id="rooms_extra_demands">
-	<div id="rooms_type_extra_demands">
+<div style="display:none;" id="rooms_extra_services">
+	{* <div id="rooms_type_extra_demands">
 		<div class="panel">
 			<div class="rooms_extra_demands_head">
 				<h3>{l s='Additional Facilities'}</h3>
@@ -274,7 +352,7 @@
 			</div>
 			<div id="room_type_demands_desc"></div>
 		</div>
-	</div>
+	</div> *}
 </div>
 {strip}
 	{addJsDef historyUrl=$link->getPageLink("orderdetail", true)|escape:'quotes':'UTF-8'}

@@ -176,13 +176,31 @@ class AdminStatsControllerCore extends AdminStatsTabController
 		'.Shop::addSqlAssociation('category', 'c'));
     }
 
+    public static function getDisabledRoomTypes()
+    {
+        return (int)Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
+		SELECT COUNT(*)
+		FROM `'._DB_PREFIX_.'product` p
+		'.Shop::addSqlAssociation('product', 'p').'
+		WHERE product_shop.active = 0 AND p.`booking_product` = 1');
+    }
+
+    public static function getTotalRoomTypes()
+    {
+        return (int)Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
+		SELECT COUNT(*)
+		FROM `'._DB_PREFIX_.'product` p
+		'.Shop::addSqlAssociation('product', 'p').'
+        WHERE p.`booking_product` = 1');
+    }
+
     public static function getDisabledProducts()
     {
         return (int)Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
 		SELECT COUNT(*)
 		FROM `'._DB_PREFIX_.'product` p
 		'.Shop::addSqlAssociation('product', 'p').'
-		WHERE product_shop.active = 0');
+		WHERE product_shop.active = 0 AND p.`booking_product` = 0');
     }
 
     public static function getTotalProducts()
@@ -190,7 +208,8 @@ class AdminStatsControllerCore extends AdminStatsTabController
         return (int)Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
 		SELECT COUNT(*)
 		FROM `'._DB_PREFIX_.'product` p
-		'.Shop::addSqlAssociation('product', 'p'));
+		'.Shop::addSqlAssociation('product', 'p').'
+        WHERE p.`booking_product` = 0');
     }
 
     public static function getTotalSales($date_from, $date_to, $granularity = false, $id_hotel = false)
@@ -616,6 +635,12 @@ class AdminStatsControllerCore extends AdminStatsTabController
 
             case 'disabled_categories':
                 $value = AdminStatsController::getDisabledCategories();
+                break;
+
+            case 'disabled_room_types':
+                $value = round(100 * AdminStatsController::getDisabledRoomTypes() / AdminStatsController::getTotalRoomTypes(), 2).'%';
+                ConfigurationKPI::updateValue('DISABLED_ROOM_TYPES', $value);
+                ConfigurationKPI::updateValue('DISABLED_ROOM_TYPES_EXPIRE', strtotime('+2 hour'));
                 break;
 
             case 'disabled_products':

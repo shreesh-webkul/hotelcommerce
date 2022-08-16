@@ -50,7 +50,7 @@
 			<div class="room_check_in_div">
 				<div class="input-group fixed-width-xl">
 					<div class="input-group-addon">{l s='Check In'}</div>
-					<input type="text" class="form-control add_product_date_from" name="add_product[date_from]" readonly />
+					<input type="text" class="form-control add_room_date_from" name="add_product[date_from]" readonly />
 					<div class="input-group-addon"><i class="icon-calendar"></i></div>
 				</div>
 			</div>
@@ -58,7 +58,7 @@
 			<div class="room_check_out_div">
 				<div class="input-group fixed-width-xl">
 					<div class="input-group-addon">{l s='Check Out'}</div>
-					<input type="text" class="form-control add_product_date_to" name="add_product[date_to]" readonly/>
+					<input type="text" class="form-control add_room_date_to" name="add_product[date_to]" readonly/>
 					<div class="input-group-addon"><i class="icon-calendar"></i></div>
 				</div>
 			</div>

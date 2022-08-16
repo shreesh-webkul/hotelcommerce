@@ -180,6 +180,41 @@
 				$(this).closest("tr").remove();
 			}
 		});
+
+		$('body').on('click', '.delete_service_product', function(){
+			if (confirm("{l s='Are you sure?'}"))
+        	{
+
+				$.ajax({
+					type:"POST",
+					url: "{$link->getAdminLink('AdminOrders')|addslashes}",
+					data : {
+						ajax: true,
+						action: "deleteProductProcess",
+						id_product: $(this).data('id_product'),
+						id_cart: $(this).data('id_cart'),
+					},
+					dataType:"json",
+					success : function(data)
+					{
+						if (data.status == 'deleted')
+						{
+							showSuccessMessage("{l s='Remove successful'}");
+							location.reload();
+							{* if (data.cart_rooms)
+								location.reload();
+							else
+								window.location.href = "{$link->getAdminLink('AdminHotelRoomsBooking',true)}"; *}
+						}
+						else
+						{
+							alert("l s='Some error occured.please try again.'}");
+						}
+					}
+				});
+				$(this).closest("tr").remove();
+			}
+		});
 		/*END*/
 
 		$('input:radio[name="free_shipping"]').on('change',function() {
@@ -1152,8 +1187,10 @@
 		$('#total_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_tax), currency_format, currency_sign, currency_blank));
 		$('#total_without_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_price_without_tax), currency_format, currency_sign, currency_blank));
 		$('#total_with_taxes').html(formatCurrency(parseFloat(jsonSummary.summary.total_price), currency_format, currency_sign, currency_blank));
-		$('#total_extra_demands').html(formatCurrency(parseFloat(jsonSummary.summary.total_extra_demands_tax_exc), currency_format, currency_sign, currency_blank));
-		$('#total_products').html(formatCurrency(parseFloat(jsonSummary.summary.total_products), currency_format, currency_sign, currency_blank));
+		$('#total_extra_services').html(formatCurrency(parseFloat(jsonSummary.summary.total_extra_demands + jsonSummary.summary.total_additional_services), currency_format, currency_sign, currency_blank));
+		$('#total_rooms').html(formatCurrency(parseFloat(jsonSummary.summary.total_rooms), currency_format, currency_sign, currency_blank));
+		$('#total_service_products').html(formatCurrency(parseFloat(jsonSummary.summary.total_service_products), currency_format, currency_sign, currency_blank));
+
 		id_currency = jsonSummary.cart.id_currency;
 		$('#id_currency option').removeAttr('selected');
 		$('#id_currency option[value="'+id_currency+'"]').attr('selected', true);
@@ -1450,8 +1487,9 @@
 				},
 				success: function(response) {
 					if (response.status) {
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').html('');
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').append(response.html_exta_demands);
+						$('#customer_cart_details').after(response.html_exta_demands);
+						// $('#rooms_type_extra_demands').find('#room_type_demands_desc').html('');
+						// $('#rooms_type_extra_demands').find('#room_type_demands_desc').append(response.html_exta_demands);
 						$('#rooms_type_extra_demands').modal('show');
 					}
 				},
@@ -1538,6 +1576,75 @@
 				}
 			});
 		});
+
+		$(document).on('click', '.change_room_type_standard_product', function() {
+			updateStandardProducts(this);
+		});
+
+		$(document).on('click', '#rooms_type_extra_demands .qty_up', function(e) {
+			e.preventDefault();
+			qtyfield = $(this).closest('.qty_container').find('input.qty');
+			var currentVal = parseInt(qtyfield.val());
+			qtyfield.val(currentVal + 1).trigger('focusout');
+		});
+
+		$(document).on('click', '#rooms_type_extra_demands .qty_down', function(e) {
+			e.preventDefault();
+			qtyfield = $(this).closest('.qty_container').find('input.qty');
+			var currentVal = parseInt(qtyfield.val());
+			if (!isNaN(currentVal) && currentVal > 1) {
+				qtyfield.val(currentVal - 1).trigger('focusout');
+			} else {
+				qtyfield.val(1).trigger('focusout');
+			}
+		});
+
+		$(document).on('focusout', '#rooms_type_extra_demands .qty', function(e) {
+			var qty_wntd = $(this).val();
+			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
+				$(this).val(1);
+			}
+			if ($(this).closest('.room_demand_block').find('.change_room_type_standard_product').is(':checked')) {
+				updateStandardProducts($(this).closest('.room_demand_block').find('.change_room_type_standard_product'));
+			}
+		});
+
+		function updateStandardProducts(element)
+		{
+			var operator = $(element).is(':checked') ? 'up' : 'down';
+			var id_product = $(element).val();
+			var id_cart_booking = $(element).data('id_cart_booking');
+			var qty = $(element).closest('.room_demand_block').find('input.qty').val();
+			if (typeof(qty) == 'undefined') {
+				qty = 1;
+			}
+			$.ajax({
+				type: 'POST',
+				headers: {
+					"cache-control": "no-cache"
+				},
+				url: "{$link->getAdminLink('AdminOrders')|addslashes}",
+				dataType: 'JSON',
+				cache: false,
+				data: {
+					operator: operator,
+					id_product: id_product,
+					id_cart_booking: id_cart_booking,
+					qty: qty,
+					action: 'updateStandardProduct',
+					ajax: true
+				},
+				success: function(jsonData) {
+					if (!jsonData.hasError) {
+						showSuccessMessage(txtExtraDemandSucc);
+					} else {
+						showErrorMessage(jsonData.errors);
+
+					}
+				}
+			});
+
+		}
 	});
 </script>
 
@@ -1933,13 +2040,19 @@
 				<div class="col-lg-2">
 					<div class="data-focus">
 						<span>{l s='Total rooms (Tax excl.)'}</span><br/>
-						<span id="total_products" class="size_l text-success"></span>
+						<span id="total_rooms" class="size_l text-success"></span>
 					</div>
 				</div>
 				<div class="col-lg-2">
 					<div class="data-focus">
-						<span>{l s='Total additinal facilties (Tax excl.)'}</span><br/>
-						<span id="total_extra_demands" class="size_l text-success"></span>
+						<span>{l s='Total additinal services (Tax excl.)'}</span><br/>
+						<span id="total_extra_services" class="size_l text-success"></span>
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<div class="data-focus">
+						<span>{l s='Total Total service products (Tax excl.)'}</span><br/>
+						<span id="total_service_products" class="size_l text-success"></span>
 					</div>
 				</div>
 				<div class="col-lg-2">
@@ -1960,7 +2073,9 @@
 						<span id="total_taxes" class="size_l"></span>
 					</div>
 				</div>
-				<div class="col-lg-2">
+			</div>
+			<div class="row">
+				<div class="col-lg-2 col-lg-offset-10">
 					<div class="data-focus data-focus-primary">
 						<span>{l s='Total (Tax incl.)'}</span><br/>
 						<span id="total_with_taxes" class="size_l"></span>

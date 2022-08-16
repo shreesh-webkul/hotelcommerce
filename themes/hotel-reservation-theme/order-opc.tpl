@@ -39,7 +39,7 @@
 
 					<p class="alert alert-warning">{l s='The hotel is currently not accepting any bookings.'}</p>
 				{else}
-					{if $productNumber && isset($cart_htl_data)}
+					{if $productNumber}
 
 						<div class="col-md-8">
 							{include file="$tpl_dir./errors.tpl"}
@@ -215,14 +215,22 @@
 						<div class="col-md-4">
 							{* Total cart details, tax details, advance payment details and voucher details *}
 							<div class="col-sm-12 card cart_total_detail_block">
-								<p>
-									<span>{l s='Total rooms cost'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
-									<span class="cart_total_values">{displayPrice price=$total_products}</span>
-								</p>
-								{if isset($totalFacilityCostTE) && $totalFacilityCostTE}
+								{if $total_rooms}
 									<p>
-										<span>{l s='Total additional facilities'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
-										<span class="cart_total_values">{displayPrice price=$totalFacilityCostTE}</span>
+										<span>{l s='Total rooms cost'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
+										<span class="cart_total_values">{displayPrice price=$total_rooms}</span>
+									</p>
+								{/if}
+								{if (isset($total_extra_demands) && $total_extra_demands) || (isset($total_additional_services) && $total_additional_services)}
+									<p>
+										<span>{l s='Total extra services'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
+										<span class="cart_total_values">{displayPrice price=($total_extra_demands + $total_additional_services)}</span>
+									</p>
+								{/if}
+								{if $total_service_products}
+									<p>
+										<span>{l s='Total service products cost'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
+										<span class="cart_total_values">{displayPrice price=$total_service_products}</span>
 									</p>
 								{/if}
 								{if $use_taxes && $show_taxes && $total_tax != 0 }
@@ -232,18 +240,27 @@
 											<span class="cart_total_values">{displayPrice price=$total_price_without_tax}</span>
 										</p>
 									{/if}
+									{if $total_rooms_wt != 0}
+										<p class="cart_total_tax">
+											<span>{l s='Tax on rooms'}</span>
+											<span class="cart_total_values">{displayPrice price=($total_rooms_wt - $total_rooms)}</span>
+										</p>
+									{/if}
+								{/if}
+
+								{if $use_taxes && $show_taxes && ($total_extra_demands_wt + $total_additional_services_wt)!= 0 }
 									<p class="cart_total_tax">
-										<span>{l s='Tax on rooms'}</span>
-										<span class="cart_total_values">{displayPrice price=($total_tax-$additional_facilities_tax)}</span>
+										<span>{l s='Tax on services'}</span>
+										<span class="cart_total_values">{displayPrice price=(($total_extra_demands_wt - $total_extra_demands) + ($total_additional_services_wt - $total_additional_services))}</span>
 									</p>
 								{/if}
-								{if $use_taxes && $show_taxes && $additional_facilities_tax != 0 }
+								{if $use_taxes && $show_taxes && $total_service_products_wt != 0 }
 									<p class="cart_total_tax">
-										<span>{l s='Tax on facilities'}</span>
-										<span class="cart_total_values">{displayPrice price=$additional_facilities_tax}</span>
+										<span>{l s='Tax on service products'}</span>
+										<span class="cart_total_values">{displayPrice price=($total_service_products_wt - $total_service_products)}</span>
 									</p>
 								{/if}
-								<p {if $total_wrapping == 0} class="unvisible"{/if}>
+								<p {if $total_wrapping == 0}class="unvisible"{/if}>
 									<span>
 										{if $use_taxes}
 											{if $display_tax_label}{l s='Total gift wrapping (tax incl.)'}{else}{l s='Total gift-wrapping cost'}{/if}
@@ -263,7 +280,7 @@
 										{/if}
 									</span>
 								</p>
-								<p class="total_discount_block {if $total_discounts == 0} unvisible{/if}">
+								<p class="total_discount_block {if $total_discounts == 0}unvisible{/if}">
 									<span>
 										{if $display_tax_label}
 											{if $use_taxes && $priceDisplay == 0}

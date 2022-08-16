@@ -260,42 +260,49 @@ $(document).ready(function(){
 		}
 	});
 
-	// fancybox for extra bed requirement edit on checkout page
-	$('body').on('click', '.open_rooms_extra_demands', function() {
-		var idProduct = $(this).attr('id_product');
-		var idOrder = $(this).attr('id_order');
-		var dateFrom = $(this).attr('date_from');
-		var dateTo = $(this).attr('date_to');
-		$.fancybox({
-			href: "#rooms_extra_demands",
-		    autoSize : true,
-		    autoScale : true,
-			maxWidth : '100%',
-			'hideOnContentClick': false,
-			beforeLoad: function () {
-				$.ajax({
-					type: 'POST',
-					headers: {
-						"cache-control": "no-cache"
-					},
-					url: historyUrl,
-					dataType: 'html',
-					cache: false,
-					data: {
-						date_from: dateFrom,
-						date_to: dateTo,
-						id_product: idProduct,
-						id_order: idOrder,
-						method: 'getRoomTypeBookingDemands',
-						ajax: true
-					},
-					success: function(result) {
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').html('');
-						$('#rooms_type_extra_demands').find('#room_type_demands_desc').append(result);
-					},
-				});
-			},
-		});
-	});
+	// fancybox for room services
+	// $('body').on('click', '.open_rooms_extra_services_panel', function() {
+	// 	var idProduct = $(this).data('id_product');
+	// 	var idOrder = $(this).data('id_order');
+	// 	var dateFrom = $(this).data('date_from');
+	// 	var dateTo = $(this).data('date_to');
+	// 	$.ajax({
+	// 		type: 'POST',
+	// 		headers: {
+	// 			"cache-control": "no-cache"
+	// 		},
+	// 		url: historyUrl,
+	// 		dataType: 'html',
+	// 		cache: false,
+	// 		data: {
+	// 			date_from: dateFrom,
+	// 			date_to: dateTo,
+	// 			id_product: idProduct,
+	// 			id_order: idOrder,
+	// 			method: 'getRoomTypeBookingDemands',
+	// 			ajax: true,
+	// 			token: static_token
+	// 		},
+	// 		success: function(result) {
+	// 			$('#rooms_extra_services').html('');
+	// 			$('#rooms_extra_services').append(result);
+	// 			$.fancybox({
+	// 				href: "#rooms_extra_services",
+	// 				autoSize : true,
+	// 				autoScale : true,
+	// 				maxWidth : '100%',
+	// 				'hideOnContentClick': false,
+	// 				helpers: {
+	// 					overlay: {
+	// 						css: {
+	// 							'background': 'rgba(255, 255, 255, 0.95)'
+	// 						},
+	// 					},
+	// 				},
+	// 			});
+	// 		},
+	// 	});
+
+	// });
 });
 

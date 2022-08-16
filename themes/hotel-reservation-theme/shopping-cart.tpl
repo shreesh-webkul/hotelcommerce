@@ -79,43 +79,175 @@
 	{hook h="displayBeforeShoppingCartBlock"}
 
 	<div class="order-detail-content">
-		<p class="room_info_text">{l s='rooms information'}</p>
-		{foreach from=$cart_htl_data key=data_k item=data_v}
-			{foreach from=$data_v['date_diff'] key=rm_k item=rm_v}
+		{if isset($cart_htl_data) && $cart_htl_data}
+			<p class="room_info_text">{l s='rooms information'}</p>
+			{foreach from=$cart_htl_data key=data_k item=data_v}
+				{foreach from=$data_v['date_diff'] key=rm_k item=rm_v}
+					<div class="row cart_product_line">
+						<div class="col-sm-2 room-type-img-block">
+							<p>
+								<a href="{$link->getProductLink($data_v['id_product'])}">
+									<img src="{$data_v['cover_img']}" class="img-responsive" />
+								</a>
+							</p>
+							<p class="room_remove_block">
+								<a href="{$rm_v['link']}"><i class="icon-trash"></i> &nbsp;{l s='Remove'}</a>
+							</p>
+						</div>
+						<div class="col-sm-10">
+							<div class="room-info-container">
+								<div class="room-xs-img">
+									<a href="{$link->getProductLink($data_v['id_product'])}">
+										<img src="{$data_v['cover_img']}" class="img-responsive" />
+									</a>
+								</div>
+								<div class="room-xs-info">
+									<p class="product-name">
+										<a href="{$link->getProductLink($data_v['id_product'])}">
+											{$data_v['name']}
+										</a>
+										<a class="btn btn-default pull-right room-xs-remove" href="{$rm_v['link']}"><i class="icon-trash"></i></a>
+									</p>
+									{if isset($data_v['hotel_info']['location'])}
+										<p class="hotel-location">
+											<i class="icon-map-marker"></i> &nbsp;{$data_v['hotel_info']['location']}
+										</p>
+									{/if}
+								</div>
+							</div>
+							{if isset($data_v['hotel_info']['room_features'])}
+								<div class="room-type-features">
+								{foreach $data_v['hotel_info']['room_features'] as $feature}
+									<span class="room-type-feature">
+										<img src="{$THEME_DIR}img/icon/form-ok-circle.svg" /> {$feature['name']}
+									</span>
+								{/foreach}
+								</div>
+							{/if}
+							<div class="room_duration_block">
+								<div class="col-sm-3 col-xs-6">
+									<p class="room_duration_block_head">{l s='CHECK IN'}</p>
+									<p class="room_duration_block_value">{$rm_v['data_form']|date_format:"%d %b, %a"}</p>
+								</div>
+								<div class="col-sm-3 col-xs-6">
+									<p class="room_duration_block_head">{l s='CHECK OUT'}</p>
+									<p class="room_duration_block_value">{$rm_v['data_to']|date_format:"%d %b, %a"}</p>
+								</div>
+								<div class="col-sm-2 col-xs-6">
+									<p class="room_duration_block_head">{l s='ROOMS'}</p>
+									<p class="room_duration_block_value">
+										{if {$rm_v['num_rm']} <= 9}0{$rm_v['num_rm']}{else}{$rm_v['num_rm']}{/if}
+									</p>
+								</div>
+								<div class="col-sm-4 col-xs-6">
+									<p class="room_duration_block_head">{l s='NO. OF GUESTS'}</p>
+									<p class="room_duration_block_value">
+										{if {$data_v['adults']} <= 9}0{$data_v['adults']}{else}{$data_v['adults']}{/if} {l s='Adults'}, {if {$data_v['children']} <= 9}0{$data_v['children']}{else}{$data_v['children']}{/if} {l s='Child'}
+									</p>
+								</div>
+							</div>
+							<div class="row room_price_detail_block">
+								<div class="col-sm-7">
+									<div class="row">
+										<div class="col-sm-6">
+											<div class="rooms_price_block">
+												<p class="room_total_price">
+													<span class="room_type_current_price">
+														{displayPrice price=($rm_v['amount'])}
+													</span>
+													{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['standard_products']) && $data_v['standard_products'])}
+														<span class="plus-sign pull-right">
+															+
+														</span>
+													{/if}
+												</p>
+												<p class="room_total_price_detial">
+													{l s='Total rooms price'} {if $display_tax_label}{if $priceDisplay} {l s='(Excl.'} {else}{l s='(Incl.)'}{/if} {l s='all taxes.)'}{/if}
+												</p>
+											</div>
+										</div>
+										{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['standard_products']) && $data_v['standard_products'])}
+											<div class="col-sm-6">
+												<div class="demand_price_block">
+													<p class="demand_total_price">
+														<span class="room_type_current_price">
+															{displayPrice price=$rm_v['demand_price']}
+														</span>
+													</p>
+													<p class="room_total_price_detial">
+														<a data-date_from="{$rm_v['data_form']|escape:'html':'UTF-8'}" data-date_to="{$rm_v['data_to']|escape:'html':'UTF-8'}" data-id_product="{$data_v['id_product']|escape:'html':'UTF-8'}" data-action="{$link->getPageLink('order-opc')}" class="open_rooms_extra_services_panel" href="#rooms_type_extra_services_form">
+															{l s='Extra Services'}
+														</a>
+													</p>
+												</div>
+											</div>
+										{/if}
+									</div>
+								</div>
+								<div class="col-sm-5">
+									<div class="total_price_block pull-right">
+										<p class="room_total_price">
+											<span class="room_type_current_price">
+												{displayPrice price=($rm_v['amount']+$rm_v['demand_price'])}
+											</span>
+										</p>
+										<p class="room_total_price_detial">
+											{l s='Total price for'} {$rm_v['num_days']} {l s='Night(s) stay'}{if $display_tax_label}{if $priceDisplay} {l s='(Excl.'} {else}{l s='(Incl.'}{/if} {l s='all taxes.)'}{/if}
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<hr>
+				{/foreach}
+			{/foreach}
+		{/if}
+
+		{if isset($cart_normal_data) && $cart_normal_data}
+			<p class="room_info_text">{l s='service product information'}</p>
+			{foreach from=$cart_normal_data key=data_k item=product}
 				<div class="row cart_product_line">
 					<div class="col-sm-2 room-type-img-block">
 						<p>
-							<a href="{$link->getProductLink($data_v['id_product'])}">
-								<img src="{$data_v['cover_img']}" class="img-responsive" />
+							<a href="{$link->getProductLink($product['id_product'])}">
+								<img src="{$product['cover_img']}" class="img-responsive" />
 							</a>
 						</p>
 						<p class="room_remove_block">
-							<a href="{$rm_v['link']}"><i class="icon-trash"></i> &nbsp;{l s='Remove'}</a>
+							<a id="{$product.id_product}_{$product.id_product_attribute}__{$product.id_address_delivery|intval}"
+								class="cart_quantity_delete"
+								href="{$link->getPageLink('cart', true, NULL, "delete=1&amp;id_product={$product.id_product|intval}&amp;ipa={$product.id_product_attribute|intval}&amp;id_address_delivery={$product.id_address_delivery}&amp;token={$token_cart}")|escape:'html':'UTF-8'}"
+								rel="nofollow"
+								title="{l s='Delete'}">
+								<i class="icon-trash"></i> &nbsp;{l s='Remove'}
+							</a>
+							{* <a href="{$rm_v['link']}"><i class="icon-trash"></i> &nbsp;{l s='Remove'}</a> *}
 						</p>
-						{hook h='displayCartRoomImageAfter' id_product=$data_v['id_product']}
+						{hook h='displayCartRoomImageAfter' id_product=$product['id_product']}
 					</div>
 					<div class="col-sm-10">
 						<div class="room-info-container">
 							<div class="room-xs-img">
-								<a href="{$link->getProductLink($data_v['id_product'])}">
-									<img src="{$data_v['cover_img']}" class="img-responsive" />
+								<a href="{$link->getProductLink($product['id_product'])}">
+									<img src="{$product['cover_img']}" class="img-responsive" />
 								</a>
 							</div>
 							<div class="room-xs-info">
 								<p class="product-name">
-									<a href="{$link->getProductLink($data_v['id_product'])}">
-										{$data_v['name']}
+									<a href="{$link->getProductLink($product['id_product'])}">
+										{$product['name']}
 									</a>
-									<a class="btn btn-default pull-right room-xs-remove" href="{$rm_v['link']}"><i class="icon-trash"></i></a>
+									<a class="btn btn-default pull-right room-xs-remove" href="{$link->getPageLink('cart', true, NULL, "delete=1&amp;id_product={$product.id_product|intval}&amp;ipa={$product.id_product_attribute|intval}&amp;id_address_delivery={$product.id_address_delivery}&amp;token={$token_cart}")|escape:'html':'UTF-8'}"><i class="icon-trash"></i></a>
 								</p>
-								{if isset($data_v['hotel_info']['location'])}
+								{* {if isset($product['hotel_info']['location'])}
 									<p class="hotel-location">
-										<i class="icon-map-marker"></i> &nbsp;{$data_v['hotel_info']['location']}
+										<i class="icon-map-marker"></i> &nbsp;{$product['hotel_info']['location']}
 									</p>
-								{/if}
+								{/if} *}
 							</div>
 						</div>
-						{if isset($data_v['hotel_info']['room_features'])}
+						{* {if isset($data_v['hotel_info']['room_features'])}
 							<div class="room-type-features">
 							{foreach $data_v['hotel_info']['room_features'] as $feature}
 								<span class="room-type-feature">
@@ -139,7 +271,13 @@
 									{if {$rm_v['adults']} <= 9}0{$rm_v['adults']}{else}{$rm_v['adults']}{/if} {if $rm_v['adults'] > 1}{l s='Adults'}{else}{l s='Adult'}{/if}{if $rm_v['children']}, {if $rm_v['children'] <= 9}0{$rm_v['children']}{else}{$rm_v['children']}{/if} {if $rm_v['children'] > 1}{l s='Children'}{else}{l s='Child'}{/if}{/if}, {if {$rm_v['num_rm']} <= 9}0{/if}{$rm_v['num_rm']}{if $rm_v['num_rm'] > 1} {l s='Rooms'}{else} {l s='Room'}{/if}
 								</p>
 							</div>
-						</div>
+							<div class="col-sm-4 col-xs-6">
+								<p class="room_duration_block_head">{l s='NO. OF GUESTS'}</p>
+								<p class="room_duration_block_value">
+									{if {$data_v['adult']} <= 9}0{$data_v['adult']}{else}{$data_v['adult']}{/if} {l s='Adults'}, {if {$data_v['children']} <= 9}0{$data_v['children']}{else}{$data_v['children']}{/if} {l s='Child'}
+								</p>
+							</div>
+						</div> *}
 						<div class="row room_price_detail_block">
 							<div class="col-sm-7">
 								<div class="row">
@@ -147,46 +285,26 @@
 										<div class="rooms_price_block">
 											<p class="room_total_price">
 												<span class="room_type_current_price">
-													{displayPrice price=($rm_v['amount'])}
+													{$product.cart_quantity}
 												</span>
-												{if isset($data_v['extra_demands']) && $data_v['extra_demands']}
-													<span class="plus-sign pull-right">
-														+
-													</span>
-												{/if}
 											</p>
 											<p class="room_total_price_detial">
-												{l s='Total rooms price'} {if $display_tax_label}{if $priceDisplay} {l s='(Excl.'} {else}{l s='(Incl.)'}{/if} {l s='all taxes.)'}{/if}
+												{l s='Total Qty'}
 											</p>
 										</div>
 									</div>
-									{if isset($data_v['extra_demands']) && $data_v['extra_demands']}
-										<div class="col-sm-6">
-											<div class="demand_price_block">
-												<p class="demand_total_price">
-													<span class="room_type_current_price">
-														{displayPrice price=$rm_v['demand_price']}
-													</span>
-												</p>
-												<p class="room_total_price_detial">
-													<a date_from="{$rm_v['data_form']|escape:'html':'UTF-8'}" date_to="{$rm_v['data_to']|escape:'html':'UTF-8'}" id_product="{$data_v['id_product']|escape:'html':'UTF-8'}" class="open_rooms_extra_demands" href="#rooms_type_extra_demands_form">
-														{l s='Additional Facilities'}
-													</a>
-												</p>
-											</div>
-										</div>
-									{/if}
+									{* {if isset($datx *}
 								</div>
 							</div>
 							<div class="col-sm-5">
-								<div class="total_price_block">
+								<div class="total_price_block pull-right">
 									<p class="room_total_price">
 										<span class="room_type_current_price">
-											{displayPrice price=($rm_v['amount']+$rm_v['demand_price'])}
+											{if $priceDisplay}{displayPrice price=($product['total'])}{else}{displayPrice price=($product['total_wt'])}{/if}
 										</span>
 									</p>
 									<p class="room_total_price_detial">
-										{l s='Total price for'} {$rm_v['num_days']} {l s='Night(s) stay'}{if $display_tax_label}{if $priceDisplay} {l s='(Excl.'} {else}{l s='(Incl.'}{/if} {l s='all taxes.)'}{/if}
+										{l s='Total price'} {if $display_tax_label}{if $priceDisplay} {l s='(Excl.'} {else}{l s='(Incl.)'}{/if} {l s='all taxes.)'}{/if}
 									</p>
 								</div>
 							</div>
@@ -195,7 +313,7 @@
 				</div>
 				<hr>
 			{/foreach}
-		{/foreach}
+		{/if}
 
 		{* proceed only if no order restrict errors are there *}
 		{if !$orderRestrictErr}
@@ -325,14 +443,14 @@
 {/if}
 
 {* Fancybox for extra demands*}
-<div style="display:none;" id="rooms_extra_demands">
-	<div id="rooms_type_extra_demands">
-		<div class="panel">
+<div style="display:none;" id="rooms_extra_services">
+	{* <div id="rooms_type_extra_services"> *}
+		{* <div class="panel">
 			<div class="rooms_extra_demands_head">
 				<h3>{l s='Additional Facilities'}</h3>
 				<p class="rooms_extra_demands_text">{l s='Add below additional facilities to the rooms for better hotel experience'}</p>
 			</div>
 			<div id="room_type_demands_desc"></div>
-		</div>
-	</div>
+		</div> *}
+	{* </div> *}
 </div>

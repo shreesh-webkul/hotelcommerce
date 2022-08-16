@@ -23,7 +23,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 
-<tr class="product-line-row" data-id_room="{$data.id_room}" data-id_product="{$data.id_product}" data-id_hotel="{$data.id_hotel}" data-date_from="{$data.date_from}" data-date_to="{$data.date_to}" data-product_price="{$data.unit_amt_tax_incl}" data-order_detail_id="{$data.id_order_detail}">
+<tr class="product-line-row" data-id_room="{$data.id_room}" data-id_product="{$data.id_product}" data-id_hotel="{$data.id_hotel}" data-date_from="{$data.date_from}" data-date_to="{$data.date_to}" data-product_price="{$data.unit_amt_tax_incl}" data-id_order_detail="{$data.id_order_detail}">
 	{if $refund_allowed}
 		<td class="standard_refund_fields" style="display:none">
 			<input type="checkbox" name="id_htl_booking[]" value="{$data.id|escape:'html':'UTF-8'}" {if isset($refundReqBookings) && ($data.id|in_array:$refundReqBookings)}disabled{/if}/>
@@ -37,14 +37,14 @@
 	</td>
 	<td class="text-center">
 		<p>{$data.room_type}</p>
-		<p class="room_extra_demands {if !isset($data['extra_demands']) || !$data['extra_demands']}edit_product_fields{/if}" {if !isset($data['extra_demands']) || !$data['extra_demands']}style="display: none;"{/if}>
+		<p class="room_extra_demands {if !isset($data['extra_demands']) || !$data['extra_demands']}edit_product_fields{/if}" {if (!isset($data['extra_demands']) || !$data['extra_demands']) && (!isset($data['additional_services']) || !$data['additional_services'])}style="display: none;"{/if}>
 			<a href="#" data-toggle="modal" data-target="#rooms_type_extra_demands" date_from="{$data['date_from']}" date_to="{$data['date_to']}" id_product="{$data['id_product']}" id_room="{$data['id_room']}" id_order="{$order->id}" class="open_room_extra_demands" id_htl_booking="{$data['id']}" edit_orde_line="0">
-				{l s='Additional Features'}
+				{l s='Extra Services'}
 			</a>
 		</p>
-		{if isset($data['extra_demands']) && $data['extra_demands']}
+		{if (isset($data['extra_demands']) && $data['extra_demands']) || (isset($data['additional_services']) && $data['additional_services'])}
 			<p>
-				{convertPriceWithCurrency price=$data['extra_demands_price_ti'] currency=$currency->id}
+				{convertPriceWithCurrency price=($data['extra_demands_price_ti'] + $data['additional_services_price_ti']) currency=$currency->id}
 			</p>
 		{/if}
 	</td>
@@ -241,7 +241,7 @@
 		<td class="product_action text-right">
 			{* edit/delete controls *}
 			<div class="btn-group pull-right">
-				<button type="button" class="btn btn-default edit_product_change_link">
+				<button type="button" class="btn btn-default edit_room_change_link">
 					<i class="icon-pencil"></i>
 					{l s='Edit'}
 				</button>
@@ -250,7 +250,7 @@
 				</button>
 				<ul class="dropdown-menu" role="menu">
 					<li>
-						<a href="#" class="delete_product_line">
+						<a href="#" class="delete_room_line">
 							<i class="icon-trash"></i>
 							{l s='Delete'}
 						</a>
@@ -258,11 +258,11 @@
 				</ul>
 			</div>
 			{* Update controls *}
-			<button type="button" class="btn btn-default submitProductChange" style="display: none;">
+			<button type="button" class="btn btn-default submitRoomChange" style="display: none;">
 				<i class="icon-ok"></i>
 				{l s='Update'}
 			</button>
-			<button type="button" class="btn btn-default cancel_product_change_link" style="display: none;">
+			<button type="button" class="btn btn-default cancel_room_change_link" style="display: none;">
 				<i class="icon-remove"></i>
 				{l s='Cancel'}
 			</button>

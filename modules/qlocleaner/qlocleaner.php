@@ -835,6 +835,9 @@ class QloCleaner extends Module
             'htl_booking_detail',
             'htl_booking_demands',
             'htl_booking_demands_tax',
+
+            'htl_standard_product_order_detail',
+            'htl_standard_product_cart_detail',
         );
     }
 }
