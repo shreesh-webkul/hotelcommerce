@@ -223,8 +223,11 @@ class HotelRoomTypeStandardProduct extends ObjectModel
         $objProduct = new Product($idProduct);
         if ($standardProductsCategories = $objProduct->getAvailableStandardProductsCategories($idLang)) {
             foreach ($standardProductsCategories as $key => $category) {
-                $products = $this->getStandardProductsData($idProduct, $p, $n, $front, $category['id_category'], $idLang);
-                $standardProductsCategories[$key]['products'] = $products;
+                if ($products = $this->getStandardProductsData($idProduct, $p, $n, $front, $category['id_category'], $idLang)) {
+                    $standardProductsCategories[$key]['products'] = $products;
+                } else {
+                    unset($standardProductsCategories[$key]);
+                }
             }
         }
         return $standardProductsCategories;
