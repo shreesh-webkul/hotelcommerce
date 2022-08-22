@@ -312,7 +312,7 @@ class OrderHistoryCore extends ObjectModel
         }
 
         // set orders as paid
-        if ($new_os->paid == 1) {
+        if ($new_os->paid == 1 || (Configuration::get('PS_OS_PARTIAL_PAYMENT') == $new_os->id && $new_os->logable == 1)) {
             $invoices = $order->getInvoicesCollection();
             if ($order->total_paid != 0) {
                 $payment_method = Module::getInstanceByName($order->module);
@@ -432,14 +432,15 @@ class OrderHistoryCore extends ObjectModel
                 '{firstname}' => $result['firstname'],
                 '{id_order}' => (int)$this->id_order,
                 '{order_name}' => $order->getUniqReference(),
-                '{payment_detail}' => '',
+                '{payment_module_detail_html}' => '',
+                '{payment_module_detail_text}' => '',
                 '{payment_method}' => '',
             );
 
             if ($result['module_name']) {
                 $module = Module::getInstanceByName($result['module_name']);
-                if (Validate::isLoadedObject($module) && isset($module->extra_mail_vars) && is_array($module->extra_mail_vars)) {
-                    $data = array_merge($data, $module->extra_mail_vars);
+                if (Validate::isLoadedObject($module) && method_exists($module, 'getMailContent')) {
+                    $data = array_merge($data, $module->getMailContent($result['id_order_state'], $order->id_lang));
                     $data['{payment_method}'] = $module->displayName;
                 }
             }

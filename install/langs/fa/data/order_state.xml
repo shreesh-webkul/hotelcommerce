@@ -8,7 +8,7 @@
         <name>پرداخت تایید شده</name>
         <template>payment</template>
     </order_state>
-    <order_state id="Processing_in_progress">
+    <order_state id="Preparation_in_progress">
         <name>در حال آماده سازی</name>
         <template>preparation</template>
     </order_state>
@@ -24,22 +24,6 @@
         <name>خطای پرداخت</name>
         <template>payment_error</template>
     </order_state>
-    <order_state id="On_backorder_paid">
-        <name>خارج از موجودی</name>
-        <template>outofstock</template>
-    </order_state>
-    <order_state id="On_backorder_unpaid">
-        <name>خارج از موجودی</name>
-        <template>outofstock</template>
-    </order_state>
-    <order_state id="Awaiting_bank_wire_payment">
-        <name>منتظر پرداخت فیش بانکی</name>
-        <template>bankwire</template>
-    </order_state>
-    <order_state id="Awaiting_PayPal_payment">
-        <name>منتظر پرداخت پی پال</name>
-        <template/>
-    </order_state>
     <order_state id="Payment_remotely_accepted">
         <name>پرداخت از راه دور تایید شده</name>
         <template>payment</template>
@@ -48,15 +32,15 @@
         <name>Awaiting remote payment</name>
         <template/>
     </order_state>
-    <order_state id="Awaiting_partial_payment">
-        <name>Awaiting partial payment</name>
+    <order_state id="Overbooking">
+        <name>Over Booking</name>
         <template/>
     </order_state>
-    <order_state id="Overbooking">
-    <name>Over Booking</name>
-    <template/>
-  </order_state>
-  <order_state id="Partial_payment_accepted">
+    <order_state id="Overbooking_unpaid">
+        <name>Over Booking (not paid)</name>
+        <template/>
+    </order_state>
+    <order_state id="Partial_payment_accepted">
         <name>Partial payment accepted</name>
         <template/>
     </order_state>

@@ -213,7 +213,7 @@ class OrderCore extends ObjectModel
             'current_state' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'secure_key' =>                array('type' => self::TYPE_STRING, 'validate' => 'isMd5'),
             'payment' =>                    array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'required' => true),
-            'payment_type' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
+            'payment_type' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
             'module' =>                    array('type' => self::TYPE_STRING, 'validate' => 'isModuleName', 'required' => true),
             'recyclable' =>                array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'gift' =>                        array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),

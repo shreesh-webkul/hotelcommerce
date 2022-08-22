@@ -69,17 +69,27 @@ class Cheque extends PaymentModule
 			$this->warning = $this->l('No currency has been set for this module.');
 		}
 
-		$this->context->smarty->assign(array(
-			'cheque_name' => Configuration::get('CHEQUE_NAME'),
-			'cheque_address' => Configuration::get('CHEQUE_ADDRESS'),
-			'cheque_address_html' => str_replace("\n", '<br />', Configuration::get('CHEQUE_ADDRESS'))
-		));
-		$this->extra_mail_vars = array(
-			'{payment_detail}' => $this->display(__FILE__, 'mail_template.tpl'),
-			'{payment_detail_text}' => $this->display(__FILE__, 'mail_template_text.tpl')
-		);
-
 		$this->payment_type = PaymentModule::PAYMENT_TYPE_REMOTE_PAYMENT;
+	}
+
+	public function getMailContent($id_order_state, $id_lang)
+	{
+        if (Configuration::get('PS_OS_AWATING') == $id_order_state) {
+			$this->context->smarty->assign(array(
+				'cheque_name' => Configuration::get('CHEQUE_NAME'),
+				'cheque_address' => Configuration::get('CHEQUE_ADDRESS'),
+				'cheque_address_html' => str_replace("\n", '<br />', Configuration::get('CHEQUE_ADDRESS'))
+			));
+			return array(
+                '{payment_module_detail_html}' => $this->context->smarty->fetch(
+					$this->local_path.'mails/'.Language::getIsoById($id_lang).'/mail_template_html.tpl'
+				),
+                '{payment_module_detail_text}' => $this->context->smarty->fetch(
+					$this->local_path.'mails/'.Language::getIsoById($id_lang).'/mail_template_text.tpl'
+				)
+            );
+		}
+		return false;
 	}
 
 	public function install()
