@@ -389,32 +389,38 @@
 	<configuration id="PS_OS_ERROR" name="PS_OS_ERROR">
 		<value>6</value>
 	</configuration>
-	<!-- <configuration id="PS_OS_OUTOFSTOCK" name="PS_OS_OUTOFSTOCK">
+	<configuration id="PS_OS_OUTOFSTOCK" name="PS_OS_OUTOFSTOCK">
 		<value>7</value>
-	</configuration> -->
+	</configuration>
 	<!-- <configuration id="PS_OS_BANKWIRE" name="PS_OS_BANKWIRE">
 		<value>8</value>
 	</configuration> -->
 	<!-- <configuration id="PS_OS_PAYPAL" name="PS_OS_PAYPAL">
 		<value>9</value>
 	</configuration> -->
-	<!-- <configuration id="PS_OS_WS_PAYMENT" name="PS_OS_WS_PAYMENT">
-		<value>7</value>
-	</configuration> -->
-	<!-- <configuration id="PS_OS_OUTOFSTOCK_PAID" name="PS_OS_OUTOFSTOCK_PAID">
+	<configuration id="PS_OS_WS_PAYMENT" name="PS_OS_WS_PAYMENT">
+		<value>10</value>
+	</configuration>
+	<configuration id="PS_OS_OUTOFSTOCK_PAID" name="PS_OS_OUTOFSTOCK_PAID">
 		<value>7</value>
 	</configuration>
 	<configuration id="PS_OS_OUTOFSTOCK_UNPAID" name="PS_OS_OUTOFSTOCK_UNPAID">
 		<value>11</value>
-	</configuration> -->
-	<!-- <configuration id="PS_OS_AWAITING_REMOTE_PAYMENT" name="PS_OS_AWAITING_REMOTE_PAYMENT">
-		<value>12</value>
 	</configuration>
-	<configuration id="PS_OS_AWAITING_PARTIAL_PAYMENT" name="PS_OS_AWAITING_PARTIAL_PAYMENT">
+	<configuration id="PS_OS_REMOTE_PAYMENT" name="PS_OS_REMOTE_PAYMENT">
+		<value>9</value>
+	</configuration>
+	<configuration id="PS_OS_WS_PAYMENT" name="PS_OS_WS_PAYMENT">
+		<value>10</value>
+	</configuration>
+	<!-- <configuration id="PS_OS_AWAITING_PARTIAL_PAYMENT" name="PS_OS_AWAITING_PARTIAL_PAYMENT">
 		<value>13</value>
 	</configuration> -->
 	<configuration id="PS_OS_OVERBOOKING" name="PS_OS_OVERBOOKING">
 		<value>7</value>
+	</configuration>
+	<configuration id="PS_OS_OVERBOOKING_UNPAID" name="PS_OS_OVERBOOKING_UNPAID">
+		<value>11</value>
 	</configuration>
 	<configuration id="PS_OS_PARTIAL_PAYMENT" name="PS_OS_PARTIAL_PAYMENT">
 		<value>8</value>
