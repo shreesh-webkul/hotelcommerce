@@ -18,12 +18,11 @@
 */
 
 $('document').ready( function() {
-	loadSuggestion();
 	initPagination();
     // ScrollTo
     $('#module-search').on('keyup', function(){
         val = this.value;
-        var interval = setTimeout(function () {
+        setTimeout(function () {
             filterPanel(val, 'suggested-modules-list');
         }, 200);
     }).on('keydown', function(e){
@@ -36,7 +35,7 @@ $('document').ready( function() {
 
 	$('#theme-search').on('keyup', function(){
         val = this.value;
-        var interval = setTimeout(function () {
+        setTimeout(function () {
             filterPanel(val, 'suggested-theme-list');
         }, 200);
     }).on('keydown', function(e){
@@ -54,7 +53,7 @@ $('document').ready( function() {
 	function filterPanel(val, element_class)
 	{
 		$('#'+element_class+' .list-empty').hide();
-        $('#'+element_class+' .element-panel').show().removeClass('hidden');
+        $('#'+element_class+' .element-panel').css('display', 'flex').removeClass('hidden');
 
 		if (val != '') {
             var reg = new RegExp(val, "i");
@@ -66,31 +65,9 @@ $('document').ready( function() {
             });
         }
 		if (!$('#'+element_class+' .element-panel:visible').length) {
-			$('#'+element_class+' .list-empty').show();
+			$('#'+element_class+' .list-empty').css('display', 'flex');
 		}
 		initPagination(element_class);
-	}
-
-	function loadSuggestion()
-	{
-		$.ajax({
-			type: 'POST',
-			url: 'index.php',
-			async: true,
-			dataType: 'JSON',
-			data: {
-				action: 'getSuggestionContent',
-				tab: 'AdminModulesCatalog',
-				ajax: 1,
-				token: token
-			},
-			success: function(res) {
-				if (res.success) {
-					$('#suggestion-wrapper-placeholder').fadeOut('slow').hide();
-					$('#suggestion-wrapper').html(res.content).fadeIn('slow');
-				}
-			},
-		});
 	}
 
 	function setFilter()
@@ -132,7 +109,7 @@ $('document').ready( function() {
 					onPageClick: function(e, pageNumber) {
 						let showFrom = num_block_per_page * (pageNumber - 1);
 						let showTo = showFrom + num_block_per_page;
-						items.hide().slice(showFrom, showTo).show();
+						items.hide().slice(showFrom, showTo).css('display', 'flex');
 					}
 				});
 			}

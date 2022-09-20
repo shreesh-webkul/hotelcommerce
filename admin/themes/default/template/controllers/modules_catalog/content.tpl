@@ -2,7 +2,8 @@
 {* ajaxBox allows*}
 <div id="ajaxBox" style="display:none"></div>
 
-{include file='controllers/modules_catalog/header-banner.tpl'}
+{* {include file='controllers/modules_catalog/recomended-banner.tpl'} *}
+{include file='recomended-banner.tpl'}
 
 <div class="row">
 	<div class="col-lg-12">

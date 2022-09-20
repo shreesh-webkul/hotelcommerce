@@ -110,7 +110,7 @@
         </div>
         <div class="panel explore-panel text-center">
             {l s='Explore all themes of Qloapps'}&nbsp;
-            <a href="https://qloapps.com/addons/" class="btn btn-primary btn-lg">{l s='QloApps Themes'}</a>
+            <a href="https://store.webkul.com/Qloapps/responsive.html" class="btn btn-primary btn-lg">{l s='QloApps Themes'}</a>
         </div>
     {/if}
 </div>

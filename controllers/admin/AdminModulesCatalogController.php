@@ -23,10 +23,12 @@ class AdminModulesCatalogControllerCore extends AdminController
 
     public $modules;
 
-    const CATALOG_SUGGESTION_CONTENT = '/cache/catalog_suggestion.html';
+    const CATALOG_RECOMMENDATION_CONTENT = '/cache/catalog_recommendation.html';
 
     const ELEMENT_TYPE_MODULE = 1;
     const ELEMENT_TYPE_THEME = 2;
+
+    const MODULES_PER_PAGE = 18;
 
     public function __construct()
     {
@@ -34,22 +36,62 @@ class AdminModulesCatalogControllerCore extends AdminController
         parent::__construct();
     }
 
+    public function init()
+    {
+        parent::init();
+        $this->initSuggestedModulesList();
+    }
+
     public function initContent()
     {
         parent::initContent();
-        $this->warmUp();
 
-        $modules = Module::getSuggestedModules();
-        array_map(function($value) {
-            $this->fillModuleData($value, 'array');
-            $value->element_type = self::ELEMENT_TYPE_MODULE;
-            return $value;
-        }, $modules);
+        $suggestedModules = Module::getSuggestedModules();
+
+        $modulesToAdd = array();
+        $dirModules = ModuleCore::getModulesOnDisk();
+        $modules_name = array_column($suggestedModules, 'name');
+        foreach ($dirModules as $mod) {
+            if (($id = array_search($mod->name, $modules_name)) !== false) {
+                if ($mod->installed) {
+                    unset($suggestedModules[$id]);
+                } else {
+                    $suggestedModules[$id]->not_on_disk = false;
+                }
+            } else {
+                if (!$mod->installed) {
+                    $modulesToAdd[] = $mod;
+                }
+            }
+        }
+
+        $modules = array_merge($suggestedModules, $modulesToAdd);
+
+        $link_admin_modules = $this->context->link->getAdminLink('AdminModules', true);
+        foreach ($modules as $key => $module) {
+            $module->options['install_url'] = $link_admin_modules.'&install='.urlencode($module->name).'&tab_module='.$module->tab.'&module_name='.$module->name.'&anchor='.ucfirst($module->name);
+            $module->element_type = self::ELEMENT_TYPE_MODULE;
+            $module->logo = '../../img/questionmark.png';
+
+            if (@filemtime(_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.basename(_PS_MODULE_DIR_).DIRECTORY_SEPARATOR.$module->name
+                .DIRECTORY_SEPARATOR.'logo.gif')) {
+                $module->logo = 'logo.gif';
+            }
+            if (@filemtime(_PS_ROOT_DIR_.DIRECTORY_SEPARATOR.basename(_PS_MODULE_DIR_).DIRECTORY_SEPARATOR.$module->name
+                .DIRECTORY_SEPARATOR.'logo.png')) {
+                $module->logo = 'logo.png';
+            }
+
+            $modules[$key] = $module;
+        }
+
         $this->sortList($modules, 'module');
-
         $this->modules = $modules;
+
         $this->themes = $this->getSuggestedThemes();
+
         $this->assignSortCriteria();
+
         $this->context->smarty->assign(array(
             'modules' => $this->modules,
             'themes' => $this->themes,
@@ -60,13 +102,26 @@ class AdminModulesCatalogControllerCore extends AdminController
         ));
     }
 
+    public function initModal()
+    {
+        parent::initModal();
+
+        $modal_content = $this->context->smarty->fetch('controllers/modules/'.(($this->context->mode == Context::MODE_HOST) ? 'modal_not_trusted_blocked.tpl' : 'modal_not_trusted.tpl'));
+        $this->modals[] = array(
+            'modal_id' => 'moduleNotTrusted',
+            'modal_class' => 'modal-lg',
+            'modal_title' => ($this->context->mode == Context::MODE_HOST) ? $this->l('This module cannot be installed') : $this->l('Important Notice'),
+            'modal_content' => $modal_content
+        );
+    }
+
     public function assignSortCriteria()
     {
         $sortCriterta = array(
             array (
-                'key' => 'relevence',
-                'value' => 'relevence',
-                'title' => $this->l('Relevance')
+                'key' => 'popularity',
+                'value' => 'popularity',
+                'title' => $this->l('Popularity')
             ),
             array (
                 'key' => 'name',
@@ -174,120 +229,26 @@ class AdminModulesCatalogControllerCore extends AdminController
         return $theme_list;
     }
 
-    public function getSuggestionContent()
+    public function initToolbar()
     {
-        if (!$this->isFresh(self::CATALOG_SUGGESTION_CONTENT, 86400)) {
-            @file_put_contents(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT, Tools::addonsRequest('catalog-suggestion'));
-        }
-        if (file_exists(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT)) {
-            return Tools::file_get_contents(_PS_ROOT_DIR_.self::CATALOG_SUGGESTION_CONTENT);
-        }
-        return false;
+        parent::initToolbar();
+        $this->page_header_toolbar_btn['addons'] = array(
+            'href' => 'https://qloapps.com/addons/',
+            'desc' => $this->l('Explore all Addons'),
+            'imgclass' => 'modules-list',
+            'target' => true
+        );
     }
 
-    public function getSuggestedModules()
+    public function getRecommendationContent()
     {
-        $files_list = array(
-            array('type' => 'addonsMustHave', 'file' => _PS_ROOT_DIR_.Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 0),
-            array('type' => 'addonsNative', 'file' => _PS_ROOT_DIR_.Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 'loggedOnAddons' => 0),
-        );
-        $module_list = array();
-        foreach ($files_list as $f) {
-            $file = $f['file'];
-            $content = Tools::file_get_contents($file);
-            $xml = @simplexml_load_string($content, null, LIBXML_NOCDATA);
-            if ($xml && isset($xml->module)) {
-                foreach ($xml->module as $modaddons) {
-                    $item = new stdClass();
-                    $item->id = 0;
-                    $item->warning = '';
-                    $item->type = strip_tags((string)$f['type']);
-                    $item->element_type = self::ELEMENT_TYPE_MODULE;
-                    $item->name = strip_tags((string)$modaddons->name);
-                    $item->version = strip_tags((string)$modaddons->version);
-                    $item->tab = strip_tags((string)$modaddons->tab);
-                    $item->displayName = strip_tags((string)$modaddons->displayName);
-                    $item->description = stripslashes(strip_tags((string)$modaddons->description));
-                    $item->description_full = stripslashes(strip_tags((string)$modaddons->description_full));
-                    $item->author = strip_tags((string)$modaddons->author);
-                    $item->limited_countries = array();
-                    $item->parent_class = '';
-                    $item->onclick_option = false;
-                    $item->is_configurable = 0;
-                    $item->need_instance = 0;
-                    $item->not_on_disk = 1;
-                    $item->available_on_addons = 1;
-                    $item->trusted = Module::isModuleTrusted($item->name);
-                    $item->active = 0;
-                    $item->description_full = stripslashes($modaddons->description_full);
-                    $item->additional_description = isset($modaddons->additional_description) ? stripslashes($modaddons->additional_description) : null;
-                    $item->compatibility = isset($modaddons->compatibility) ? (array)$modaddons->compatibility : null;
-                    $item->nb_rates = isset($modaddons->nb_rates) ? (array)$modaddons->nb_rates : null;
-                    $item->avg_rate = isset($modaddons->avg_rate) ? (array)$modaddons->avg_rate : null;
-                    $item->badges = isset($modaddons->badges) ? (array)$modaddons->badges : null;
-                    $item->url = isset($modaddons->url) ? $modaddons->url : null;
-                    $item->is_native = false;
-
-                    if (isset($modaddons->img)) {
-                        if (!file_exists(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg')) {
-                            if (!file_put_contents(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg', Tools::file_get_contents($modaddons->img))) {
-                                copy(_PS_IMG_DIR_.'404.gif', _PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg');
-                            }
-                        }
-
-                        if (file_exists(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg')) {
-                            $item->image = '../img/tmp/'.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg';
-                        }
-                    }
-
-                    if ($item->type == 'addonsMustHave') {
-                        $item->addons_buy_url = strip_tags((string)$modaddons->url);
-                        $prices = (array)$modaddons->price;
-                        $id_default_currency = Configuration::get('PS_CURRENCY_DEFAULT');
-
-                        foreach ($prices as $currency => $price) {
-                            if ($id_currency = Currency::getIdByIsoCode($currency)) {
-                                $item->price = (float)$price;
-                                $item->id_currency = (int)$id_currency;
-
-                                if ($id_default_currency == $id_currency) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    // ppp($item);
-                    // $this->fillModuleData($item, 'array');
-                    // ddd($item);
-
-                    $module_list[$modaddons->id.'-'.$item->name] = $item;
-                    $module_list[$modaddons->id.'-'.$item->name.'1'] = $item;
-                    $module_list[$modaddons->id.'-'.$item->name.'2'] = $item;
-                    $module_list[$modaddons->id.'-'.$item->name.'3'] = $item;
-                    $module_list[$modaddons->id.'-'.$item->name.'3d'] = $item;
-                    $module_list[$modaddons->id.'-'.$item->name.'312'] = $item;
-                }
-            }
+        if (!$this->isFresh(self::CATALOG_RECOMMENDATION_CONTENT, _TIME_1_DAY_)) {
+            @file_put_contents(_PS_ROOT_DIR_.self::CATALOG_RECOMMENDATION_CONTENT, Tools::addonsRequest('catalog-recommendation'));
         }
-        $module_list = array_values($module_list);
-        $modules_name = array_column($module_list, 'name');
-        $modulesToAdd = array();
-        $installedModules = ModuleCore::getModulesOnDisk();
-        foreach ($installedModules as $installedMod) {
-            if (($id = array_search($installedMod->name, $modules_name)) !== false) {
-                if ($installedMod->installed) {
-                    unset($module_list[$id]);
-                }
-            } else {
-                if (!$installedMod->installed) {
-                    $installedMod->element_type = self::ELEMENT_TYPE_MODULE;
-                    $modulesToAdd[] = $installedMod;
-                }
-            }
+        if (file_exists(_PS_ROOT_DIR_.self::CATALOG_RECOMMENDATION_CONTENT)) {
+            return Tools::file_get_contents(_PS_ROOT_DIR_.self::CATALOG_RECOMMENDATION_CONTENT);
         }
-        $module_list = array_merge($module_list, $modulesToAdd);
-        $this->sortList($module_list, 'module');
-        return $module_list;
+        return false;
     }
 
     public function sortList(&$list, $type)
@@ -301,7 +262,7 @@ class AdminModulesCatalogControllerCore extends AdminController
                 $criteria = Configuration::get('PS_SORT_THEME_MODULES_CATALOG_'.(int)$this->context->employee->id);
                 break;
         }
-        if ($criteria != 'relevence') {
+        if ($criteria != 'popularity') {
             usort($list, function($a, $b) use($criteria){
                 if ($criteria == 'name') {
                     return strnatcasecmp($a->displayName, $b->displayName);
@@ -329,10 +290,10 @@ class AdminModulesCatalogControllerCore extends AdminController
     }
 
 
-    public function ajaxProcessGetSuggestionContent()
+    public function ajaxProcessGetRecommendationContent()
     {
         $response = array('success' => false);
-        if ($content = $this->getSuggestionContent()) {
+        if ($content = $this->getRecommendationContent()) {
             $response['success'] = true;
             $response['content'] = $content;
         }
@@ -348,13 +309,13 @@ class AdminModulesCatalogControllerCore extends AdminController
     }
 
 
-    protected function warmUp()
+    protected function initSuggestedModulesList()
     {
-        if (!$this->isFresh(Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 86400)) {
+        if (!$this->isFresh(Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, _TIME_1_DAY_)) {
             file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, Tools::addonsRequest('native'));
         }
 
-        if (!$this->isFresh(Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, 86400)) {
+        if (!$this->isFresh(Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, _TIME_1_DAY_)) {
             @file_put_contents(_PS_ROOT_DIR_.Module::CACHE_FILE_MUST_HAVE_MODULES_LIST, Tools::addonsRequest('must-have'));
         }
     }
@@ -365,7 +326,7 @@ class AdminModulesCatalogControllerCore extends AdminController
         $this->addJS(_PS_JS_DIR_.'admin/modules_catalog.js');
         $this->context->controller->addJS(_PS_JS_DIR_.'/twbs-pagination/jquery.twbsPagination.min.js');
         Media::addJSdef(array(
-            'num_block_per_page' => 15
+            'num_block_per_page' => self::MODULES_PER_PAGE
         ));
     }
 }

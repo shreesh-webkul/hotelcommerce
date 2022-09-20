@@ -1261,6 +1261,16 @@ abstract class ModuleCore
         return Translate::getModuleTranslation((string)$xml_module->name, Module::configXmlStringFormat($xml_module->displayName), (string)$xml_module->name);
     }
 
+    public static function getModuleInstallVersion($module)
+    {
+        return Db::getInstance()->getRow('
+		SELECT m.`name`, m.`version`, mp.`interest`, module_shop.`enable_device`
+		FROM `'._DB_PREFIX_.'module` m
+		'.Shop::addSqlAssociation('module', 'm', false).'
+		LEFT JOIN `'._DB_PREFIX_.'module_preference` mp ON (mp.`module` = m.`name` AND mp.`id_employee` = '.(int)$id_employee.')
+        WHERE m.`name` = "'.pSQL($module).'"');
+    }
+
     protected static function useTooMuchMemory()
     {
         $memory_limit = Tools::getMemoryLimit();
@@ -1299,7 +1309,7 @@ abstract class ModuleCore
         $result = Db::getInstance()->executeS('
 		SELECT m.name, m.version, mp.interest, module_shop.enable_device
 		FROM `'._DB_PREFIX_.'module` m
-		'.Shop::addSqlAssociation('module', 'm').'
+		'.Shop::addSqlAssociation('module', 'm', false).'
 		LEFT JOIN `'._DB_PREFIX_.'module_preference` mp ON (mp.`module` = m.`name` AND mp.`id_employee` = '.(int)$id_employee.')');
         foreach ($result as $row) {
             $modules_installed[$row['name']] = $row;
@@ -1367,8 +1377,20 @@ abstract class ModuleCore
                     $item->active = 0;
                     $item->onclick_option = false;
                     $item->url = false;
-                    $item->trusted = Module::isModuleTrusted($item->name);
                     $item->is_native = false;
+
+                    if (defined('_PS_HOST_MODE_') && in_array($item->name, self::$hosted_modules_blacklist)) {
+                        continue;
+                    } elseif (isset($modules_installed[$item->name])) {
+                        $item->installed = true;
+                        $item->database_version = $modules_installed[$item->name]['version'];
+                        $item->interest = $modules_installed[$item->name]['interest'];
+                        $item->enable_device = $modules_installed[$item->name]['enable_device'];
+                    } else {
+                        $item->installed = false;
+                        $item->database_version = 0;
+                        $item->interest = 0;
+                    }
 
                     $module_list[] = $item;
 
@@ -1421,7 +1443,6 @@ abstract class ModuleCore
                     $item->is_configurable = $tmp_module->is_configurable = method_exists($tmp_module, 'getContent') ? 1 : 0;
                     $item->need_instance = isset($tmp_module->need_instance) ? $tmp_module->need_instance : 0;
                     $item->active = $tmp_module->active;
-                    $item->trusted = Module::isModuleTrusted($tmp_module->name);
                     $item->currencies = isset($tmp_module->currencies) ? $tmp_module->currencies : null;
                     $item->currencies_mode = isset($tmp_module->currencies_mode) ? $tmp_module->currencies_mode : null;
                     $item->confirmUninstall = isset($tmp_module->confirmUninstall) ? html_entity_decode($tmp_module->confirmUninstall) : null;
@@ -1443,6 +1464,19 @@ abstract class ModuleCore
                         foreach ($option_tab as $opt) {
                             $item->onclick_option_content[$opt] = $tmp_module->onclickOption($opt, $href);
                         }
+                    }
+
+                    if (defined('_PS_HOST_MODE_') && in_array($item->name, self::$hosted_modules_blacklist)) {
+                        continue;
+                    } elseif (isset($modules_installed[$item->name])) {
+                        $item->installed = true;
+                        $item->database_version = $modules_installed[$item->name]['version'];
+                        $item->interest = $modules_installed[$item->name]['interest'];
+                        $item->enable_device = $modules_installed[$item->name]['enable_device'];
+                    } else {
+                        $item->installed = false;
+                        $item->database_version = 0;
+                        $item->interest = 0;
                     }
 
                     $module_list[] = $item;
@@ -1482,8 +1516,6 @@ abstract class ModuleCore
         $files_list = array(
             array('type' => 'addonsModules', 'file' => _PS_ROOT_DIR_.self::CACHE_FILE_ADDONS_MODULES_LIST, 'loggedOnAddons' => 0),
             array('type' => 'addonsNative', 'file' => _PS_ROOT_DIR_.self::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST, 'loggedOnAddons' => 0),
-            array('type' => 'addonsMustHave', 'file' => _PS_ROOT_DIR_.self::CACHE_FILE_MUST_HAVE_MODULES_LIST, 'loggedOnAddons' => 0),
-            // array('type' => 'addonsBought', 'file' => _PS_ROOT_DIR_.self::CACHE_FILE_CUSTOMER_MODULES_LIST, 'loggedOnAddons' => 1),
         );
         foreach ($files_list as $f) {
             if (file_exists($f['file']) && ($f['loggedOnAddons'] == 0 || $logged_on_addons)) {
@@ -1512,86 +1544,11 @@ abstract class ModuleCore
                                 }
                             }
                         }
-
-                        // if ($flag_found == 0) {
-                        //     $item = new stdClass();
-                        //     $item->id = 0;
-                        //     $item->warning = '';
-                        //     $item->type = strip_tags((string)$f['type']);
-                        //     $item->name = strip_tags((string)$modaddons->name);
-                        //     $item->version = strip_tags((string)$modaddons->version);
-                        //     $item->tab = strip_tags((string)$modaddons->tab);
-                        //     $item->displayName = strip_tags((string)$modaddons->displayName);
-                        //     $item->description = stripslashes(strip_tags((string)$modaddons->description));
-                        //     $item->description_full = stripslashes(strip_tags((string)$modaddons->description_full));
-                        //     $item->author = strip_tags((string)$modaddons->author);
-                        //     $item->limited_countries = array();
-                        //     $item->parent_class = '';
-                        //     $item->onclick_option = false;
-                        //     $item->is_configurable = 0;
-                        //     $item->need_instance = 0;
-                        //     $item->not_on_disk = 1;
-                        //     $item->available_on_addons = 1;
-                        //     $item->trusted = Module::isModuleTrusted($item->name);
-                        //     $item->active = 0;
-                        //     $item->description_full = stripslashes($modaddons->description_full);
-                        //     $item->additional_description = isset($modaddons->additional_description) ? stripslashes($modaddons->additional_description) : null;
-                        //     $item->compatibility = isset($modaddons->compatibility) ? (array)$modaddons->compatibility : null;
-                        //     $item->nb_rates = isset($modaddons->nb_rates) ? (array)$modaddons->nb_rates : null;
-                        //     $item->avg_rate = isset($modaddons->avg_rate) ? (array)$modaddons->avg_rate : null;
-                        //     $item->badges = isset($modaddons->badges) ? (array)$modaddons->badges : null;
-                        //     $item->url = isset($modaddons->url) ? $modaddons->url : null;
-
-                        //     if (isset($modaddons->img)) {
-                        //         if (!file_exists(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg')) {
-                        //             if (!file_put_contents(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg', Tools::file_get_contents($modaddons->img))) {
-                        //                 copy(_PS_IMG_DIR_.'404.gif', _PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg');
-                        //             }
-                        //         }
-
-                        //         if (file_exists(_PS_TMP_IMG_DIR_.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg')) {
-                        //             $item->image = '../img/tmp/'.md5((int)$modaddons->id.'-'.$modaddons->name).'.jpg';
-                        //         }
-                        //     }
-
-                        //     if ($item->type == 'addonsMustHave') {
-                        //         $item->addons_buy_url = strip_tags((string)$modaddons->url);
-                        //         $prices = (array)$modaddons->price;
-                        //         $id_default_currency = Configuration::get('PS_CURRENCY_DEFAULT');
-
-                        //         foreach ($prices as $currency => $price) {
-                        //             if ($id_currency = Currency::getIdByIsoCode($currency)) {
-                        //                 $item->price = (float)$price;
-                        //                 $item->id_currency = (int)$id_currency;
-
-                        //                 if ($id_default_currency == $id_currency) {
-                        //                     break;
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-
-                        //     $module_list[$modaddons->id.'-'.$item->name] = $item;
-                        // }
                     }
                 }
             }
         }
 
-        foreach ($module_list as $key => &$module) {
-            if (defined('_PS_HOST_MODE_') && in_array($module->name, self::$hosted_modules_blacklist)) {
-                unset($module_list[$key]);
-            } elseif (isset($modules_installed[$module->name])) {
-                $module->installed = true;
-                $module->database_version = $modules_installed[$module->name]['version'];
-                $module->interest = $modules_installed[$module->name]['interest'];
-                $module->enable_device = $modules_installed[$module->name]['enable_device'];
-            } else {
-                $module->installed = false;
-                $module->database_version = 0;
-                $module->interest = 0;
-            }
-        }
         usort($module_list, function ($a, $b) { return strnatcasecmp($a->displayName, $b->displayName); });
         if ($errors) {
             if (!isset(Context::getContext()->controller) && !Context::getContext()->controller->controller_name) {
@@ -1672,7 +1629,6 @@ abstract class ModuleCore
                     $item->need_instance = 0;
                     $item->not_on_disk = 1;
                     $item->available_on_addons = 1;
-                    $item->trusted = Module::isModuleTrusted($item->name);
                     $item->active = 0;
                     $item->description_full = stripslashes($modaddons->description_full);
                     $item->additional_description = isset($modaddons->additional_description) ? stripslashes($modaddons->additional_description) : null;
@@ -1717,21 +1673,6 @@ abstract class ModuleCore
             }
         }
         $module_list = array_values($module_list);
-        $modules_name = array_column($module_list, 'name');
-        $modulesToAdd = array();
-        $installedModules = ModuleCore::getModulesOnDisk();
-        foreach ($installedModules as $installedMod) {
-            if (($id = array_search($installedMod->name, $modules_name)) !== false) {
-                if ($installedMod->installed) {
-                    unset($module_list[$id]);
-                }
-            } else {
-                if (!$installedMod->installed) {
-                    $modulesToAdd[] = $installedMod;
-                }
-            }
-        }
-        $module_list = array_merge($module_list, $modulesToAdd);
         return $module_list;
     }
 
@@ -1822,7 +1763,7 @@ abstract class ModuleCore
      * @param string $key The key provided by addons
      * @return int
      */
-    final public static function isModuleTrusted($module_name)
+    final public static function isModuleTrusted($module_name, $check_api = true)
     {
         static $trusted_modules_list_content = null;
         static $modules_list_content = null;
@@ -1836,7 +1777,7 @@ abstract class ModuleCore
         // we use the file, otherwise we regenerate it
         if (!(file_exists(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST)
             && filesize(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST) > 0
-            && ((time() - filemtime(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST)) < 86400)
+            && ((time() - filemtime(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST)) < _TIME_1_DAY_)
             )) {
             self::generateTrustedXml();
         }
@@ -1879,10 +1820,11 @@ abstract class ModuleCore
             // If the module isn't in one of the xml files
             // It might have been uploaded recenlty so we check
             // Addons API and clear XML files to be regenerated next time
-            Tools::deleteFile(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST);
-            Tools::deleteFile(_PS_ROOT_DIR_.self::CACHE_FILE_UNTRUSTED_MODULES_LIST);
-
-            return (int)Module::checkModuleFromAddonsApi($module_name);
+            if ($check_api) {
+                Tools::deleteFile(_PS_ROOT_DIR_.self::CACHE_FILE_TRUSTED_MODULES_LIST);
+                Tools::deleteFile(_PS_ROOT_DIR_.self::CACHE_FILE_UNTRUSTED_MODULES_LIST);
+                return (int)Module::checkModuleFromAddonsApi($module_name);
+            }
         }
     }
 
@@ -1900,6 +1842,7 @@ abstract class ModuleCore
             // _PS_ROOT_DIR_.self::CACHE_FILE_ALL_COUNTRY_MODULES_LIST,
             _PS_ROOT_DIR_.self::CACHE_FILE_DEFAULT_COUNTRY_MODULES_LIST,
             _PS_ROOT_DIR_.self::CACHE_FILE_MUST_HAVE_MODULES_LIST,
+            _PS_ROOT_DIR_.self::CACHE_FILE_ADDONS_MODULES_LIST,
         );
 
         if (file_exists(_PS_ROOT_DIR_.self::CACHE_FILE_CUSTOMER_MODULES_LIST)) {

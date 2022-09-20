@@ -3379,16 +3379,19 @@ exit;
                     .'&password='.urlencode($params['password_addons'])
                     .'&shop_url='.urlencode(isset($params['shop_url']) ? $params['shop_url'] : Tools::getShopDomain())
                     .'&mail='.urlencode(isset($params['email']) ? $params['email'] : Configuration::get('PS_SHOP_EMAIL'));
-                $protocols[] = 'https';
                 break;
             case 'install-modules':
-                $protocols[] = 'http';
                 $post_data .= '&method=listing&action=install-modules';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
-            case 'catalog-suggestion':
+            case 'catalog-recommendation':
                 $protocols[] = 'http';
                 $post_data .= '&method=content&action=suggestion';
+                $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
+                break;
+            case 'dashboard-recommendation':
+                $protocols[] = 'http';
+                $post_data .= '&method=content&action=dashboardContent';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
             case 'check-version':

@@ -28,9 +28,10 @@
                     </div>
                     <h4 class="name" data-name="{$element->name}">{$element->displayName}</h4>
                     <p class="text-muted">{$element->version} {l s='By'} {$element->author}</p>
-                    <p>{if $element->description_full}{$element->description_full|truncate:180:"..."}{else}{$element->description|truncate:180:"..."}{/if}<a href="{if $element->element_type == $element_type_module}{$currentIndex|escape:'html':'UTF-8'}&amp;token={$token|escape:'html':'UTF-8'}&amp;ajax=1&amp;action=GetModuleQuickView&amp;module={$element->name|urlencode}{else}{$element->addons_buy_url|replace:' ':'+'|escape:'html':'UTF-8'}{/if}" class="fancybox-quick-view pull-right">{l s='Read more'}</a>
+                    <p>
+                        {if $element->description_full}{$element->description_full|truncate:180:"..."}{else}{$element->description|truncate:180:"..."}{/if}
                     </p>
-                    <div class="panel-action">
+                    <div class="panel-action clearfix">
                         {if isset($element->type) && $element->type == 'addonsMustHave'}
                             <span class="theme-price">{if isset($element->price)}{if $element->price|floatval == 0}{l s='Free'}{elseif isset($element->id_currency)}{displayPrice price=$element->price currency=$element->id_currency}{/if}{/if}</span>
                             <a class="btn button-action pull-right btn-primary _blank" href="{$element->addons_buy_url|replace:' ':'+'|escape:'html':'UTF-8'}">{l s='Explore'}</a>
