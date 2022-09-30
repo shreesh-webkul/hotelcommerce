@@ -103,7 +103,6 @@ class AdminProductsControllerCore extends AdminController
             'Seo' => $this->l('SEO'),
             'Images' => $this->l('Images'),
             'Associations' => $this->l('Associations'),
-            'Features' => $this->l('Features'),
         );
 
         if ($this->context->shop->getContext() != Shop::CONTEXT_GROUP) {
@@ -113,7 +112,6 @@ class AdminProductsControllerCore extends AdminController
                 'Seo' => 2,
                 'Associations' => 3,
                 'Images' => 4,
-                'Features' => 5,
             ));
         }
 
@@ -225,6 +223,17 @@ class AdminProductsControllerCore extends AdminController
             'title' => $this->l('Name'),
             'filter_key' => 'b!name'
         );
+        $serviceProductType = array(
+            Product::SERVICE_PRODUCT_WITH_ROOMTYPE => $this->l('Bought with room type'),
+            Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE => $this->l('Bought without room type')
+        );
+        $this->fields_list['service_product_type'] = array(
+            'type' => 'select',
+            'list' => $serviceProductType,
+            'title' => $this->l('Buying option'),
+            'filter_key' => 'a!service_product_type',
+            'callback' => 'getBuyingOption'
+        );
         if (Shop::isFeatureActive() && Shop::getContext() != Shop::CONTEXT_SHOP) {
             $this->fields_list['shopname'] = array(
                 'title' => $this->l('Default shop'),
@@ -291,6 +300,17 @@ class AdminProductsControllerCore extends AdminController
                 'position' => 'position'
             );
         }
+    }
+
+    public function getBuyingOption($service_product_type, $row)
+    {
+        if ($service_product_type == Product::SERVICE_PRODUCT_WITH_ROOMTYPE) {
+            return $this->l('With room type');
+        } else if ($service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE) {
+            return $this->l('Without room type');
+        }
+
+        return '--';
     }
 
     public function getHotelName($hotelName, $row)
@@ -757,7 +777,7 @@ class AdminProductsControllerCore extends AdminController
             && ($combination_images = Product::duplicateAttributes($id_product_old, $product->id)) !== false
             && GroupReduction::duplicateReduction($id_product_old, $product->id)
             && Product::duplicateAccessories($id_product_old, $product->id)
-            && Product::duplicateFeatures($id_product_old, $product->id)
+            // && Product::duplicateFeatures($id_product_old, $product->id)
             && Pack::duplicate($id_product_old, $product->id)
             && Product::duplicateCustomizationFields($id_product_old, $product->id)
             && Product::duplicateTags($id_product_old, $product->id)
@@ -1063,40 +1083,40 @@ class AdminProductsControllerCore extends AdminController
         }
     }
 
-    public function processFeatures()
-    {
-        if (!Feature::isFeatureActive()) {
-            return;
-        }
+    // public function processFeatures()
+    // {
+    //     if (!Feature::isFeatureActive()) {
+    //         return;
+    //     }
 
-        if (Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
-            // delete all objects
-            $product->deleteFeatures();
+    //     if (Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
+    //         // delete all objects
+    //         $product->deleteFeatures();
 
-            // add new objects
-            $languages = Language::getLanguages(false);
-            foreach ($_POST as $key => $val) {
-                if (preg_match('/^feature_([0-9]+)_check/i', $key, $match)) {
-                    if ($val) {
-                        $product->addFeaturesToDB($match[1], $val);
-                    } else {
-                        if ($default_value = $this->checkFeatures($languages, $match[1])) {
-                            $id_value = $product->addFeaturesToDB($match[1], 0, 1);
-                            foreach ($languages as $language) {
-                                if ($cust = Tools::getValue('custom_'.$match[1].'_'.(int)$language['id_lang'])) {
-                                    $product->addFeaturesCustomToDB($id_value, (int)$language['id_lang'], $cust);
-                                } else {
-                                    $product->addFeaturesCustomToDB($id_value, (int)$language['id_lang'], $default_value);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            $this->errors[] = Tools::displayError('A room type must be created before adding features.');
-        }
-    }
+    //         // add new objects
+    //         $languages = Language::getLanguages(false);
+    //         foreach ($_POST as $key => $val) {
+    //             if (preg_match('/^feature_([0-9]+)_check/i', $key, $match)) {
+    //                 if ($val) {
+    //                     $product->addFeaturesToDB($match[1], $val);
+    //                 } else {
+    //                     if ($default_value = $this->checkFeatures($languages, $match[1])) {
+    //                         $id_value = $product->addFeaturesToDB($match[1], 0, 1);
+    //                         foreach ($languages as $language) {
+    //                             if ($cust = Tools::getValue('custom_'.$match[1].'_'.(int)$language['id_lang'])) {
+    //                                 $product->addFeaturesCustomToDB($id_value, (int)$language['id_lang'], $cust);
+    //                             } else {
+    //                                 $product->addFeaturesCustomToDB($id_value, (int)$language['id_lang'], $default_value);
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } else {
+    //         $this->errors[] = Tools::displayError('A room type must be created before adding features.');
+    //     }
+    // }
 
     /**
      * This function is never called at the moment (specific prices cannot be edited)
@@ -1443,13 +1463,13 @@ class AdminProductsControllerCore extends AdminController
             }
         }
         // Product features management
-        elseif (Tools::isSubmit('submitFeatures') || Tools::isSubmit('submitFeaturesAndStay')) {
-            if ($this->tabAccess['edit'] === '1') {
-                $this->action = 'features';
-            } else {
-                $this->errors[] = Tools::displayError('You do not have permission to edit this.');
-            }
-        }
+        // elseif (Tools::isSubmit('submitFeatures') || Tools::isSubmit('submitFeaturesAndStay')) {
+        //     if ($this->tabAccess['edit'] === '1') {
+        //         $this->action = 'features';
+        //     } else {
+        //         $this->errors[] = Tools::displayError('You do not have permission to edit this.');
+        //     }
+        // }
         // Product specific prices management NEVER USED
         elseif (Tools::isSubmit('submitPricesModification')) {
             if ($this->tabAccess['add'] === '1') {
@@ -1823,38 +1843,38 @@ class AdminProductsControllerCore extends AdminController
     }
 
     /* Checking customs feature */
-    protected function checkFeatures($languages, $feature_id)
-    {
-        $rules = call_user_func(array('FeatureValue', 'getValidationRules'), 'FeatureValue');
-        $feature = Feature::getFeature((int)Configuration::get('PS_LANG_DEFAULT'), $feature_id);
+    // protected function checkFeatures($languages, $feature_id)
+    // {
+    //     $rules = call_user_func(array('FeatureValue', 'getValidationRules'), 'FeatureValue');
+    //     $feature = Feature::getFeature((int)Configuration::get('PS_LANG_DEFAULT'), $feature_id);
 
-        foreach ($languages as $language) {
-            if ($val = Tools::getValue('custom_'.$feature_id.'_'.$language['id_lang'])) {
-                $current_language = new Language($language['id_lang']);
-                if (Tools::strlen($val) > $rules['sizeLang']['value']) {
-                    $this->errors[] = sprintf(
-                        Tools::displayError('The name for feature %1$s is too long in %2$s.'),
-                        ' <b>'.$feature['name'].'</b>',
-                        $current_language->name
-                    );
-                } elseif (!call_user_func(array('Validate', $rules['validateLang']['value']), $val)) {
-                    $this->errors[] = sprintf(
-                        Tools::displayError('A valid name required for feature. %1$s in %2$s.'),
-                        ' <b>'.$feature['name'].'</b>',
-                        $current_language->name
-                    );
-                }
-                if (count($this->errors)) {
-                    return 0;
-                }
-                // Getting default language
-                if ($language['id_lang'] == Configuration::get('PS_LANG_DEFAULT')) {
-                    return $val;
-                }
-            }
-        }
-        return 0;
-    }
+    //     foreach ($languages as $language) {
+    //         if ($val = Tools::getValue('custom_'.$feature_id.'_'.$language['id_lang'])) {
+    //             $current_language = new Language($language['id_lang']);
+    //             if (Tools::strlen($val) > $rules['sizeLang']['value']) {
+    //                 $this->errors[] = sprintf(
+    //                     Tools::displayError('The name for feature %1$s is too long in %2$s.'),
+    //                     ' <b>'.$feature['name'].'</b>',
+    //                     $current_language->name
+    //                 );
+    //             } elseif (!call_user_func(array('Validate', $rules['validateLang']['value']), $val)) {
+    //                 $this->errors[] = sprintf(
+    //                     Tools::displayError('A valid name required for feature. %1$s in %2$s.'),
+    //                     ' <b>'.$feature['name'].'</b>',
+    //                     $current_language->name
+    //                 );
+    //             }
+    //             if (count($this->errors)) {
+    //                 return 0;
+    //             }
+    //             // Getting default language
+    //             if ($language['id_lang'] == Configuration::get('PS_LANG_DEFAULT')) {
+    //                 return $val;
+    //             }
+    //         }
+    //     }
+    //     return 0;
+    // }
 
     /**
      * Add or update a product image
@@ -2160,9 +2180,9 @@ class AdminProductsControllerCore extends AdminController
                         if ($this->isTabSubmitted('Suppliers')) {
                             $this->processSuppliers();
                         }
-                        if ($this->isTabSubmitted('Features')) {
-                            $this->processFeatures();
-                        }
+                        // if ($this->isTabSubmitted('Features')) {
+                        //     $this->processFeatures();
+                        // }
                         if ($this->isTabSubmitted('Combinations')) {
                             $this->processProductAttribute();
                         }
@@ -2695,7 +2715,7 @@ class AdminProductsControllerCore extends AdminController
             $helper->value = ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN');
         }
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=product_avg_gross_margin';
-        $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
+        $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types / products. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
         $helper->refresh = (bool)(ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN_EXPIRE') < $time);
         $kpis[] = $helper->generate();
 
@@ -2721,7 +2741,7 @@ class AdminProductsControllerCore extends AdminController
         $helper->icon = 'icon-off';
         $helper->color = 'color4';
         $helper->href = $this->context->link->getAdminLink('AdminProducts');
-        $helper->title = $this->l('Disabled Room Types', null, null, false);
+        $helper->title = $this->l('Disabled Products', null, null, false);
         if (ConfigurationKPI::get('DISABLED_PRODUCTS') !== false) {
             $helper->value = ConfigurationKPI::get('DISABLED_PRODUCTS');
         }
@@ -2845,15 +2865,15 @@ class AdminProductsControllerCore extends AdminController
         if ($this->display == 'edit') {
             if (($product = $this->loadObject(true)) && $product->isAssociatedToShop()) {
                 // adding button for preview this product
-                if ($url_preview = $this->getPreviewUrl($product)) {
-                    $this->page_header_toolbar_btn['preview'] = array(
-                        'short' => $this->l('Preview', null, null, false),
-                        'href' => $url_preview,
-                        'desc' => $this->l('Preview', null, null, false),
-                        'target' => true,
-                        'class' => 'previewUrl'
-                    );
-                }
+                // if (($url_preview = $this->getPreviewUrl($product))) {
+                //     $this->page_header_toolbar_btn['preview'] = array(
+                //         'short' => $this->l('Preview', null, null, false),
+                //         'href' => $url_preview,
+                //         'desc' => $this->l('Preview', null, null, false),
+                //         'target' => true,
+                //         'class' => 'previewUrl'
+                //     );
+                // }
 
                 $js = (bool)Image::getImages($this->context->language->id, (int)$product->id) ?
                 'confirm_link(\'\', \''.$this->l('This will copy the images too. If you wish to proceed, click "Yes". If not, click "No".', null, true, false).'\', \''.$this->l('Yes', null, true, false).'\', \''.$this->l('No', null, true, false).'\', \''.$this->context->link->getAdminLink('AdminProducts', true).'&id_product='.(int)$product->id.'&duplicateproduct'.'\', \''.$this->context->link->getAdminLink('AdminProducts', true).'&id_product='.(int)$product->id.'&duplicateproduct&noimage=1'.'\')'
@@ -2871,22 +2891,22 @@ class AdminProductsControllerCore extends AdminController
                 }
 
                 // adding button for preview this product statistics
-                if (file_exists(_PS_MODULE_DIR_.'statsproduct/statsproduct.php')) {
-                    $this->page_header_toolbar_btn['stats'] = array(
-                    'short' => $this->l('Statistics', null, null, false),
-                    'href' => $this->context->link->getAdminLink('AdminStats').'&module=statsproduct&id_product='.(int)$product->id,
-                    'desc' => $this->l('Room Type Sales', null, null, false),
-                );
-                }
+                // if (file_exists(_PS_MODULE_DIR_.'statsproduct/statsproduct.php')) {
+                //     $this->page_header_toolbar_btn['stats'] = array(
+                //     'short' => $this->l('Statistics', null, null, false),
+                //     'href' => $this->context->link->getAdminLink('AdminStats').'&module=statsproduct&id_product='.(int)$product->id,
+                //     'desc' => $this->l('Room Type Sales', null, null, false),
+                // );
+                // }
 
                 // adding button for delete this product
                 if ($this->tabAccess['delete']) {
                     $this->page_header_toolbar_btn['delete'] = array(
                         'short' => $this->l('Delete', null, null, false),
                         'href' => $this->context->link->getAdminLink('AdminProducts').'&id_product='.(int)$product->id.'&deleteproduct',
-                        'desc' => $this->l('Delete this room type', null, null, false),
+                        'desc' => $this->l('Delete this product', null, null, false),
                         'confirm' => 1,
-                        'js' => 'if (confirm(\''.$this->l('Delete room type?', null, true, false).'\')){return true;}else{event.preventDefault();}'
+                        'js' => 'if (confirm(\''.$this->l('Delete product?', null, true, false).'\')){return true;}else{event.preventDefault();}'
                     );
                 }
             }
@@ -3265,246 +3285,6 @@ class AdminProductsControllerCore extends AdminController
         }
     }
 
-    /**
-    * Post treatment for warehouses
-    */
-    public function processWarehouses()
-    {
-        if ((int)Tools::getValue('warehouse_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$id_product = Tools::getValue('id_product')))) {
-            // Get all id_product_attribute
-            $attributes = $product->getAttributesResume($this->context->language->id);
-            if (empty($attributes)) {
-                $attributes[] = array(
-                    'id_product_attribute' => 0,
-                    'attribute_designation' => ''
-                );
-            }
-
-            // Get all available warehouses
-            $warehouses = Warehouse::getWarehouses(true);
-
-            // Get already associated warehouses
-            $associated_warehouses_collection = WarehouseProductLocation::getCollection($product->id);
-
-            $elements_to_manage = array();
-
-            // get form inforamtion
-            foreach ($attributes as $attribute) {
-                foreach ($warehouses as $warehouse) {
-                    $key = $warehouse['id_warehouse'].'_'.$product->id.'_'.$attribute['id_product_attribute'];
-
-                    // get elements to manage
-                    if (Tools::isSubmit('check_warehouse_'.$key)) {
-                        $location = Tools::getValue('location_warehouse_'.$key, '');
-                        $elements_to_manage[$key] = $location;
-                    }
-                }
-            }
-
-            // Delete entry if necessary
-            foreach ($associated_warehouses_collection as $awc) {
-                /** @var WarehouseProductLocation $awc */
-                if (!array_key_exists($awc->id_warehouse.'_'.$awc->id_product.'_'.$awc->id_product_attribute, $elements_to_manage)) {
-                    $awc->delete();
-                }
-            }
-
-            // Manage locations
-            foreach ($elements_to_manage as $key => $location) {
-                $params = explode('_', $key);
-
-                $wpl_id = (int)WarehouseProductLocation::getIdByProductAndWarehouse((int)$params[1], (int)$params[2], (int)$params[0]);
-
-                if (empty($wpl_id)) {
-                    //create new record
-                    $warehouse_location_entity = new WarehouseProductLocation();
-                    $warehouse_location_entity->id_product = (int)$params[1];
-                    $warehouse_location_entity->id_product_attribute = (int)$params[2];
-                    $warehouse_location_entity->id_warehouse = (int)$params[0];
-                    $warehouse_location_entity->location = pSQL($location);
-                    $warehouse_location_entity->save();
-                } else {
-                    $warehouse_location_entity = new WarehouseProductLocation((int)$wpl_id);
-
-                    $location = pSQL($location);
-
-                    if ($location != $warehouse_location_entity->location) {
-                        $warehouse_location_entity->location = pSQL($location);
-                        $warehouse_location_entity->update();
-                    }
-                }
-            }
-            StockAvailable::synchronize((int)$id_product);
-        }
-    }
-
-    /**
-     * @param Product $obj
-     *
-     * @throws Exception
-     * @throws PrestaShopException
-     * @throws SmartyException
-     */
-    public function initFormConfiguration($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-        if ($obj->id) {
-            if ($this->product_exists_in_shop) {
-
-            // $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-            // $selectedElements = $objHotelRoomTypeStandardProduct->getAssociatedHotelsAndRoomType($obj->id);
-
-            // $tree = new HelperTreeHotels('associated-hotels-tree', 'Associated hotels');
-            // $tree->setTemplate('tree_associated_hotels.tpl')
-            //     ->setHeaderTemplate('tree_associated_header.tpl')
-            //     ->setRootCategory((int)Configuration::get('PS_LOCATIONS_CATEGORY'))
-            //     ->setUseCheckBox(true)
-            //     ->setFullTree(true)
-            //     ->setRoomsOnly(false)
-            //     ->setSelectedHotels($selectedElements['hotels'])
-            //     ->setSelectedRoomTypes($selectedElements['room_types'])
-            //     ->setUseBulkActions(false);
-            //     // ->setAttachProducts(true);
-            //     // ddd($tree->render());
-            //     $data->assign(array(
-            //         'hotel_tree' => $tree->render(),
-            //     ));
-            // // return $tree->render();
-        //         $objHotelInfo = new HotelBranchInformation();
-        //         $hotelInfo = $objHotelInfo->hotelsNameAndId();
-        //         if ($hotelInfo) {
-        //             $objRoomInfo = new HotelRoomInformation();
-        //             $roomStatus = $objRoomInfo->getAllRoomStatus();
-
-        //             $objRoomType = new HotelRoomType();
-        //             if ($hotelRoomType = $objRoomType->getRoomTypeInfoByIdProduct($obj->id)) {
-        //                 $data->assign('htl_room_type', $hotelRoomType);
-
-        //                 $hotelFullInfo = $objHotelInfo->hotelBranchInfoById($hotelRoomType['id_hotel']);
-        //                 $data->assign('htl_full_info', $hotelFullInfo);
-
-        //                 $objRoomDisableDates = new HotelRoomDisableDates();
-        //                 $hotelRoomInfo = $objRoomInfo->getHotelRoomInfo($obj->id, $hotelRoomType['id_hotel']);
-        //                 if ($hotelRoomInfo) {
-        //                     foreach ($hotelRoomInfo as &$room) {
-        //                         if ($room['id_status'] == HotelRoomInformation::STATUS_TEMPORARY_INACTIVE) {
-        //                             $disabledDates = $objRoomDisableDates->getRoomDisableDates($room['id']);
-        //                             $room['disabled_dates_json'] = json_encode($disabledDates);
-        //                         }
-        //                     }
-        //                     $data->assign('htl_room_info', $hotelRoomInfo);
-        //                 }
-        //             }
-
-        //             $data->assign(
-        //                 array(
-        //                     'product' => $obj,
-        //                     'htl_info' => $hotelInfo,
-        //                     'rm_status' => $roomStatus,
-        //                     'datesMissing' => $this->l('Please fill all Date From and Date To'),
-        //                     'datesOverlapping' => $this->l('Some date are conflicting with each other. Please check and reselect the date ranges.'),
-        //                 )
-        //             );
-        //         } else {
-        //             $this->displayWarning($this->l('Add Hotel Before configurate this room type.'));
-        //         }
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing hotel configuration.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before attaching product to hotel or room types.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    // send information for the occupancy tab
-    public function initFormOccupancy($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-        if ($obj->id) {
-            $smartyVars['product'] = $obj;
-            if ($this->product_exists_in_shop) {
-                // Check is any hotel is created or not
-                $objHotelInfo = new HotelBranchInformation();
-                if ($objHotelInfo->hotelsNameAndId()) {
-                    $objRoomType = new HotelRoomType();
-                    if ($roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($obj->id)) {
-                        $smartyVars['roomTypeInfo'] = $roomTypeInfo;
-                    }
-                } else {
-                    $this->displayWarning($this->l('Add Hotel Before configurate this room type.'));
-                }
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing occupancy.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before managing occupancy.'));
-        }
-        $data->assign($smartyVars);
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    // save occupancy information
-    public function processOccupancy()
-    {
-        $idProduct = Tools::getValue('id_product');
-        if ((int)Tools::getValue('is_occupancy_submit')
-            && Validate::isLoadedObject($product = new Product((int)$idProduct)
-        )) {
-            // htl_room_type id field use only in edit case
-            if ($idHtlRoomType = Tools::getValue('wk_id_room_type')) {
-                if (Validate::isLoadedObject($objRoomType = new HotelRoomType($idHtlRoomType))) {
-                    $baseAdults = Tools::getValue('base_adults');
-                    $baseChildren = Tools::getValue('base_children');
-
-                    if (!$baseAdults || !Validate::isUnsignedInt($baseAdults)) {
-                        $this->errors[] = Tools::displayError('Invalid base adults');
-                    }
-                    if (!Validate::isUnsignedInt($baseChildren)) {
-                        $this->errors[] = Tools::displayError('Invalid base children');
-                    }
-                    if (!count($this->errors)) {
-                        $objRoomType->adult = $baseAdults;
-                        $objRoomType->children = $baseChildren;
-                        $objRoomType->save();
-                    }
-                } else {
-                    $this->errors[] = Tools::displayError('Invalid room type found.');
-                }
-            } else {
-                $this->errors[] = Tools::displayError('Please save hotel of the room type from configuration tab.');
-            }
-        }
-    }
-
-    public function validateDisableDateRanges($disableDates)
-    {
-        if (count($disableDates)) {
-            foreach ($disableDates as $disable_key => $disableDate) {
-                if (!$disableDate['date_to'] && !$disableDate['date_from']) {
-                    unset($disableDates[$disable_key]);
-                } elseif (!Validate::isDate($disableDate['date_from']) || !Validate::isDate($disableDate['date_to'])) {
-                    $this->errors[] = Tools::displayError('Please fill valid date in disable date fields.');
-                } elseif (($disableDate['date_from'] && !$disableDate['date_to']) || (!$disableDate['date_from'] && $disableDate['date_to'])) {
-                    $this->errors[] = Tools::displayError('Please fill all date from and date to for disable dates fields.');
-                } else {
-                    foreach ($disableDates as $key => $disDate) {
-                        if ($key != $disable_key) {
-                            if ((($disableDate['date_from'] < $disDate['date_from']) && ($disableDate['date_to'] <= $disDate['date_from'])) || (($disableDate['date_from'] > $disDate['date_from']) && ($disableDate['date_from'] >= $disDate['date_to']))) {
-                                // continue
-                            } else {
-                                $this->errors[] = Tools::displayError('Some date are conflicting with each other. Please check and reselect the date ranges.');
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            $this->errors[] = Tools::displayError('Please add dates for status temporary inactive.');
-        }
-    }
-
     public function updateLinkedHotelsAndRooms($product)
     {
         if (Validate::isLoadedObject($product)) {
@@ -3513,13 +3293,13 @@ class AdminProductsControllerCore extends AdminController
 
             if (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product->service_product_type) {
                 // add product link for hotel
-                if ($selectedHotels = Tools::getValue('hotelBox')) {
-                    $objHotelRoomTypeStandardProduct->addRoomProductLink(
-                        $product->id,
-                        $selectedHotels,
-                        HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL
-                    );
-                }
+                // if ($selectedHotels = Tools::getValue('hotelBox')) {
+                //     $objHotelRoomTypeStandardProduct->addRoomProductLink(
+                //         $product->id,
+                //         $selectedHotels,
+                //         HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL
+                //     );
+                // }
 
                 // add product link for room types
                 if ($selectedRoomTypes = Tools::getValue('roomTypeBox')) {
@@ -3530,174 +3310,6 @@ class AdminProductsControllerCore extends AdminController
                     );
                 }
             }
-        }
-    }
-
-    public function ajaxProcessDeleteHotelRoom()
-    {
-        if ($this->tabAccess['edit'] == 1) {
-            $idRoom = Tools::getValue('id');
-            $objRoomInfo = new HotelRoomInformation((int)$idRoom);
-            if ($objRoomInfo->delete()) {
-                die('1');
-            }
-        }
-        die('0');
-    }
-
-    /**
-     * @param Product $obj
-     *
-     * @throws Exception
-     * @throws PrestaShopException
-     * @throws SmartyException
-     */
-    public function initFormBooking($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-        if ($obj->id) {
-            if ($this->product_exists_in_shop) {
-                $data->assign(array('product' => $obj));
-
-                $date_from = Tools::getValue('date_from');
-                $date_to = Tools::getValue('date_to');
-
-                $obj_rm_type = new HotelRoomType();
-                $obj_booking_dtl = new HotelBookingDetail();
-
-                $rm_info = $obj_rm_type->getRoomTypeInfoByIdProduct($obj->id);
-                if ($rm_info) {
-                    if ($date_from && $date_to) {
-                        $search_flag = 1;
-                        $start_date = $date_from;
-                        $last_date = $date_to;
-                    } else {
-                        $date_from = date('Y-m-d');
-                        $date_to = date('Y-m-t');
-                        $start_date = date('Y-m-01'); // hard-coded '01' for first day
-                        $last_date = date('Y-m-t');
-                    }
-                    $bookingParams = array();
-                    $bookingParams['date_from'] = $date_from;
-                    $bookingParams['date_to'] = $date_to;
-                    $bookingParams['hotel_id'] = $rm_info['id_hotel'];
-                    $bookingParams['room_type'] = $obj->id;
-                    $bookingParams['adult'] = $rm_info['adult'];
-                    $bookingParams['children'] = $rm_info['children'];
-                    $bookingParams['num_rooms'] = 0;
-
-                    $bookingParams['only_active_roomtype'] = 0;
-
-                    $booking_data = $obj_booking_dtl->getBookingData($bookingParams);
-
-                    $bookingParams['for_calendar'] = 1;
-                    while ($start_date <= $last_date) {
-                        $cal_date_from = $start_date;
-                        $cal_date_to = date('Y-m-d', strtotime('+1 day', strtotime($cal_date_from)));
-                        $booking_calendar_data[$cal_date_from] = $obj_booking_dtl->getBookingData($bookingParams);
-
-                        // if product is inactive then booking_details will be false
-                        if (!$booking_calendar_data[$cal_date_from]) {
-                            $booking_calendar_data[$cal_date_from]['stats']['num_avail'] = 0;
-                            $booking_calendar_data[$cal_date_from]['stats']['num_part_avai'] = 0;
-                            $booking_calendar_data[$cal_date_from]['stats']['num_unavail'] = 0;
-                            $booking_calendar_data[$cal_date_from]['stats']['num_booked'] = 0;
-                        }
-                        $start_date = date('Y-m-d', strtotime('+1 day', strtotime($start_date)));
-                    }
-                    if (isset($search_flag) && $search_flag) {
-                        if ($booking_data['stats']['num_avail'] > 0) {
-                            $check_css_condition_var = 'available';
-                        } elseif ($booking_data['stats']['num_part_avai'] > 0) {
-                            $check_css_condition_var = 'part_available';
-                        } else {
-                            $check_css_condition_var = 'unavailable';
-                        }
-                    } else {
-                        if ($booking_data['stats']['num_avail'] > 0) {
-                            $check_css_condition_var = 'default_available';
-                        } elseif ($booking_data['stats']['num_part_avai'] > 0) {
-                            $check_css_condition_var = 'default_part_available';
-                        } else {
-                            $check_css_condition_var = 'default_unavailable';
-                        }
-                    }
-
-                    $data->assign(
-                        array(
-                            'rooms_info' => $rm_info,
-                            'check_calendar_var' => 1,
-                            'date_from' => $date_from,
-                            'date_to' => $date_to,
-                            'booking_data' => $booking_data,
-                            'booking_calendar_data' => $booking_calendar_data,
-                            'htl_config' => 1,
-                            'check_css_condition_var' => $check_css_condition_var,
-                        )
-                    );
-                } else {
-                    $this->displayWarning($this->l('First you have to fill Room configuration.'));
-                }
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing hotel configuration.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type to see the booking information.'));
-        }
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    public function processBooking()
-    {
-        if (Tools::isSubmit('submitAddproductAndStay')) {
-            $checkTabClick = Tools::getValue('checkTabClick');
-            $date_from = Tools::getValue('from_date');
-            $date_to = Tools::getValue('to_date');
-            $num_rooms = Tools::getValue('num_rooms');
-            $id_product = Tools::getValue('id_product');
-
-            $link = new Link();
-            if ($checkTabClick) {
-                Tools::redirectAdmin($link->getAdminLink('AdminProducts').'&id_product='.$id_product.'&updateproduct&key_tab=Booking&date_from='.$date_from.'&date_to='.$date_to);
-            }
-        }
-    }
-
-    public function ajaxProcessProductRoomsBookingDetailsOnMonthChange()
-    {
-        $month = Tools::getValue('month');
-        $year = Tools::getValue('year');
-        $query_date = $year.'-'.$month.'-04';
-        $start_date = date('Y-m-01', strtotime($query_date)); // hard-coded '01' for first day
-        $last_day_this_month = date('Y-m-t', strtotime($query_date));
-        $hotel_id = Tools::getValue('id_hotel');
-        $room_type = Tools::getValue('id_product');
-        $adult = Tools::getValue('num_adults');
-        $children = Tools::getValue('num_children');
-        $num_rooms = 1;
-
-        $obj_booking_dtl = new HotelBookingDetail();
-        $bookingParams = array();
-        $bookingParams['hotel_id'] = $hotel_id;
-        $bookingParams['room_type'] = $room_type;
-        $bookingParams['adult'] = $adult;
-        $bookingParams['children'] = $children;
-        $bookingParams['num_rooms'] = $num_rooms;
-        $bookingParams['for_calendar'] = 1;
-        while ($start_date <= $last_day_this_month) {
-            $cal_date_from = $start_date;
-            $cal_date_to = date('Y-m-d', strtotime($cal_date_from) + 86400);
-
-            $bookingParams['date_from'] = $cal_date_from;
-            $bookingParams['date_to'] = $cal_date_to;
-            $booking_calendar_data[$cal_date_from] = $obj_booking_dtl->getBookingData($bookingParams);
-            $start_date = date('Y-m-d', strtotime($start_date) + 86400);
-        }
-
-        if ($booking_calendar_data) {
-            die(json_encode($booking_calendar_data));
-        } else {
-            die(0);
         }
     }
 
@@ -3840,7 +3452,7 @@ class AdminProductsControllerCore extends AdminController
             ));
 
             // get hotel address for this room type
-            $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($obj->id));
+            $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($obj->id));
         } else {
             $this->displayWarning($this->l('You must save this product before adding specific pricing'));
             $product->id_tax_rules_group = (int)Product::getIdTaxRulesGroupMostUsed();
@@ -4584,7 +4196,6 @@ class AdminProductsControllerCore extends AdminController
 
         $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
         $selectedElements = $objHotelRoomTypeStandardProduct->getAssociatedHotelsAndRoomType($product->id);
-
         $tree = new HelperTreeHotels('associated-hotels-tree', 'Associated hotels');
         $tree->setTemplate('tree_associated_hotels.tpl')
             ->setHeaderTemplate('tree_associated_header.tpl')
@@ -5370,64 +4981,64 @@ class AdminProductsControllerCore extends AdminController
      * @throws Exception
      * @throws SmartyException
      */
-    public function initFormFeatures($obj)
-    {
-        if (!$this->default_form_language) {
-            $this->getLanguages();
-        }
+    // public function initFormFeatures($obj)
+    // {
+    //     if (!$this->default_form_language) {
+    //         $this->getLanguages();
+    //     }
 
-        $data = $this->createTemplate($this->tpl_form);
-        $data->assign('default_form_language', $this->default_form_language);
-        $data->assign('languages', $this->_languages);
+    //     $data = $this->createTemplate($this->tpl_form);
+    //     $data->assign('default_form_language', $this->default_form_language);
+    //     $data->assign('languages', $this->_languages);
 
-        if (!Feature::isFeatureActive()) {
-            $this->displayWarning($this->l('This feature has been disabled. ').' <a href="index.php?tab=AdminPerformance&token='.Tools::getAdminTokenLite('AdminPerformance').'#featuresDetachables">'.$this->l('Performances').'</a>');
-        } else {
-            if ($obj->id) {
-                if ($this->product_exists_in_shop) {
-                    $features = Feature::getFeatures($this->context->language->id, (Shop::isFeatureActive() && Shop::getContext() == Shop::CONTEXT_SHOP));
+    //     if (!Feature::isFeatureActive()) {
+    //         $this->displayWarning($this->l('This feature has been disabled. ').' <a href="index.php?tab=AdminPerformance&token='.Tools::getAdminTokenLite('AdminPerformance').'#featuresDetachables">'.$this->l('Performances').'</a>');
+    //     } else {
+    //         if ($obj->id) {
+    //             if ($this->product_exists_in_shop) {
+    //                 $features = Feature::getFeatures($this->context->language->id, (Shop::isFeatureActive() && Shop::getContext() == Shop::CONTEXT_SHOP));
 
-                    foreach ($features as $k => $tab_features) {
-                        $features[$k]['current_item'] = false;
-                        $features[$k]['val'] = array();
+    //                 foreach ($features as $k => $tab_features) {
+    //                     $features[$k]['current_item'] = false;
+    //                     $features[$k]['val'] = array();
 
-                        $custom = true;
-                        foreach ($obj->getFeatures() as $tab_products) {
-                            if ($tab_products['id_feature'] == $tab_features['id_feature']) {
-                                $features[$k]['current_item'] = $tab_products['id_feature_value'];
-                            }
-                        }
+    //                     $custom = true;
+    //                     foreach ($obj->getFeatures() as $tab_products) {
+    //                         if ($tab_products['id_feature'] == $tab_features['id_feature']) {
+    //                             $features[$k]['current_item'] = $tab_products['id_feature_value'];
+    //                         }
+    //                     }
 
-                        $features[$k]['featureValues'] = FeatureValue::getFeatureValuesWithLang($this->context->language->id, (int)$tab_features['id_feature']);
-                        if (count($features[$k]['featureValues'])) {
-                            foreach ($features[$k]['featureValues'] as $value) {
-                                if ($features[$k]['current_item'] == $value['id_feature_value']) {
-                                    $custom = false;
-                                }
-                            }
-                        }
+    //                     $features[$k]['featureValues'] = FeatureValue::getFeatureValuesWithLang($this->context->language->id, (int)$tab_features['id_feature']);
+    //                     if (count($features[$k]['featureValues'])) {
+    //                         foreach ($features[$k]['featureValues'] as $value) {
+    //                             if ($features[$k]['current_item'] == $value['id_feature_value']) {
+    //                                 $custom = false;
+    //                             }
+    //                         }
+    //                     }
 
-                        if ($custom) {
-                            $feature_values_lang = FeatureValue::getFeatureValueLang($features[$k]['current_item']);
-                            foreach ($feature_values_lang as $feature_value) {
-                                $features[$k]['val'][$feature_value['id_lang']] = $feature_value;
-                            }
-                        }
-                    }
+    //                     if ($custom) {
+    //                         $feature_values_lang = FeatureValue::getFeatureValueLang($features[$k]['current_item']);
+    //                         foreach ($feature_values_lang as $feature_value) {
+    //                             $features[$k]['val'][$feature_value['id_lang']] = $feature_value;
+    //                         }
+    //                     }
+    //                 }
 
-                    $data->assign('available_features', $features);
-                    $data->assign('product', $obj);
-                    $data->assign('link', $this->context->link);
-                    $data->assign('default_form_language', $this->default_form_language);
-                } else {
-                    $this->displayWarning($this->l('You must save the room type in this shop before adding features.'));
-                }
-            } else {
-                $this->displayWarning($this->l('You must save this room type before adding features.'));
-            }
-        }
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
+    //                 $data->assign('available_features', $features);
+    //                 $data->assign('product', $obj);
+    //                 $data->assign('link', $this->context->link);
+    //                 $data->assign('default_form_language', $this->default_form_language);
+    //             } else {
+    //                 $this->displayWarning($this->l('You must save the room type in this shop before adding features.'));
+    //             }
+    //         } else {
+    //             $this->displayWarning($this->l('You must save this room type before adding features.'));
+    //         }
+    //     }
+    //     $this->tpl_form_vars['custom_form'] = $data->fetch();
+    // }
 
     public function ajaxProcessProductQuantity()
     {

@@ -21,10 +21,10 @@
 	<form method="post" action="{$current|escape:'htmlall':'UTF-8'}&{if !empty($submit_action)}{$submit_action|escape:'htmlall':'UTF-8'}{/if}&token={$token|escape:'htmlall':'UTF-8'}" class="defaultForm form-horizontal" enctype="multipart/form-data">
 		<div class="panel">
 			<div class="panel-heading">
-				<i class="icon-user"></i> {l s='Room Type Additional Facilities' mod='hotelreservationsystem'}
+				<i class="icon-user"></i> {l s='Room Type Facilities' mod='hotelreservationsystem'}
 			</div>
 			<div class="alert alert-info">
-				{l s='To create new please visit' mod='hotelreservationsystem'} <a target="_blank" href="{$link->getAdminLink('AdminRoomTypeGlobalDemand')}">{l s='Additional facilities' mod='hotelreservationsystem'}</a> {l s='page' mod='hotelreservationsystem'}.
+				{l s='To create new please visit' mod='hotelreservationsystem'} <a target="_blank" href="{$link->getAdminLink('AdminRoomTypeGlobalDemand')}">{l s='Facilities' mod='hotelreservationsystem'}</a> {l s='page' mod='hotelreservationsystem'}.
 			</div>
 			{if isset($allDemands) && $allDemands}
 				<div id="service_accordian">
@@ -109,7 +109,7 @@
 				</div>
 			{else}
 				<div class="alert alert-warning">
-					{l s='No additional facilities created yet. To create please visit' mod='hotelreservationsystem'} <a target="_blank" href="{$link->getAdminLink('AdminRoomTypeGlobalDemand')}">{l s='Additional facilities' mod='hotelreservationsystem'}</a> {l s='page' mod='hotelreservationsystem'}.
+					{l s='No facilities created yet. To create please visit' mod='hotelreservationsystem'} <a target="_blank" href="{$link->getAdminLink('AdminRoomTypeGlobalDemand')}">{l s='Facilities' mod='hotelreservationsystem'}</a> {l s='page' mod='hotelreservationsystem'}.
 				</div>
 			{/if}
 		</div>

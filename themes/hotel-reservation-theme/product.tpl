@@ -180,7 +180,7 @@
 				</div>
 
 				<div id="standard_products_cont">
-					{if $PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER && isset($standard_products_by_category) && $standard_products_by_category}
+					{if isset($standard_products_by_category) && $standard_products_by_category && $PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER}
 						{assign var='standard_products_exists' value=1}
 					{else if isset($standard_products) && $standard_products}
 						{assign var='standard_products_exists' value=1}
@@ -222,15 +222,17 @@
 											</div>
 										</div>
 									{/if}
-									<div class="info_margin_div">
-										<div class="room_info_heading">
-											<span>{l s='Check-in and check-out time'}</span>
+									{if isset($id_hotel) && $id_hotel}
+										<div class="info_margin_div">
+											<div class="room_info_heading">
+												<span>{l s='Check-in and check-out time'}</span>
+											</div>
+											<div class="room_info_content">
+												<p>{l s='Check-in: '}{$hotel_check_in|escape:'html':'UTF-8'}</p>
+												<p>{l s='Check-out: '}{$hotel_check_out|escape:'html':'UTF-8'}</p>
+											</div>
 										</div>
-										<div class="room_info_content">
-											<p>{l s='Check-in: '}{$hotel_check_in|escape:'html':'UTF-8'}</p>
-											<p>{l s='Check-out: '}{$hotel_check_out|escape:'html':'UTF-8'}</p>
-										</div>
-									</div>
+									{/if}
 									{if isset($features) && $features}
 										<div class="info_margin_div">
 											<div class="room_info_heading">
@@ -484,7 +486,7 @@
 						{* extra room type demands *}
 						{if isset($room_type_demands) && $room_type_demands}
 							<div class="col-sm-12 card room_demands_container">
-								<label for="" class="control-label">{l s='Additional Facilities'}</label>
+								<label for="" class="control-label">{l s='Facilities'}</label>
 								{foreach $room_type_demands as $idGlobalDemand => $demand}
 									<div class="row room_demand_block">
 										{if $product->show_price && !isset($restricted_country_mode) && !$PS_CATALOG_MODE}

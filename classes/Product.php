@@ -510,7 +510,7 @@ class ProductCore extends ObjectModel
             $this->manufacturer_name = Manufacturer::getNameById((int)$this->id_manufacturer);
             $this->supplier_name = Supplier::getNameById((int)$this->id_supplier);
             $address = null;
-            $id_address = Cart::getIdAddressForTaxCalculation($this->id);
+            $id_address = Product::getIdAddressForTaxCalculation($this->id);
             $this->tax_rate = $this->getTaxesRate(new Address($id_address));
 
             $this->new = $this->isNew();
@@ -909,6 +909,14 @@ class ProductCore extends ObjectModel
         return parent::toggleStatus();
     }
 
+    public static function isBookingProduct($id_product)
+    {
+        return Db::getInstance()->getValue('
+            SELECT `booking_product` FROM `'._DB_PREFIX_.'product` p
+            WHERE p.`id_product` = '.(int)$id_product
+        );
+    }
+
     public function delete()
     {
         /*
@@ -1303,8 +1311,12 @@ class ProductCore extends ObjectModel
 					FROM `'._DB_PREFIX_.'product` p
 					'.Shop::addSqlAssociation('product', 'p').'
                     INNER JOIN `'._DB_PREFIX_.'htl_room_type_standard_product` rsp ON (rsp.`id_product` = p.`id_product`)
-					WHERE ((`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')
-                    OR (`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$roomInfo['id'].'))
+					WHERE
+                    ('.
+                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
+                        // 'OR'.
+                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                    )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                 .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
@@ -1348,8 +1360,12 @@ class ProductCore extends ObjectModel
 				LEFT JOIN `'._DB_PREFIX_.'image_lang` il
 					ON (image_shop.`id_image` = il.`id_image`
 					AND il.`id_lang` = '.(int)$id_lang.')
-				WHERE ((`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')
-                    OR (`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$roomInfo['id'].'))
+				WHERE
+                    ('.
+                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
+                        // 'OR'.
+                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                    )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                     .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
@@ -1392,8 +1408,12 @@ class ProductCore extends ObjectModel
 				INNER JOIN `'._DB_PREFIX_.'category_lang` cl
 					ON (product_shop.`id_category_default` = cl.`id_category`
 					AND cl.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('cl').')
-				WHERE ((`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')
-                    OR (`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$roomInfo['id'].'))
+				WHERE
+                    ('.
+                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
+                        // 'OR'.
+                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                    )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                     .($front ? ' AND product_shop.`show_at_front` = 1':'')
@@ -3013,7 +3033,11 @@ class ProductCore extends ObjectModel
         if ($id_address) {
             $address_infos = Address::getCountryAndState($id_address);
         } else {
-            $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($id_product));
+            if ($id_roomtype) {
+                $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_roomtype));
+            } else {
+                $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_product));
+            }
         }
 
         if ($address_infos['id_country']) {
@@ -3331,6 +3355,14 @@ class ProductCore extends ObjectModel
         return self::$_prices[$cache_id];
     }
 
+    public static function getIdAddressForTaxCalculation($id_product)
+    {
+        if (self::isBookingProduct($id_product)) {
+            return HotelRoomType::getHotelIdAddressByIdProduct($id_product);
+        }
+        return false;
+    }
+
     public static function convertAndFormatPrice($price, $currency = false, Context $context = null)
     {
         if (!$context) {
@@ -3357,7 +3389,7 @@ class ProductCore extends ObjectModel
         $quantity = $cart_quantity ? $cart_quantity : $quantity;
 
         $id_currency = (int)$context->currency->id;
-        $ids = Address::getCountryAndState(cart::getIdAddressForTaxCalculation($id_product));
+        $ids = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_product));
         $id_country = $ids['id_country'] ? (int)$ids['id_country'] : (int)Configuration::get('PS_COUNTRY_DEFAULT');
         return (bool)SpecificPrice::getSpecificPrice((int)$id_product, $context->shop->id, $id_currency, $id_country, $id_group, $quantity, null, 0, 0, $quantity);
     }
@@ -5245,7 +5277,7 @@ class ProductCore extends ObjectModel
     public function getTaxesRate(Address $address = null)
     {
         if (!$address || !$address->id_country) {
-            $address = Address::initialize(Cart::getIdAddressForTaxCalculation($this->id));
+            $address = Address::initialize(Product::getIdAddressForTaxCalculation($this->id));
         }
 
         $tax_manager = TaxManagerFactory::getManager($address, $this->id_tax_rules_group);

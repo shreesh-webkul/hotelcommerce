@@ -4,14 +4,12 @@
 	</button>
 	<ul class="nav nav-tabs" role="tablist">
 		{if (isset($extraDemands) && $extraDemands) || (isset($roomTypeDemands) && $roomTypeDemands)}
-			<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Additional Facilities'}</a></li>
+			<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Facilities'}</a></li>
 		{/if}
 		{if (isset($additionalServices) && $additionalServices) || (isset($roomTypeStandardProducts) && $roomTypeStandardProducts)}
-			<li role="presentation" {if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Additional Services'}</a></li>
+			<li role="presentation" {if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
 		{/if}
 	</ul>
-	{* <h3 class="modal-title"><i class="icon-tasks"></i> {l s='Additional Facilities'} {if isset($orderEdit) && $orderEdit}<span class="badge badge-success demand_edit_badge">{l s='edit'}</span>{/if} <button type="button" class="close pull-right" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	</h3> *}
 </div>
 <div class="modal-body" id="rooms_extra_demands">
 	<div class="tab-content clearfix">
@@ -41,7 +39,7 @@
 								{else}
 									<tr>
 										<td colspan="3">
-											<i class="icon-warning"></i> {l s='No additional facilities added yet.'}
+											<i class="icon-warning"></i> {l s='No facilities added yet.'}
 										</td>
 									</tr>
 								{/if}
@@ -138,7 +136,7 @@
 								{else}
 									<tr>
 										<td colspan="3">
-											<i class="icon-warning"></i> {l s='No additional facilities added yet.'}
+											<i class="icon-warning"></i> {l s='No facilities added yet.'}
 										</td>
 									</tr>
 								{/if}

@@ -24,7 +24,7 @@
 *}
 <li class="tree-item{if isset($node['disabled']) && $node['disabled'] == true} tree-item-disable{/if}">
 	<span class="tree-item-name{if isset($node['disabled']) && $node['disabled'] == true} tree-item-name-disable{/if}">
-		<input type="checkbox" class="select_room_type" name="{$input_name}[]" value="{$node['id_room_type']}"{if isset($node['disabled']) && $node['disabled'] == true} disabled="disabled"{/if} />
+		<input type="checkbox" class="select_room_type" name="{$input_name}[]" value="{$node['id_product']}"{if isset($node['disabled']) && $node['disabled'] == true} disabled="disabled"{/if} />
 		<i class="tree-dot"></i>
 		<label class="tree-toggler">{$node['room_type']}</label>
 	</span>

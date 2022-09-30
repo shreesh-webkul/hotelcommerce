@@ -673,15 +673,14 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
     protected function getTaxBreakdown()
     {
         $breakdowns = array(
-            // 'product_tax' => $this->order_invoice->getProductTaxesBreakdown($this->order),
             'room_tax' => $this->order_invoice->getRoomsTaxesBreakdown($this->order),
+            'additional_services_tax' => $this->order_invoice->getAdditionalServicesTaxesBreakdown($this->order),
             'extra_demands_tax' => $this->order_invoice->getExtraDemandTaxesBreakdown($this->order),
             'service_products_tax' => $this->order_invoice->getServiceProductsTaxesBreakdown($this->order),
             'shipping_tax' => $this->order_invoice->getShippingTaxesBreakdown($this->order),
             'ecotax_tax' => $this->order_invoice->getEcoTaxTaxesBreakdown(),
             'wrapping_tax' => $this->order_invoice->getWrappingTaxesBreakdown(),
         );
-
         foreach ($breakdowns as $type => $bd) {
             if (empty($bd)) {
                 unset($breakdowns[$type]);
@@ -694,6 +693,12 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
         if (isset($breakdowns['product_tax'])) {
             foreach ($breakdowns['product_tax'] as &$bd) {
+                $bd['total_tax_excl'] = $bd['total_price_tax_excl'];
+            }
+        }
+
+        if (isset($breakdowns['additional_services_tax'])) {
+            foreach ($breakdowns['additional_services_tax'] as &$bd) {
                 $bd['total_tax_excl'] = $bd['total_price_tax_excl'];
             }
         }

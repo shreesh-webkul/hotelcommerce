@@ -185,7 +185,7 @@
 									</div>
 								</div>
 								<div class="col-sm-5">
-									<div class="total_price_block">
+									<div class="total_price_block pull-right">
 										<p class="room_total_price">
 											<span class="room_type_current_price">
 												{displayPrice price=($rm_v['amount']+$rm_v['demand_price'])}
@@ -224,7 +224,7 @@
 							</a>
 							{* <a href="{$rm_v['link']}"><i class="icon-trash"></i> &nbsp;{l s='Remove'}</a> *}
 						</p>
-						{hook h='displayCartRoomImageAfter' id_product=$data_v['id_product']}
+						{hook h='displayCartRoomImageAfter' id_product=$product['id_product']}
 					</div>
 					<div class="col-sm-10">
 						<div class="room-info-container">
@@ -297,7 +297,7 @@
 								</div>
 							</div>
 							<div class="col-sm-5">
-								<div class="total_price_block">
+								<div class="total_price_block pull-right">
 									<p class="room_total_price">
 										<span class="room_type_current_price">
 											{if $priceDisplay}{displayPrice price=($product['total'])}{else}{displayPrice price=($product['total_wt'])}{/if}

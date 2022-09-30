@@ -294,7 +294,7 @@ abstract class PaymentModuleCore extends Module
                     $order->id_customer = (int)$this->context->cart->id_customer;
                     $order->id_address_invoice = (int)$this->context->cart->id_address_invoice;
                     $order->id_address_delivery = (int)$id_address;
-                    $order->id_address_tax = (int)Cart::getIdAddressForTaxCalculation($order->product_list[0]['id_product']);
+                    $order->id_address_tax = (int)Product::getIdAddressForTaxCalculation($order->product_list[0]['id_product']);
                     $order->id_currency = $this->context->currency->id;
                     $order->id_lang = (int)$this->context->cart->id_lang;
                     $order->id_cart = (int)$this->context->cart->id;

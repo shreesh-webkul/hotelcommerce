@@ -270,24 +270,7 @@
 			var product_name_redirected = '{$product_name_redirected|escape:'html':'UTF-8'}';
 		</script>
 	</div>
-	<div class="form-group">
-		<label class="control-label col-lg-3" for="">
-			{l s='Show Product at Front Office'}
-		</label>
-		<div class="col-lg-3">
-			<span class="switch prestashop-switch fixed-width-lg">
-				<input type="radio" name="show_at_front" id="show_at_front_on" value="1" {if $product->show_at_front}checked="checked"{/if}/>
-				<label for="show_at_front_on" class="radioCheck">
-					{l s='Yes'}
-				</label>
-				<input type="radio" name="show_at_front" id="show_at_front_off" value="0" {if !$product->show_at_front}checked="checked"{/if}/>
-				<label for="show_at_front_off" class="radioCheck">
-					{l s='No'}
-				</label>
-				<a class="slide-button btn"></a>
-			</span>
-		</div>
-	</div>
+
 	{* <div class="form-group hidden">
 		<label class="control-label col-lg-3" for="">
 			<span class="label-tooltip" data-toggle="tooltip" title="{l s='This type of product can only be bought once per order/hotel'}">
@@ -321,6 +304,34 @@
 			</select>
 		</div>
 	</div>
+	<div class="form-group" id="independent_product_info" {if $product->service_product_type != Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none"{/if}>
+		<div class="col-lg-6 col-lg-offset-3">
+			<div class="alert alert-info">
+			{l s='Independent products can only be bought from backoffice.'}
+			</div>
+		</div>
+	</div>
+	<div class="form-group" id="show_at_front_container" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if}>
+		<label class="control-label col-lg-3" for="">
+			<span class="label-tooltip" data-toggle="tooltip"
+					title="{l s='Allow this product to be bought from front office of your website.'}">
+				{l s='Show Product at Front Office'}
+			</span>
+		</label>
+		<div class="col-lg-3">
+			<span class="switch prestashop-switch fixed-width-lg">
+				<input type="radio" name="show_at_front" id="show_at_front_on" value="1" {if $product->show_at_front}checked="checked"{/if}/>
+				<label for="show_at_front_on" class="radioCheck">
+					{l s='Yes'}
+				</label>
+				<input type="radio" name="show_at_front" id="show_at_front_off" value="0" {if !$product->show_at_front}checked="checked"{/if}/>
+				<label for="show_at_front_off" class="radioCheck">
+					{l s='No'}
+				</label>
+				<a class="slide-button btn"></a>
+			</span>
+		</div>
+	</div>
 	<div class="form-group" id="associated_hotel_rooms_tree" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if}>
 		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="category_box" type="category_box"}</span></div>
 		<label class="control-label col-lg-2" for="category_block">
@@ -347,7 +358,7 @@
 		</div>
 	</div>
 
-	<div id="product_options" class="form-group">
+	<div id="product_options" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if} class="form-group">
 		<div class="col-lg-12">
 			<div class="form-group">
 				<div class="col-lg-1">

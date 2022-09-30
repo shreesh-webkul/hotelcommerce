@@ -208,7 +208,7 @@
 							{/if}
 							<td colspan="4"></td>
 							<td colspan="3">
-								<strong>{l s='Total additional services (tax excl.)'}</strong>
+								<strong>{l s='Total extra services (tax excl.)'}</strong>
 							</td>
 							<td colspan="2" class="text-right">
 								<span>{displayWtPriceWithCurrency price=$additional_service_price_tax_excl currency=$currency}</span>
@@ -223,7 +223,7 @@
 						{/if}
 						<td colspan="4"></td>
 						<td colspan="3">
-							<strong>{l s='Total additional services (tax incl.)'}</strong>
+							<strong>{l s='Total extra services (tax incl.)'}</strong>
 						</td>
 						<td colspan="2" class="text-right">
 							<span>{displayWtPriceWithCurrency price=$additional_service_price_tax_incl currency=$currency convert=1}</span>
@@ -376,7 +376,7 @@
 									{if (isset($rm_v['extra_demands']) && $rm_v['extra_demands']) || (isset($rm_v['additional_services']) && $rm_v['additional_services'])}
 										<p class="room_extra_demands">
 											<a data-date_from="{$rm_v['data_form']|escape:'html':'UTF-8'}" data-date_to="{$rm_v['data_to']|escape:'html':'UTF-8'}" data-id_product="{$data_v['id_product']|escape:'html':'UTF-8'}" data-id_order="{$order->id|escape:'html':'UTF-8'}" data-action="{$link->getPageLink('order-detail')}" class="open_rooms_extra_services_panel" href="#rooms_type_extra_services_form">
-												{l s='Additional Facilities'}
+												{l s='Extra Services'}
 											</a>
 										</p>
 										<p>
@@ -511,7 +511,7 @@
 
 	{if $refund_allowed && $non_requested_rooms}
 		<div class="alert alert-info-light standard_refund_fields">
-			<i class="icon-info-circle"></i> {l s='Select rooms which bookings you want to cancel. Attached additional facilities with the room will be cancelled with room cancellation.'}
+			<i class="icon-info-circle"></i> {l s='Select rooms which bookings you want to cancel. Attached facilities with the room will be cancelled with room cancellation.'}
 		</div>
 		{if !$hasCompletelyRefunded}
 			<div class="row standard_refund_fields">

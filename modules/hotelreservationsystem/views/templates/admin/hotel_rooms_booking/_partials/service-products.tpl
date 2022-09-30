@@ -22,7 +22,7 @@
                                 </div>
                             {/if}
                             <div class="product-actions">
-                                <button type="button" data-id-product="{$product.id_product|intval}" class="btn btn-primary service_product_add_to_cart">{l s='Add To Cart' mod='hotelreservationsystem'}</button>
+                                <button type="button" data-id-product="{$product.id_product|intval}" data-id-hotel="{$hotel_id|intval}" class="btn btn-primary service_product_add_to_cart">{l s='Add To Cart' mod='hotelreservationsystem'}</button>
                             </div>
                         </div>
                     </div>

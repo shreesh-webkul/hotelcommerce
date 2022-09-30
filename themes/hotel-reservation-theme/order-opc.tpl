@@ -165,7 +165,7 @@
 								{/if}
 								{if (isset($total_extra_demands) && $total_extra_demands) || (isset($total_additional_services) && $total_additional_services)}
 									<p>
-										<span>{l s='Total additional services'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
+										<span>{l s='Total extra services'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
 										<span class="cart_total_values">{displayPrice price=($total_extra_demands + $total_additional_services)}</span>
 									</p>
 								{/if}

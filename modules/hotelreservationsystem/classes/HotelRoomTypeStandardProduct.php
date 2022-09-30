@@ -93,9 +93,9 @@ class HotelRoomTypeStandardProduct extends ObjectModel
         return $rows;
     }
 
-    public function getIdProductsForHotelAndRoomType($idHotel = false, $idRoomType = false)
+    public function getIdProductsForHotelAndRoomType($idHotel = false, $idProductRoomType = false)
     {
-        if (!$idHotel && !$idRoomType) {
+        if (!$idHotel && !$idProductRoomType) {
             return false;
         }
 
@@ -103,35 +103,34 @@ class HotelRoomTypeStandardProduct extends ObjectModel
             $sql = 'SELECT `id_product` FROM `'._DB_PREFIX_.'htl_room_type_standard_product`
                 WHERE `element_type` = '.self::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$idHotel;
         }
-        if ($idHotel && $idRoomType) {
+        if ($idHotel && $idProductRoomType) {
             $sql  .= ' UNION ';
         } else {
             $sql = '';
         }
-        if ($idRoomType) {
+        if ($idProductRoomType) {
             $sql .= 'SELECT `id_product` FROM `'._DB_PREFIX_.'htl_room_type_standard_product`
-                WHERE `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$idRoomType;
+                WHERE `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$idProductRoomType;
         }
 
         return Db::getInstance()->executeS($sql);
     }
 
-    public function isRoomTypeLinkedWithProduct($idRoomType, $idStandardProduct)
+    public function isRoomTypeLinkedWithProduct($idProductRoomType, $idStandardProduct)
     {
         $sql = 'SELECT `id_room_type_standard_product` FROM  `'._DB_PREFIX_.'htl_room_type_standard_product`
-            WHERE `id_product` = '.(int)$idStandardProduct.' AND `id_element` = '.(int)$idRoomType.'
+            WHERE `id_product` = '.(int)$idStandardProduct.' AND `id_element` = '.(int)$idProductRoomType.'
             AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE;
 
         return Db::getInstance()->getValue($sql);
     }
 
-    public function getStandardProductsData($idProduct, $p = 1, $n = 0, $front = false, $subCategory = false, $idLang = false)
+    public function getStandardProductsData($idProductRoomType, $p = 1, $n = 0, $front = false, $subCategory = false, $idLang = false)
     {
         if (!$idLang) {
             $idLang = Context::getContext()->language->id;
         }
-        $objProduct = new ProductCore($idProduct);
-
+        $objProduct = new Product($idProductRoomType);
         if ($standardProducts = $objProduct->getProductStandardProducts(
             $idLang,
             $p,
@@ -143,71 +142,89 @@ class HotelRoomTypeStandardProduct extends ObjectModel
         )) {
             $objHotelRoomType = new HotelRoomType();
             $standardProducts = Product::getProductsProperties($idLang, $standardProducts);
-            $roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($idProduct);
-            foreach($standardProducts as &$product) {
-                $product['price_tax_exc'] = Product::getPriceStatic(
-                    (int)$product['id_product'],
-                    false,
-                    null,
-                    6,
-                    null,
-                    false,
-                    true,
+            // $roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($idProductRoomType);
+            $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
+            foreach($standardProducts as &$standardProduct) {
+                $standardProduct['price_tax_exc'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                    (int)$standardProduct['id_product'],
+                    (int)$idProductRoomType,
                     1,
-                    false,
-                    null,
-                    null,
-                    null,
-                    $specificPrice,
-                    true,
-                    true,
-                    null,
-                    true,
-                    $roomInfo['id']
+                    false
                 );
-
-                $product['price_tax_incl'] = Product::getPriceStatic(
-                    (int)$product['id_product'],
-                    true,
-                    null,
-                    6,
-                    null,
-                    false,
-                    true,
+                // $standardProduct['price_tax_exc'] = Product::getPriceStatic(
+                //     (int)$standardProduct['id_product'],
+                //     false,
+                //     null,
+                //     6,
+                //     null,
+                //     false,
+                //     true,
+                //     1,
+                //     false,
+                //     null,
+                //     null,
+                //     null,
+                //     $specificPrice,
+                //     true,
+                //     true,
+                //     null,
+                //     true,
+                //     $roomInfo['id']
+                // );
+                $standardProduct['price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                    (int)$standardProduct['id_product'],
+                    (int)$idProductRoomType,
                     1,
-                    false,
-                    null,
-                    null,
-                    null,
-                    $specificPrice,
-                    true,
-                    true,
-                    null,
-                    true,
-                    $roomInfo['id']
+                    true
                 );
+                // $standardProduct['price_tax_incl'] = Product::getPriceStatic(
+                //     (int)$standardProduct['id_product'],
+                //     true,
+                //     null,
+                //     6,
+                //     null,
+                //     false,
+                //     true,
+                //     1,
+                //     false,
+                //     null,
+                //     null,
+                //     null,
+                //     $specificPrice,
+                //     true,
+                //     true,
+                //     null,
+                //     true,
+                //     $roomInfo['id']
+                // );
 
                 $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
-                $product['price_without_reduction'] = Product::getPriceStatic(
-                    (int)$product['id_product'],
-                    $useTax,
-                    null,
-                    6,
-                    null,
-                    false,
-                    false,
+                $standardProduct['price_without_reduction'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                    (int)$standardProduct['id_product'],
+                    (int)$idProductRoomType,
                     1,
-                    false,
-                    null,
-                    null,
-                    null,
-                    $specificPrice,
-                    true,
-                    true,
-                    null,
-                    true,
-                    $roomInfo['id']
+                    $useTax
                 );
+                // $standardProduct['price_without_reduction'] = Product::getPriceStatic(
+                //     (int)$standardProduct['id_product'],
+                //     $useTax,
+                //     null,
+                //     6,
+                //     null,
+                //     false,
+                //     false,
+                //     1,
+                //     false,
+                //     null,
+                //     null,
+                //     null,
+                //     $specificPrice,
+                //     true,
+                //     true,
+                //     null,
+                //     true,
+                //     $roomInfo['id']
+                // );
             }
         }
 

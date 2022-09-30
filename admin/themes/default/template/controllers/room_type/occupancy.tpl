@@ -26,7 +26,7 @@
         <div class="alert alert-info">
             {l s='Set the occupancy of this room type. Enter how much adults and children this room type can accomodate.'}
 			<br /><br />
-			<b>{l s='Note'} : {l s='These occupancy settings will not affect "ROOM TYPE ADDITIONAL FACILITIES" any way. It will work separately.'}</b>
+			<b>{l s='Note'} : {l s='These occupancy settings will not affect "ROOM TYPE FACILITIES" any way. It will work separately.'}</b>
         </div>
 
 		<div class="form-group">

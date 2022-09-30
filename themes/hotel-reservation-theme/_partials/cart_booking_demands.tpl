@@ -2,17 +2,17 @@
 	{if (isset($selectedRoomDemands) && $selectedRoomDemands) || (isset($roomTypeStandardProducts) && $roomTypeStandardProducts)}
 		<ul class="nav nav-tabs">
 			{if isset($selectedRoomDemands) && $selectedRoomDemands}
-				<li class="active"><a href="#room_type_demands_desc" data-toggle="tab">{l s='Additional Facilities'}</a></li>
+				<li class="active"><a href="#room_type_demands_desc" data-toggle="tab">{l s='Facilities'}</a></li>
 			{/if}
 			{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-				<li{if !isset($selectedRoomDemands) || !$selectedRoomDemands} class="active"{/if}><a href="#room_type_standard_product_desc" data-toggle="tab">{l s='Additional Services'}</a></li>
+				<li{if !isset($selectedRoomDemands) || !$selectedRoomDemands} class="active"{/if}><a href="#room_type_standard_product_desc" data-toggle="tab">{l s='Products'}</a></li>
 			{/if}
 		</ul>
 		<div class="tab-content">
 			{if isset($selectedRoomDemands) && $selectedRoomDemands}
 				<div id="room_type_demands_desc" class="tab-pane active">
 					<div class="rooms_extra_demands_head">
-						<p class="rooms_extra_demands_text">{l s='Add below additional facilities to the rooms for better hotel experience'}</p>
+						<p class="rooms_extra_demands_text">{l s='Add below facilities to the rooms for better hotel experience'}</p>
 					</div>
 					{assign var=roomCount value=1}
 					{foreach $selectedRoomDemands as $key => $roomDemand}
@@ -69,7 +69,7 @@
 			{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
 				<div id="room_type_standard_product_desc" class="tab-pane{if !isset($selectedRoomDemands) || !$selectedRoomDemands} active{/if}">
 					<div class="rooms_extra_demands_head">
-						<p class="rooms_extra_demands_text">{l s='Add below additional services to the rooms for better hotel experience'}</p>
+						<p class="rooms_extra_demands_text">{l s='Add below products to the rooms for better hotel experience'}</p>
 					</div>
 					{assign var=roomCount value=1}
 					{foreach $selectedRoomStandardProduct as $key => $cartRoom}

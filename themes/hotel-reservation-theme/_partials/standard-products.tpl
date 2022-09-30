@@ -2,7 +2,7 @@
 {if isset($standard_products_exists) && $standard_products_exists}
     <ul class="nav nav-tabs product_description_tabs">
         {if $PS_STANDARD_PRODUCT_DISPLAY_TYPE == 'list' || ($PS_STANDARD_PRODUCT_DISPLAY_TYPE == 'slider' && !$PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER)}
-            <li class="active"><a href="#all_products" class="idTabHrefShort" data-toggle="tab">{l s='Additional Services'}</a></li>
+            <li class="active"><a href="#all_products" class="idTabHrefShort" data-toggle="tab">{l s='Products'}</a></li>
         {else}
             {foreach $standard_products_categories as $category}
                 <li {if $category@iteration == 1}class="active"{/if}><a class="idTabHrefShort" href="#category_{$category['id_category']}" data-toggle="tab">{$category['name']}</a></li>
@@ -26,24 +26,24 @@
                         {foreach $standard_products_by_category as $standard_product_category}
                             <div class="tab-pane {if $standard_product_category@iteration == 1}active{/if}" id="category_{$standard_product_category['id_category']}">
                                 <ul class="product-list">
-                                    {include file="{$tpl_dir}_partials/standard-products-list.tpl" standard_products=$standard_product_category.products}
+                                    {include file="{$tpl_dir}_partials/standard-products-list.tpl" standard_products=$standard_product_category.products group=$standard_product_category['id_category']}
                                 </ul>
                                 {if HotelRoomTypeStandardProduct::WK_NUM_RESULTS < $standard_product_category.num_products}
                                     <div class="show_more_btn_container">
-                                        <button class="btn get-standard-products" data-id_category="{$standard_product_category['id_category']}" data-page="2" data-num_total="{$standard_product_category.num_products}">{l s='Show More'}</button>
+                                        <button class="btn btn-default get-standard-products" data-id_category="{$standard_product_category['id_category']}" data-page="2" data-num_total="{$standard_product_category.num_products}">{l s='Show More'}</button>
                                     </div>
                                 {/if}
                             </div>
                         {/foreach}
                     {else}
                         <ul class="product-list">
-                            {include file="{$tpl_dir}_partials/standard-products-list.tpl" standard_products=$standard_products}
+                            {include file="{$tpl_dir}_partials/standard-products-list.tpl" standard_products=$standard_products group='all'}
                         </ul>
-                        {* {if HotelRoomTypeStandardProduct::WK_NUM_RESULTS < $standard_product_category.num_products} *}
+                        {if HotelRoomTypeStandardProduct::WK_NUM_RESULTS < $num_total_standard_products}
                             <div class="show_more_btn_container">
-                                <button class="btn get-standard-products" data-page="2" data-num_total="{$num_total_standard_products}"">{l s='Show More'}</button>
+                                <button class="btn btn-default get-standard-products" data-page="2" data-num_total="{$num_total_standard_products}">{l s='Show More'}</button>
                             </div>
-                        {* {/if} *}
+                        {/if}
                     {/if}
                 </div>
             {else}

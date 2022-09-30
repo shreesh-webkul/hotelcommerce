@@ -13,16 +13,16 @@
                         <th class="col-sm-3">
 							<span>{l s='name'}</span>
 						</th>
-                        <th class="col-sm-2">
+                        <th class="">
                             <span>{l s='Category'}</span>
                         </th>
-						<th class="col-sm-2">
+						<th class="">
 							<span>{l s='Price'}</span>
                         </th>
-                        <th class="col-sm-3">
+                        <th class="">
                             <span>{l s='Tax'}</span>
                         </th>
-                        <th class="col-sm-1">
+                        <th class="text-right">
                             <span>{l s='Action'}</span>
                         </th>
                     </tr>
@@ -55,11 +55,11 @@
                                     </div>
                                     <div class="help-block">{l s='Default tax rule: %s' sprintf=$product.default_tax_rules_group_name}
                                 </td>
-                                <td class="">
+                                <td class="text-right">
                                     <a href="#" class="btn btn-default button-edit-price field-view"><i class="icon-pencil"></i></a>
                                     <span class="field-edit" style="display:none">
-                                        <a href="#" class="btn btn-default btn-save" data-roomtype_url="{$link->getAdminLink('AdminRoomType', true)|addslashes}" data-id_product="{$product.id_product|escape:'html':'UTF-8'}" data-id_room_type_standard_product_price="{$product.id_room_type_standard_product_price|escape:'html':'UTF-8'}">{l s='save'}</a>
-                                        <a href="#" class="btn btn-default btn-cancel">{l s='Cancel'}</a>
+                                        <a href="#" class="btn btn-default btn-save" data-roomtype_url="{$link->getAdminLink('AdminRoomType', true)|addslashes}" data-id_product="{$product.id_product|escape:'html':'UTF-8'}" data-id_room_type_standard_product_price="{$product.id_room_type_standard_product_price|escape:'html':'UTF-8'}"><i class="icon-save"></i> {l s='save'}</a>
+                                        <a href="#" class="btn btn-default btn-cancel"><i class="icon-times"></i></a>
                                     </span>
                                 </td>
                             </tr>

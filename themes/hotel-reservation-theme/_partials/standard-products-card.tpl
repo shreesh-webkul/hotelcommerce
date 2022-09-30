@@ -26,7 +26,7 @@
                     </div>
                 </div>
             {/if}
-            {if ($product.available_for_order && $product.show_price && !isset($restricted_country_mode)) || isset($groups)}
+            {if $product.available_for_order && !$PS_CATALOG_MODE && !$order_date_restrict && !((isset($restricted_country_mode) && $restricted_country_mode))}
                 <div>
                     <button class="btn btn-block btn-standard-product{if isset($product.selected) && $product.selected} btn-danger remove_roomtype_product{else} btn-success add_product_to_roomtype{/if}" data-id-product="{$product.id_product}">{if isset($product.selected) && $product.selected}{l s='Remove'}{else}{l s='Select'}{/if}</button>
                 </div>

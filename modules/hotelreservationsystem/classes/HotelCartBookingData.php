@@ -804,7 +804,9 @@ class HotelCartBookingData extends ObjectModel
                     $value['id_room'],
                     $value['date_from'],
                     $value['date_to'],
-                    1
+                    1,
+                    0,
+                    false
                 );
 
                 $cart_detail_data[$key]['additional_service'] = $objHotelRoomTypeStandardProduct->getStandardProductsData($value['id_product']);
@@ -825,7 +827,8 @@ class HotelCartBookingData extends ObjectModel
                     $value['date_from'],
                     $value['date_to'],
                     $value['id'],
-                    true
+                    true,
+                    false
                 );
                 // By webkul New way to calculate product prices with feature Prices
                 $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice($value['id_product'], $value['date_from'], $value['date_to']);
@@ -1084,7 +1087,6 @@ class HotelCartBookingData extends ObjectModel
                                     $data_v['id'],
                                     true
                                 );
-
                                 $totalAdditionalServicePrice = $demandPrice + $standardProductPrice;
 
                                 if (isset($cartHotelData[$prodKey]['date_diff'][$dateJoin])) {

@@ -1365,11 +1365,14 @@ $(document).ready(function() {
         }
     });
 
+    var ajax_check_var = '';
+
     $('#standard_products_cont .get-standard-products').on('click', function(e) {
         var triggerElement = $(this);
         var p = $(this).data('page');
         var id_category = $(this).data('id_category');
-        ajax_req = $.ajax({
+        abortRunningAjax();
+        ajax_check_var = $.ajax({
             type: 'POST',
             headers: {
                 "cache-control": "no-cache"
@@ -1384,6 +1387,9 @@ $(document).ready(function() {
                 action: 'getStandardProducts',
                 ajax: true,
                 token: static_token
+            },
+            beforeSend: function() {
+                triggerElement.attr('disabled', 'disabled');
             },
             success: function(result) {
                 if (result.status) {
@@ -1416,10 +1422,18 @@ $(document).ready(function() {
             {
                 if (textStatus != 'error' || errorThrown != '')
                     showErrorMessage(textStatus + ': ' + errorThrown);
+            },
+            complete: function() {
+                triggerElement.attr('disabled', false);
             }
         });
     });
 
+    function abortRunningAjax() {
+        if (ajax_check_var) {
+            ajax_check_var.abort();
+        }
+    }
 });
 
 function removeRoomtypeProduct(that)

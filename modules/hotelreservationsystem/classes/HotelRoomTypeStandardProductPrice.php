@@ -69,12 +69,14 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
         );
     }
 
-    public function getProductPrice($idProduct, $idRoomType, $quantity, $useTax = null, $id_cart = false)
+    public function getProductPrice($idProduct, $idProductRoomType, $quantity, $useTax = null, $id_cart = false, $id_address = null, $test= false)
     {
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
 
-        $price = Product::getPriceStatic(
+        $id_address =  $id_address ? $id_address : Product::getIdAddressForTaxCalculation($idProductRoomType);
+
+        $price = ProductCore::getPriceStatic(
             (int)$idProduct,
             $useTax,
             null,
@@ -85,14 +87,14 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
             (int)$quantity,
             false,
             null,
-            null,
-            null,
+            $id_cart,
+            $id_address,
             $specificPrice,
             true,
             true,
             null,
             true,
-            (int)$idRoomType
+            (int)$idProductRoomType
         );
 
         return $price * (int)$quantity;

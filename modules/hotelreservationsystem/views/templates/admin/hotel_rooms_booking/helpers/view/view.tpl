@@ -105,7 +105,9 @@
         {include file="../../_partials/booking-rooms.tpl"}
     {/if}
 </div>
-{include file="../../_partials/cart-modal.tpl"}
+<div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    {include file="../../_partials/cart-modal.tpl"}
+</div>
 
 <!-- Modal for reallocation of rooms -->
 <div class="modal fade" id="mySwappigModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

@@ -4220,14 +4220,10 @@ class AdminOrdersControllerCore extends AdminController
         if ($selectedServices = Tools::getValue('selected_service')) {
             // valiadate services being added
             if (Validate::isLoadedObject($objHotelBookingDetail = new HotelBookingDetail($idBookingDetail))) {
-                $objHotelRoomType = new HotelRoomType();
                 $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-
-                $roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($objHotelBookingDetail->id_product);
                 $qty = Tools::getValue('service_qty');
-
                 foreach ($selectedServices as $key => $service) {
-                    if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($roomInfo['id'], $service)) {
+                    if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($objHotelBookingDetail->id_product, $service)) {
                         $objProduct = new Product($service, false, $this->context->language->id);
                         if ($objProduct->allow_multiple_quantity) {
                             if (!Validate::isUnsignedInt($qty[$service])) {
@@ -4667,18 +4663,16 @@ class AdminOrdersControllerCore extends AdminController
     public function ajaxProcessUpdateStandardProduct()
     {
         $operator = Tools::getValue('operator', 'up');
-        $idProduct = Tools::getValue('id_product');
+        $idStandardProduct = Tools::getValue('id_product');
         $idCartBooking = Tools::getValue('id_cart_booking');
         $qty = Tools::getValue('qty');
 
         if (Validate::isLoadedObject($objHotelCartBookingData = new HotelCartBookingData($idCartBooking))) {
-            $objHotelRoomType = new HotelRoomType();
-            $roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($objHotelCartBookingData->id_product);
             $objStandardProductCartDetail = new StandardProductCartDetail();
 
             if ($operator == 'up') {
                 $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($roomInfo['id'], $idProduct)) {
+                if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idStandardProduct)) {
                     // validate quanitity
                     $objProduct = new Product($objHotelCartBookingData->id_product);
                     if ($objProduct->allow_multiple_quantity) {
@@ -4696,7 +4690,7 @@ class AdminOrdersControllerCore extends AdminController
             if (empty($this->errors)) {
                 if ($objStandardProductCartDetail->updateCartStandardProduct(
                     $idCartBooking,
-                    $idProduct,
+                    $idStandardProduct,
                     $qty,
                     $objHotelCartBookingData->id_cart,
                     $operator

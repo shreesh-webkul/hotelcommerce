@@ -140,7 +140,8 @@ class StandardProductCartDetail extends ObjectModel
         $dateTo = 0,
         $htlCartBookingId = 0,
         $getTotalPrice = 0,
-        $useTax = null
+        $useTax = null,
+        $id_address = null
     ) {
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
@@ -184,13 +185,14 @@ class StandardProductCartDetail extends ObjectModel
         if ($standardProducts = Db::getInstance()->executeS($sql)) {
             foreach ($standardProducts as $product) {
                 if ($getTotalPrice) {
-                    $roomTypeInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($product['room_type_id_product']);
                     $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
                     $totalPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice(
                         (int)$product['id_product'],
-                        $roomTypeInfo['id'],
+                        (int)$product['room_type_id_product'],
                         $qty,
-                        $useTax
+                        $useTax,
+                        false,
+                        $id_address
                     );
 
                 } else {
@@ -210,21 +212,27 @@ class StandardProductCartDetail extends ObjectModel
                         }
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            $useTax
+                            $useTax,
+                            false,
+                            $id_address
                         );
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            false
+                            false,
+                            false,
+                            $id_address
                         );
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            true
+                            true,
+                            false,
+                            $id_address
                         );
                     } else {
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['htl_cart_booking_id'] = $product['htl_cart_booking_id'];
@@ -242,15 +250,19 @@ class StandardProductCartDetail extends ObjectModel
                             $selectedStandardProducts[$product['htl_cart_booking_id']]['quantity'] = $product['quantity'];
                             $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
                                 (int)$product['id_product'],
-                                $roomTypeInfo['id'],
+                                (int)$product['room_type_id_product'],
                                 1,
-                                false
+                                false,
+                                false,
+                                $id_address
                             );
                             $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
                                 (int)$product['id_product'],
-                                $roomTypeInfo['id'],
+                                (int)$product['room_type_id_product'],
                                 1,
-                                true
+                                true,
+                                false,
+                                $id_address
                             );
                         } else {
                             $selectedStandardProducts[$product['htl_cart_booking_id']]['selected_products_info'] = ($product['id_product']) ? array(
@@ -259,15 +271,19 @@ class StandardProductCartDetail extends ObjectModel
                                     'quantity' => $product['quantity'],
                                     'unit_price_tax_excl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
                                         (int)$product['id_product'],
-                                        $roomTypeInfo['id'],
+                                        (int)$product['room_type_id_product'],
                                         1,
-                                        false
+                                        false,
+                                        false,
+                                        $id_address
                                     ),
                                     'unit_price_tax_incl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
                                         (int)$product['id_product'],
-                                        $roomTypeInfo['id'],
+                                        (int)$product['room_type_id_product'],
                                         1,
-                                        true
+                                        true,
+                                        false,
+                                        $id_address
                                     ),
                                 )
                             ): array();
@@ -275,21 +291,27 @@ class StandardProductCartDetail extends ObjectModel
 
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            $useTax
+                            $useTax,
+                            false,
+                            $id_address
                         );
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            false
+                            false,
+                            false,
+                            $id_address
                         );
                         $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
                             (int)$product['id_product'],
-                            $roomTypeInfo['id'],
+                            (int)$product['room_type_id_product'],
                             $qty,
-                            true
+                            true,
+                            false,
+                            $id_address
                         );
                     }
                 }

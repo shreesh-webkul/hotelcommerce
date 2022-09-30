@@ -337,8 +337,7 @@ class CartCore extends ObjectModel
 
         foreach ($products as $product) {
             // products refer to the cart details
-
-            $address_id = Cart::getIdAddressForTaxCalculation($product['id_product']);
+            $address_id = Product::getIdAddressForTaxCalculation($product['id_product']);
             if (!Address::addressExists($address_id)) {
                 $address_id = null;
             }
@@ -649,7 +648,7 @@ class CartCore extends ObjectModel
             }
 
             // hotel address for tax calculation
-            $address_id = Cart::getIdAddressForTaxCalculation($row['id_product']);
+            $address_id = Product::getIdAddressForTaxCalculation($row['id_product']);
             if (!Address::addressExists($address_id)) {
                 $address_id = null;
             }
@@ -1686,7 +1685,7 @@ class CartCore extends ObjectModel
             }
 
             // hotel address for tax calculation
-            $id_address = Cart::getIdAddressForTaxCalculation($product['id_product']);
+            $id_address = Product::getIdAddressForTaxCalculation($product['id_product']);
             if (!$address_factory->addressExists($id_address)) {
                 $id_address = null;
             }
@@ -2382,7 +2381,6 @@ class CartCore extends ObjectModel
                 );
             }
         }
-
         $final_package_list = $hotelWisePackageList;
         // END $package_list hotel wise
         $cache[$cache_key] = $final_package_list;
@@ -2913,11 +2911,6 @@ class CartCore extends ObjectModel
             }
         }
         return $collection;
-    }
-
-    public static function getIdAddressForTaxCalculation($id_product)
-    {
-        return HotelRoomType::getHotelIdAddressByIdProduct($id_product);
     }
 
     /**

@@ -2,17 +2,17 @@
 	{if (isset($extraDemands) && $extraDemands) || (isset($additionalServices) && $additionalServices)}
 		<ul class="nav nav-tabs">
 			{if isset($extraDemands) && $extraDemands}
-				<li class="active"><a href="#room_type_demands_desc" data-toggle="tab">{l s='Additional Facilities'}</a></li>
+				<li class="active"><a href="#room_type_demands_desc" data-toggle="tab">{l s='Facilities'}</a></li>
 			{/if}
 			{if isset($additionalServices) && $additionalServices}
-				<li{if !isset($extraDemands) || !$extraDemands} class="active"{/if}><a href="#room_type_standard_product_desc" data-toggle="tab">{l s='Additional Services'}</a></li>
+				<li{if !isset($extraDemands) || !$extraDemands} class="active"{/if}><a href="#room_type_standard_product_desc" data-toggle="tab">{l s='Products'}</a></li>
 			{/if}
 		</ul>
 		<div class="tab-content">
 			{if isset($extraDemands) && $extraDemands}
 				<div id="room_type_demands_desc" class="tab-pane active">
 					<div class="rooms_extra_demands_head">
-						<p class="rooms_extra_demands_text">{l s='Below are the additional facilities chosen by you in this booking'}</p>
+						<p class="rooms_extra_demands_text">{l s='Below are the facilities chosen by you in this booking'}</p>
 					</div>
 					{assign var=roomCount value=1}
 					{foreach $extraDemands as $roomDemand}
@@ -47,7 +47,7 @@
 			{if isset($additionalServices) && $additionalServices}
 				<div id="room_type_standard_product_desc" class="tab-pane{if !isset($extraDemands) || !$extraDemands} active{/if}">
 					<div class="rooms_extra_demands_head">
-						<p class="rooms_extra_demands_text">{l s='Below are the additional services chosen by you in this booking'}</p>
+						<p class="rooms_extra_demands_text">{l s='Below are the products chosen by you in this booking'}</p>
 					</div>
 					{assign var=roomCount value=1}
 					{foreach $additionalServices as $key => $roomAdditionalService}

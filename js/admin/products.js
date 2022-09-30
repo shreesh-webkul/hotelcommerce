@@ -1038,8 +1038,14 @@ product_tabs['Informations'] = new function(){
 		$('#service_product_type').on('change',function(){
 			if (parseInt($(this).val()) == with_room_type) {
 				$('#associated_hotel_rooms_tree').show('slow');
+				$('#show_at_front_container').show('slow');
+				$('#product_options').show('slow');
+				$('#independent_product_info').hide('slow');
 			} else {
 				$('#associated_hotel_rooms_tree').hide('slow');
+				$('#show_at_front_container').hide('slow');
+				$('#product_options').hide('slow');
+				$('#independent_product_info').show('slow');
 			}
 		});
 

@@ -3,7 +3,6 @@ $(document).ready(function() {
     toggleSearchFields();
     $('#booking_product').on('change', function() {
         toggleSearchFields();
-        console.log('dasda');
     });
 
     // add action for render kpis
@@ -16,8 +15,8 @@ $(document).ready(function() {
         var current_btn = $(this);
         current_btn.attr('disabled', 'disabled');
         var search_id_prod = $("#search_id_prod").val();
-
-        var id_product = $(this).attr('data-id-product');
+        var id_product = $(this).data('id-product');
+        var id_hotel = $(this).data('id-hotel');
         var qty = current_btn.closest('.product-container').find('.product_quantity').val();
         if (typeof(qty) == 'undefined') {
             qty = 1;
@@ -31,6 +30,7 @@ $(document).ready(function() {
                 ajax: true,
                 action: 'updateProductInCart',
                 id_product: id_product,
+                id_hotel: id_hotel,
                 qty: qty,
                 search_id_prod: search_id_prod,
                 opt: 1,
@@ -67,8 +67,9 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result) {
-                    current_btn.closest('tr').remove();
-                    $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    // current_btn.closest('tr').remove();
+                    // $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    refreshCartData();
                     refresh_kpis(true);
                 }
             }
@@ -192,7 +193,9 @@ $(document).ready(function() {
                             });
                             $('#room_type').append(html);
                         } else {
-                            showErrorMessage(noRoomTypeAvlTxt);
+                            if($('#booking_product').val() == 1) {
+                                showErrorMessage(noRoomTypeAvlTxt);
+                            }
                             $('#room_type').append(html);
                         }
                     }
@@ -295,7 +298,7 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result) {
-                    if (result.rms_in_cart) {
+                    if (result.total_products_in_cart) {
                         $(".cart_booking_btn").removeAttr('disabled');
                         $current_btn.removeAttr('disabled');
                     }
@@ -367,7 +370,7 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result) {
-                    if (result.rms_in_cart) {
+                    if (result.total_products_in_cart) {
                         $(".cart_booking_btn").removeAttr('disabled');
                         $current_btn.removeAttr('disabled');
                     }
@@ -438,12 +441,13 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result) {
-                    if (!(result.rms_in_cart)) {
+                    if (!(result.total_products_in_cart)) {
                         $(".cart_booking_btn").attr('disabled', 'true');
                     }
 
-                    btn.parent().parent().remove();
-                    $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    // btn.parent().parent().remove();
+                    // $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    refreshCartData();
                     refresh_kpis(true);
                     // $('#cart_record').html(result.rms_in_cart);
 
@@ -465,7 +469,7 @@ $(document).ready(function() {
 
                     panel_btn.removeClass('btn-danger').addClass('btn-primary').html(add_to_cart);
 
-                    $("#htl_rooms_list").empty().append(result.room_tpl);
+                    $("#htl_rooms_list").replaceWith(result.room_tpl);
                 }
             }
         });
@@ -504,12 +508,13 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result) {
-                    if (!(result.rms_in_cart)) {
+                    if (!(result.total_products_in_cart)) {
                         $(".cart_booking_btn").attr('disabled', 'true');
                     }
 
-                    $(".cart_tbody tr td button[data-id-cart-book-data='" + id_cart_book_data + "']").parent().parent().remove();
-                    $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    // $(".cart_tbody tr td button[data-id-cart-book-data='" + id_cart_book_data + "']").parent().parent().remove();
+                    // $('#cart_total_amt').html(currency_prefix + result.total_amount + currency_suffix);
+                    refreshCartData();
                     refresh_kpis(true);
                     // $('#cart_record').html(result.rms_in_cart);
 
@@ -578,8 +583,7 @@ function refreshCartData()
         },
         success: function(result) {
             if (result) {
-                $("#cartModal").remove()
-                $("#content").append(result.cart_content);
+                $("#cartModal").html(result.cart_content);
             }
         }
     });

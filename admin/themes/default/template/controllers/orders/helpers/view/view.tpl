@@ -1101,7 +1101,7 @@
 										{/if}
 										{if isset($additional_service_price_tax_excl) && $additional_service_price_tax_excl > 0}
 											<tr id="total_products">
-												<td class="text-right"><strong>{l s='Total additional services (tax excl.)'}</strong></td>
+												<td class="text-right"><strong>{l s='Total Extra services (tax excl.)'}</strong></td>
 												<td class="amount text-right nowrap">
 													<strong>{displayPrice price=$additional_service_price_tax_excl currency=$currency->id}</strong>
 												</td>
@@ -1119,7 +1119,7 @@
 										{/if}
 										{if isset($additional_service_price_tax_excl) && $additional_service_price_tax_excl > 0}
 											<tr id="total_tax_order">
-												<td class="text-right"><strong>{l s='Additional services Tax'}</strong></td>
+												<td class="text-right"><strong>{l s='Extra services Tax'}</strong></td>
 												<td class="text-right nowrap">
 													<strong>{displayPrice price=($additional_service_price_tax_incl - $additional_service_price_tax_excl) currency=$currency->id}</strong>
 												</td>

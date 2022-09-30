@@ -26,10 +26,10 @@
 				</button>
 				<ul class="nav nav-tabs" role="tablist">
 					{if isset($selectedRoomDemands) && $selectedRoomDemands}
-						<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Additional Facilities'}</a></li>
+						<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Facilities'}</a></li>
 					{/if}
 					{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Additional Services'}</a></li>
+						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
 					{/if}
 				</ul>
 			</div>
@@ -38,7 +38,7 @@
 					{if isset($selectedRoomDemands) && $selectedRoomDemands}
 						<div id="room_type_demands_desc" class="tab-pane active">
 							<div class="rooms_extra_demands_head">
-								<p class="rooms_extra_demands_text">{l s='Add below additional facilities to the room for better hotel experience'}</p>
+								<p class="rooms_extra_demands_text">{l s='Add below facilities to the room for better hotel experience'}</p>
 							</div>
 							<div id="room_type_demands_desc">
 								{if isset($selectedRoomDemands) && $selectedRoomDemands}
@@ -99,7 +99,7 @@
 					{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
 						<div id="room_type_standard_product_desc" class="tab-pane{if !isset($selectedRoomDemands) || !$selectedRoomDemands} active{/if}">
 							<div class="rooms_extra_demands_head">
-								<p class="rooms_extra_demands_text">{l s='Add below additional facilities to the rooms for better hotel experience'}</p>
+								<p class="rooms_extra_demands_text">{l s='Add below products to the rooms for better hotel experience'}</p>
 							</div>
 							<div id="room_type_services_desc">
 								{assign var=roomCount value=1}

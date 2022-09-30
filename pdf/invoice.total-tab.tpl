@@ -35,7 +35,7 @@
 	{if isset($footer.additional_service_price_tax_excl) && $footer.additional_service_price_tax_excl}
 		<tr>
 			<td class="grey" width="70%">
-				{l s='Extra Demands Cost (tax excl.)' pdf='true'}
+				{l s='Additional service Cost (tax excl.)' pdf='true'}
 			</td>
 			<td class="white" width="30%">
 				{displayPrice currency=$order->id_currency price=$footer.additional_service_price_tax_excl}
@@ -55,7 +55,7 @@
 	{if isset($footer.additional_service_price_tax_excl) && $footer.additional_service_price_tax_excl}
 		<tr>
 			<td class="grey" width="70%">
-				{l s='Extra Demands Tax' pdf='true'}
+				{l s='Additional service Tax' pdf='true'}
 			</td>
 			<td class="white" width="30%">
 				{displayPrice currency=$order->id_currency price=($footer.additional_service_price_tax_incl - $footer.additional_service_price_tax_excl)}

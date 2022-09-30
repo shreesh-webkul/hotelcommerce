@@ -67,12 +67,12 @@
 				<tr class="{if !$label_printed}tr-border-top{/if}">
 					{if !$label_printed}
 						<td class="white" rowspan="{$bd|count}">
-							{if $label == 'product_tax'}
-								{l s='Rooms' pdf='true'}
+							{if $label == 'additional_services_tax'}
+								{l s='Additional service' pdf='true'}
 							{elseif $label == 'room_tax'}
 								{l s='Rooms' pdf='true'}
 							{elseif $label == 'extra_demands_tax'}
-								{l s='Extra Service' pdf='true'}
+								{l s='Additional service' pdf='true'}
 							{elseif $label == 'service_products_tax'}
 								{l s='Service Products' pdf='true'}
 							{elseif $label == 'shipping_tax'}

@@ -184,7 +184,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     {
         $obj_htl_info = new HotelBranchInformation();
         $obj_rm_type = new HotelRoomType();
-        $obj_cart_book_data = new HotelCartBookingData();
+        $objHotelCartBookingData = new HotelCartBookingData();
 
 
         $hotel_list = $obj_htl_info->hotelBranchesInfo(false, 1);
@@ -195,7 +195,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             1
         );
         $all_room_type = $obj_rm_type->getRoomTypeByHotelId($this->hotel_id, Configuration::get('PS_LANG_DEFAULT'), 1);
-        $rms_in_cart = $obj_cart_book_data->getCountRoomsInCart($this->id_cart, $this->id_guest);
+        // $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
 
         $this->tpl_view_vars = array(
             'hotel_list' => $hotel_list,
@@ -216,9 +216,9 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'id_guest' => $this->id_guest,
         );
 
+        $objHotelCartBookingData = new HotelCartBookingData();
         if ($cartProducts = $this->context->cart->getProducts()) {
-            $obj_cart_book_data = new HotelCartBookingData();
-            if ($cart_bdata = $obj_cart_book_data->getCartBookingDetailsByIdCartIdGuest(
+            if ($cart_bdata = $objHotelCartBookingData->getCartBookingDetailsByIdCartIdGuest(
                 $this->id_cart,
                 $this->id_guest,
                 Configuration::get('PS_LANG_DEFAULT')
@@ -230,7 +230,11 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                 $smartyVars['cart_normal_data'] = $normalCartProduct;
             }
 
+
         }
+        $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
+        $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
+        $smartyVars['total_products_in_cart'] = (int)$rms_in_cart + (int)$products_in_cart;
         $smartyVars['cart_tamount'] = $this->context->cart->getOrderTotal();
 
         return $smartyVars;
@@ -250,7 +254,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
 
     public function assignRoomBookingForm()
     {
-        $obj_booking_dtl = new HotelBookingDetail();
+        $objHotelBookingDetail = new HotelBookingDetail();
 
         $adult = 0;
         $children = 0;
@@ -270,9 +274,6 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         );
 
         //To show info of every date
-        $start_date = $this->date_from; // hard-coded '01' for first day
-        $last_day_this_month  = $this->date_to;
-
         $bookingParams = array();
         $bookingParams['hotel_id'] = $this->hotel_id;
         $bookingParams['room_type'] = $this->room_type;
@@ -288,13 +289,16 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $bookingParams['id_guest'] = $this->id_guest;
         $bookingParams['search_cart_rms'] = 1;
 
+        $start_date = $this->date_from; // hard-coded '01' for first day
+        $last_day_this_month  = date("Y-m-t", strtotime($this->date_from));;
+
         while ($start_date <= $last_day_this_month) {
             $cal_date_from = $start_date;
             $cal_date_to = date('Y-m-d', strtotime('+1 day', strtotime($cal_date_from)));
             $bookingParams['date_from'] = $cal_date_from;
             $bookingParams['date_to'] = $cal_date_to;
 
-            $booking_calendar_data[$cal_date_from] = $obj_booking_dtl->getBookingData($bookingParams);
+            $booking_calendar_data[$cal_date_from] = $objHotelBookingDetail->getBookingData($bookingParams);
             $start_date = date('Y-m-d', strtotime('+1 day', strtotime($start_date)));
         }
 
@@ -307,6 +311,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                 $check_css_condition_var = 'default_unavailable';
             }
         }
+        $currency = new Currency((int)Configuration::get('PS_CURRENCY_DEFAULT'));
         // booking allotment types
         $allotmentTypes = HotelBookingDetail::getAllAllotmentTypes();
 
@@ -343,8 +348,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $id_cart,
         $id_guest
     ) {
-        $obj_booking_dtl = new HotelBookingDetail();
-        $obj_cart_book_data = new HotelCartBookingData();
+        $objHotelBookingDetail = new HotelBookingDetail();
+        $objHotelCartBookingData = new HotelCartBookingData();
 
         $bookingParams = array();
         $bookingParams['date_from'] = $date_from;
@@ -363,7 +368,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $bookingParams['id_guest'] = $id_guest;
         $bookingParams['search_cart_rms'] = 1;
 
-        $booking_data = $obj_booking_dtl->getBookingData($bookingParams);
+        $booking_data = $objHotelBookingDetail->getBookingData($bookingParams);
         if ($booking_data) {
             foreach ($booking_data['rm_data'] as $key_bk_data => $value_bk_data) {
                 if (isset($value_bk_data['data']['booked']) && $value_bk_data['data']['booked']) {
@@ -381,8 +386,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                                 } else {
                                     $booking_data['rm_data'][$key_bk_data]['data']['booked'][$booked_k1]['detail'][$kDtl]['alloted_cust_email'] = "No customer email found";
                                 }
-                                $booking_data['rm_data'][$key_bk_data]['data']['booked'][$booked_k1]['detail'][$kDtl]['avail_rooms_to_realloc'] = $obj_booking_dtl->getAvailableRoomsForReallocation($booked_v1['detail'][$kDtl]['date_from'], $booked_v1['detail'][$kDtl]['date_to'], $booked_v1['id_product'], $booked_v1['id_hotel']);
-                                $booking_data['rm_data'][$key_bk_data]['data']['booked'][$booked_k1]['detail'][$kDtl]['avail_rooms_to_swap'] = $obj_booking_dtl->getAvailableRoomsForSwapping($booked_v1['detail'][$kDtl]['date_from'], $booked_v1['detail'][$kDtl]['date_to'], $booked_v1['id_product'], $booked_v1['id_hotel'], $booked_v1['id_room']);
+                                $booking_data['rm_data'][$key_bk_data]['data']['booked'][$booked_k1]['detail'][$kDtl]['avail_rooms_to_realloc'] = $objHotelBookingDetail->getAvailableRoomsForReallocation($booked_v1['detail'][$kDtl]['date_from'], $booked_v1['detail'][$kDtl]['date_to'], $booked_v1['id_product'], $booked_v1['id_hotel']);
+                                $booking_data['rm_data'][$key_bk_data]['data']['booked'][$booked_k1]['detail'][$kDtl]['avail_rooms_to_swap'] = $objHotelBookingDetail->getAvailableRoomsForSwapping($booked_v1['detail'][$kDtl]['date_from'], $booked_v1['detail'][$kDtl]['date_to'], $booked_v1['id_product'], $booked_v1['id_hotel'], $booked_v1['id_room']);
                             }
                         }
                     }
@@ -412,8 +417,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $helper->title = $this->l('Products In Cart', null, null, false);
         $helper->href = '#cartModal';
         $helper->value = 0;
-        $obj_cart_book_data = new HotelCartBookingData();
-        $rms_in_cart = $obj_cart_book_data->getCountRoomsInCart($this->id_cart, $this->id_guest);
+        $objHotelCartBookingData = new HotelCartBookingData();
+        $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
         $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
         $helper->value = (int)$rms_in_cart + (int)$products_in_cart;
         $helper->source = $this->context->link->getAdminLink('AdminHotelRoomsBooking').'&ajax=1&action=getKpi&kpi=room_in_cart';
@@ -427,6 +432,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $helper->value = $this->l('Book Now');
         $helper->title = $this->l('Proceed to checkout');
         $helper->href = $this->context->link->getAdminLink('AdminOrders').'&addorder&cart_id='.$this->id_cart.'&guest_id='.$this->id_guest;
+        $helper->source = $this->context->link->getAdminLink('AdminHotelRoomsBooking').'&ajax=1&action=getKpi&kpi=book_now';
         $kpis[] = $helper->generate();
 
         $helper = new HelperKpiRow();
@@ -439,8 +445,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     {
         $kpi = Tools::getValue('kpi');
         if ('room_in_cart' == $kpi) {
-            $obj_cart_book_data = new HotelCartBookingData();
-            $rms_in_cart = $obj_cart_book_data->getCountRoomsInCart($this->id_cart, $this->id_guest);
+            $objHotelCartBookingData = new HotelCartBookingData();
+            $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
             $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
             die(json_encode(array('value' => (int)$rms_in_cart + (int)$products_in_cart)));
         }
@@ -448,6 +454,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         if ('order_total' == $kpi) {
             die(json_encode(array('value' => Tools::displayPrice($this->context->cart->getOrderTotal()))));
         }
+
+        die(json_encode(array('status' => false)));
     }
 
     public function ajaxProcessGetRoomType()
@@ -466,6 +474,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $id_product = Tools::getValue('id_product');
         $quantity = Tools::getValue('qty', 1);
         $id_cart = $this->context->cart->id;
+        $id_hotel = Tools::getValue('id_hotel');
         $opt = Tools::getValue('opt', 1);
 
         if ($opt) {
@@ -485,12 +494,19 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                     }
                 }
             }
+            // get hotel address for product tax calculation
+            if (validate::isLoadedObject($objHotelBranch = new HotelBranchInformation($id_hotel))) {
+                $hotelIdAddress = $objHotelBranch->getHotelIdAddress();
+            } else {
+                $this->errrors[] = $this->l('Hotel not found');
+            }
+
         }
 
         if (empty($this->errors)) {
             if ($opt) {
                 $direction = 'up';
-                if ($this->context->cart->updateQty($quantity, $product->id, null, false, $direction)) {
+                if ($this->context->cart->updateQty($quantity, $product->id, null, false, $direction, $hotelIdAddress)) {
                     $response = array(
                         'status' => true,
                         'total_amount' => $this->context->cart->getOrderTotal()
@@ -541,8 +557,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
 
         $opt = Tools::getValue('opt'); // if 1 then add quantity or if 0 means delete quantity
 
-        $obj_booking_dtl = new HotelBookingDetail();
-        $num_day = $obj_booking_dtl->getNumberOfDays($date_from, $date_to); //quantity of product
+        $objHotelBookingDetail = new HotelBookingDetail();
+        $num_day = $objHotelBookingDetail->getNumberOfDays($date_from, $date_to); //quantity of product
         $product = new Product($id_product, false, Configuration::get('PS_LANG_DEFAULT'));
 
         if ($opt) {
@@ -570,24 +586,25 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $id_cart = $this->context->cart->id;
         $id_guest = $this->context->cookie->id_guest;
 
-        $obj_cart_book_data = new HotelCartBookingData();
+        $objHotelCartBookingData = new HotelCartBookingData();
         if ($opt) {
-            $obj_cart_book_data->id_cart = $id_cart;
-            $obj_cart_book_data->id_guest = $id_guest;
-            $obj_cart_book_data->id_product = $id_product;
-            $obj_cart_book_data->id_room = $id_room;
-            $obj_cart_book_data->id_hotel = $id_hotel;
-            $obj_cart_book_data->quantity = $num_day;
-            $obj_cart_book_data->id_currency = Configuration::get('PS_CURRENCY_DEFAULT');
-            $obj_cart_book_data->booking_type = $booking_type;
-            $obj_cart_book_data->comment = $comment;
-            $obj_cart_book_data->date_from = $date_from;
-            $obj_cart_book_data->date_to = $date_to;
-            $obj_cart_book_data->save();
+            $objHotelCartBookingData->id_cart = $id_cart;
+            $objHotelCartBookingData->id_guest = $id_guest;
+            $objHotelCartBookingData->id_product = $id_product;
+            $objHotelCartBookingData->id_room = $id_room;
+            $objHotelCartBookingData->id_hotel = $id_hotel;
+            $objHotelCartBookingData->quantity = $num_day;
+            $objHotelCartBookingData->id_currency = Configuration::get('PS_CURRENCY_DEFAULT');
+            $objHotelCartBookingData->booking_type = $booking_type;
+            $objHotelCartBookingData->comment = $comment;
+            $objHotelCartBookingData->date_from = $date_from;
+            $objHotelCartBookingData->date_to = $date_to;
+            $objHotelCartBookingData->save();
 
             $obj_rm_info = new HotelRoomInformation($id_room);
             $total_amount = $this->context->cart->getOrderTotal();
-            $rms_in_cart = $obj_cart_book_data->getCountRoomsInCart($id_cart, $id_guest);
+            $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($id_cart, $id_guest);
+            $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
 
             $bookingParams = array();
             $bookingParams['date_from'] = $search_date_from;
@@ -606,7 +623,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $bookingParams['id_guest'] = $id_guest;
             $bookingParams['search_cart_rms'] = 1;
 
-            $booking_stats = $obj_booking_dtl->getBookingData($bookingParams);
+            $booking_stats = $objHotelBookingDetail->getBookingData($bookingParams);
             //$rm_amount = $unit_price * (int)$num_day;
             //$rm_amount = Tools::ps_round($rm_amount, 2);
             //
@@ -624,21 +641,22 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                                 'date_to' => date('Y-M-d', strtotime($date_to)),
                                 'amount' => $rm_amount,
                                 'qty' => $num_day,
-                                'rms_in_cart' => $rms_in_cart,
+                                'total_products_in_cart' => (int)$rms_in_cart + (int)$products_in_cart,
                                 'total_amount' => $total_amount,
                                 'booking_stats' => $booking_stats,
-                                'id_cart_book_data' => $obj_cart_book_data->id);
+                                'id_cart_book_data' => $objHotelCartBookingData->id);
 
-            if ($obj_cart_book_data->id) {
+            if ($objHotelCartBookingData->id) {
                 die(json_encode($cart_data));
             } else {
                 die(0);
             }
         } else {
             $total_amount = $this->context->cart->getOrderTotal();
-            $data_dlt = $obj_cart_book_data->deleteRowById($id_cart_book_data);
+            $data_dlt = $objHotelCartBookingData->deleteRowById($id_cart_book_data);
             if ($data_dlt) {
-                $rms_in_cart = $obj_cart_book_data->getCountRoomsInCart($id_cart, $id_guest);
+                $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($id_cart, $id_guest);
+                $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
 
                 if (!$ajax_delete) {
                     $bookingParams = array();
@@ -658,10 +676,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                     $bookingParams['id_guest'] = $id_guest;
                     $bookingParams['search_cart_rms'] = 1;
 
-                    $booking_stats = $obj_booking_dtl->getBookingData($bookingParams);
+                    $booking_stats = $objHotelBookingDetail->getBookingData($bookingParams);
                     $cart_data = array(
                         'total_amount' => $total_amount,
-                        'rms_in_cart' => $rms_in_cart,
+                        'total_products_in_cart' => (int)$rms_in_cart + (int)$products_in_cart,
                         'booking_stats' => $booking_stats
                     );
                 }
@@ -695,12 +713,15 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                         $id_cart,
                         $id_guest
                     );
+                    $allotmentTypes = HotelBookingDetail::getAllAllotmentTypes();
+
                     $this->context->smarty->assign(
                         array(
                             'date_from' => $search_date_from,
                             'date_to'=>$search_date_to,
                             'booking_data'=>$booking_data,
                             'ajax_delete'=>$ajax_delete,
+                            'allotment_types' => $allotmentTypes,
                         )
                     );
                     $tpl_path = 'hotelreservationsystem/views/templates/admin/hotel_rooms_booking/_partials/booking-rooms.tpl';
@@ -709,7 +730,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
                     $cart_data = array(
                         'total_amount' => $total_amount,
                         'room_tpl' => $room_tpl,
-                        'rms_in_cart' => $rms_in_cart,
+                        'total_products_in_cart' => (int)$rms_in_cart + (int)$products_in_cart,
                         'booking_data' => $booking_data,
                     );
                 }
@@ -733,7 +754,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $children = 0;
         $num_rooms = 1;
 
-        $obj_booking_dtl = new HotelBookingDetail();
+        $objHotelBookingDetail = new HotelBookingDetail();
 
         $bookingParams = array();
         $bookingParams['hotel_id'] = $hotel_id;
@@ -748,7 +769,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $bookingParams['date_from'] = $cal_date_from;
             $bookingParams['date_to'] = $cal_date_to;
 
-            $booking_calendar_data[$cal_date_from] = $obj_booking_dtl->getBookingData($bookingParams);
+            $booking_calendar_data[$cal_date_from] = $objHotelBookingDetail->getBookingData($bookingParams);
             $start_date = date('Y-m-d', strtotime('+1 day', strtotime($start_date)));
         }
         if ($booking_calendar_data) {
@@ -761,6 +782,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     public function ajaxProcessUpdateCartData()
     {
         $tplVars = $this->initCartData();
+        // ddd($tplVars);
         $tplVars['link'] = $this->context->link;
         $this->context->smarty->assign($tplVars);
         $room_tpl = $this->context->smarty->fetch(
@@ -773,7 +795,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     public function setMedia()
     {
         parent::setMedia();
-        $check_calender_var = 0;
+        $check_calender_var = 1;
         $currency = new Currency((int)Configuration::get('PS_CURRENCY_DEFAULT'));
         $jsVars = array(
             'currency_prefix' => $currency->prefix,

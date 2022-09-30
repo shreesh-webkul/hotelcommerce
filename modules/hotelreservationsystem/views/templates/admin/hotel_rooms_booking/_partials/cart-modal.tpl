@@ -1,4 +1,3 @@
-<div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -81,11 +80,10 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<a href="{$link->getAdminLink('AdminOrders')}&amp;addorder&amp;cart_id={$id_cart|escape:'htmlall':'UTF-8'|intval}&amp;guest_id={$id_guest|escape:'htmlall':'UTF-8'|intval}" class="btn btn-primary cart_booking_btn" {if empty($cart_bdata)}disabled="disabled"{/if}>
+				<a href="{$link->getAdminLink('AdminOrders')}&amp;addorder&amp;cart_id={$id_cart|escape:'htmlall':'UTF-8'|intval}&amp;guest_id={$id_guest|escape:'htmlall':'UTF-8'|intval}" class="btn btn-primary cart_booking_btn" {if empty($total_products_in_cart)}disabled="disabled"{/if}>
 					{l s='Book Now' mod='hotelreservationsystem'}
 				</a>
 				<button type="button" class="btn btn-default" data-dismiss="modal">{l s='Close' mod='hotelreservationsystem'}</button>
 			</div>
 		</div>
 	</div>
-</div>

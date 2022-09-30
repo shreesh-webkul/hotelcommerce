@@ -24,7 +24,6 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-include_once _PS_MODULE_DIR_.'hotelreservationsystem/define.php';
 class ProductControllerCore extends FrontController
 {
     public $php_self = 'product';
@@ -130,7 +129,10 @@ class ProductControllerCore extends FrontController
                         break;
                     }
                 }
-            } elseif (!$this->product->checkAccess(isset($this->context->customer->id) && $this->context->customer->id ? (int)$this->context->customer->id : 0)) {
+            } elseif (!$this->product->checkAccess(
+                isset($this->context->customer->id)
+                && $this->context->customer->id ? (int)$this->context->customer->id : 0)
+            ) {
                 header('HTTP/1.1 403 Forbidden');
                 header('Status: 403 Forbidden');
                 $this->errors[] = Tools::displayError('You do not have access to this Room Type.');
@@ -165,9 +167,9 @@ class ProductControllerCore extends FrontController
             }
 
             if (!$this->product->booking_product) {
-                // header('HTTP/1.1 403 Forbidden');
-                // header('Status: 403 Forbidden');
-                // $this->errors[] = Tools::displayError('You do not have access to this Product.');
+                header('HTTP/1.1 403 Forbidden');
+                header('Status: 403 Forbidden');
+                $this->errors[] = Tools::displayError('You do not have access to this Product.');
             }
         }
     }
@@ -397,6 +399,7 @@ class ProductControllerCore extends FrontController
                             true
                         );
                         $standardProductsCategories = $this->product->getAvailableStandardProductsCategories($this->context->language->id);
+
                         $this->context->smarty->assign(array(
                             'standard_products_by_category' => $standardProductsByCategory,
                             'standard_products_categories' => $standardProductsCategories,
@@ -448,6 +451,8 @@ class ProductControllerCore extends FrontController
                             'num_days' => $num_days,
                             'date_from' => $date_from,
                             'date_to' => $date_to,
+                            'hotel_check_in' => date('h:i a', strtotime($hotel_branch_obj->check_in)),
+                            'hotel_check_out' => date('h:i a', strtotime($hotel_branch_obj->check_out)),
                             'hotel_location' => $hotel_location,
                             'hotel_name' => $hotel_name,
                             'hotel_policies' => $hotel_policies,
@@ -548,7 +553,7 @@ class ProductControllerCore extends FrontController
         }
         $product_price_without_eco_tax = (float)$product_price_with_tax - $this->product->ecotax;
 
-        $ecotax_rate = (float)Tax::getProductEcotaxRate(Cart::getIdAddressForTaxCalculation($this->product->id));
+        $ecotax_rate = (float)Tax::getProductEcotaxRate(Product::getIdAddressForTaxCalculation($this->product->id));
         if (Product::$_taxCalculationMethod == PS_TAX_INC && (int)Configuration::get('PS_TAX')) {
             $ecotax_tax_amount = Tools::ps_round($this->product->ecotax * (1 + $ecotax_rate / 100), 2);
         } else {
@@ -579,7 +584,7 @@ class ProductControllerCore extends FrontController
             }
         }
 
-        $address = new Address(Cart::getIdAddressForTaxCalculation($this->product->id));
+        $address = new Address(Product::getIdAddressForTaxCalculation($this->product->id));
         $this->context->smarty->assign(
             array(
                 'quantity_discounts' => $this->formatQuantityDiscounts($quantity_discounts, null, (float)$tax, $ecotax_tax_amount),
@@ -1061,9 +1066,9 @@ class ProductControllerCore extends FrontController
                             if ($roomStandardProducts = Tools::getValue('room_standard_products')) {
                                 $standardProductsPrice = 0;
                                 if ($roomStandardProducts = json_decode($roomStandardProducts, true)) {
+                                    $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
                                     foreach ($roomStandardProducts as $product) {
-                                        $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-                                        $standardProductsPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice($product['id_product'], $roomTypeInfo['id'], $product['quantity']);
+                                        $standardProductsPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice($product['id_product'], $idProduct, $product['quantity'], $useTax);
                                     }
                                     // multiply price by number of room required
                                     $standardProductsPrice *= $quantity;
@@ -1132,6 +1137,11 @@ class ProductControllerCore extends FrontController
                                 $id_category
                             )) {
                                 $this->context->smarty->assign('standard_products', $roomTypeStandardProducts);
+                                if (Configuration::get('PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER')) {
+                                    $this->context->smarty->assign('group', $id_category);
+                                } else {
+                                    $this->context->smarty->assign('group', 'all');
+                                }
                                 $response['standard_products'] = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/standard-products-list.tpl');
                             }
                         }
@@ -1162,14 +1172,13 @@ class ProductControllerCore extends FrontController
             $idProduct = Tools::getValue('id_product');
             $idStandardProduct = Tools::getValue('standard_product');
             if (Validate::isLoadedObject($objProduct = new Product($idProduct))) {
-                $objHotelRoomType = new HotelRoomType();
-                if (!$roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
+                if (!Product::isBookingProduct($idProduct)) {
                     $response['error'] = Tools::displayError('Room Type info not Found');
                     $this->ajaxDie(json_encode($response));
                 }
 
                 $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($roomInfo['id'], $idStandardProduct)) {
+                if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($idProduct, $idStandardProduct)) {
                     $response['error'] = Tools::displayError('Selected product is not available with current room type');
                 } else {
                     $response['status'] = true;

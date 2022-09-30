@@ -375,9 +375,9 @@ class CartControllerCore extends FrontController
                                             // validate normal products if available
                                             if ($standardProducts) {
                                                 $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                                                foreach ($standardProducts as &$standartProduct) {
-                                                    if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($roomTypeInfo['id'], $standartProduct['id_product'])) {
-                                                        unset($standartProduct);
+                                                foreach ($standardProducts as $key => $standartProduct) {
+                                                    if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($this->id_product, $standartProduct['id_product'])) {
+                                                        unset($standardProducts[$key]);
                                                     }
                                                 }
                                             }
@@ -402,7 +402,6 @@ class CartControllerCore extends FrontController
             $obj_htl_cart_booking_data = new HotelCartBookingData();
             if ($product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE) {
                 // if can be added without room type then we can directly add product in cart.
-
                 if (!$product->allow_multiple_quantity) {
                     // check if product already exists in cart.
                     if ($id_cart) {
@@ -410,7 +409,6 @@ class CartControllerCore extends FrontController
                             $this->errors[] = Tools::displayError('You can only order one quantity for this product.');
                         }
                     }
-
                 }
             } else {
                 $this->errors[] = Tools::displayError('cannot add product without room in cart');
@@ -560,17 +558,15 @@ class CartControllerCore extends FrontController
     protected function processUpdateStandardProduct()
     {
         $operator = Tools::getValue('operator', 'up');
-        $idProduct = Tools::getValue('id_product');
+        $idStandardProduct = Tools::getValue('id_product');
         $idCartBooking = Tools::getValue('id_cart_booking');
         $qty = Tools::getValue('qty');
 
         if (Validate::isLoadedObject($objHotelCartBookingData = new HotelCartBookingData($idCartBooking))) {
-            $objHotelRoomType = new HotelRoomType();
-            $roomInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($objHotelCartBookingData->id_product);
 
             if ($operator == 'up') {
                 $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($roomInfo['id'], $idProduct)) {
+                if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idStandardProduct)) {
                     // validate quanitity
                     $objProduct = new Product($objHotelCartBookingData->id_product);
                     if ($objProduct->allow_multiple_quantity) {
@@ -589,7 +585,7 @@ class CartControllerCore extends FrontController
                 $objStandardProductCartDetail = new StandardProductCartDetail();
                 if ($objStandardProductCartDetail->updateCartStandardProduct(
                     $idCartBooking,
-                    $idProduct,
+                    $idStandardProduct,
                     $qty,
                     $this->context->cart->id,
                     $operator

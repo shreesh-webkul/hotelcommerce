@@ -72,7 +72,6 @@ class AdminRoomTypeControllerCore extends AdminController
         $this->max_image_size = (int)Configuration::get('PS_PRODUCT_PICTURE_MAX_SIZE');
         $this->allow_export = true;
 
-        // @since 1.5 : translations for tabs
         $this->available_tabs_lang = array(
             'Informations' => $this->l('Information'),
             'Prices' => $this->l('Prices'),
@@ -1099,7 +1098,7 @@ class AdminRoomTypeControllerCore extends AdminController
                 $error = $this->l('Invalid room type.');
             } else {
                 $objRoomType = new HotelRoomType();
-                if (!$hotelRoomType = $objRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
+                if (!Product::isBookingProduct($idProduct)) {
                     $error = $this->l('Room Type details not found. Save room type details before updating price.');
                 }
             }
@@ -1117,7 +1116,7 @@ class AdminRoomTypeControllerCore extends AdminController
                 $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
                 $priceExists = $objHotelRoomTypeStandardProductPrice->getProductRoomTypeLinkPriceInfo(
                     $idStandardProduct,
-                    $hotelRoomType['id'],
+                    $idProduct,
                     HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE
                 );
 
@@ -1126,7 +1125,7 @@ class AdminRoomTypeControllerCore extends AdminController
                 } else {
                     $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
                     $objHotelRoomTypeStandardProductPrice->id_product = $idStandardProduct;
-                    $objHotelRoomTypeStandardProductPrice->id_element = $hotelRoomType['id'];
+                    $objHotelRoomTypeStandardProductPrice->id_element = $idProduct;
                     $objHotelRoomTypeStandardProductPrice->element_type = HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE;
                 }
 
@@ -2251,7 +2250,7 @@ class AdminRoomTypeControllerCore extends AdminController
             $tree->setAttribute('is_category_filter', (bool)$this->id_current_category)
                 ->setAttribute('base_url', preg_replace('#&id_category=[0-9]*#', '', self::$currentIndex).'&token='.$this->token)
                 ->setInputName('id-category')
-                ->setRootCategory(Category::getRootCategory()->id)
+                ->setRootCategory((int)Configuration::get('PS_LOCATIONS_CATEGORY'))
                 ->setSelectedCategories(array((int)$id_category));
             $this->tpl_list_vars['category_tree'] = $tree->render();
 
@@ -2296,7 +2295,7 @@ class AdminRoomTypeControllerCore extends AdminController
             $helper->value = ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN');
         }
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=product_avg_gross_margin';
-        $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
+        $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types / products. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
         $helper->refresh = (bool)(ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN_EXPIRE') < $time);
         $kpis[] = $helper->generate();
 
@@ -2323,11 +2322,11 @@ class AdminRoomTypeControllerCore extends AdminController
         $helper->color = 'color4';
         $helper->href = $this->context->link->getAdminLink('AdminRoomType');
         $helper->title = $this->l('Disabled Room Types', null, null, false);
-        if (ConfigurationKPI::get('DISABLED_PRODUCTS') !== false) {
-            $helper->value = ConfigurationKPI::get('DISABLED_PRODUCTS');
+        if (ConfigurationKPI::get('DISABLED_ROOM_TYPES') !== false) {
+            $helper->value = ConfigurationKPI::get('DISABLED_ROOM_TYPES');
         }
-        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=disabled_products';
-        $helper->refresh = (bool)(ConfigurationKPI::get('DISABLED_PRODUCTS_EXPIRE') < $time);
+        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=disabled_room_types';
+        $helper->refresh = (bool)(ConfigurationKPI::get('DISABLED_ROOM_TYPES_EXPIRE') < $time);
         $helper->tooltip = $this->l('X% of your room types are disabled and not visible to your customers', null, null, false);
         $helper->href = Context::getContext()->link->getAdminLink('AdminRoomType').'&productFilter_active=0&submitFilterproduct=1';
         $kpis[] = $helper->generate();
@@ -2809,7 +2808,7 @@ class AdminRoomTypeControllerCore extends AdminController
                 $objRoomTypeLinkPrice = new HotelRoomTypeStandardProductPrice();
                 $standardProducts = $objRoomTypeLink->getIdProductsForHotelAndRoomType(
                     $hotelRoomType['id_hotel'],
-                    $hotelRoomType['id']
+                    $obj->id
                 );
                 foreach ($standardProducts as &$standardProduct) {
                     $product = new Product($standardProduct['id_product'], false, $this->context->language->id);
@@ -3352,7 +3351,7 @@ class AdminRoomTypeControllerCore extends AdminController
             ));
 
             // get hotel address for this room type
-            $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($obj->id));
+            $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($obj->id));
         } else {
             $this->displayWarning($this->l('You must save this room type before adding specific pricing'));
             $product->id_tax_rules_group = (int)Product::getIdTaxRulesGroupMostUsed();

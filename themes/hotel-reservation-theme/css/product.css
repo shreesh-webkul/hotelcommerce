@@ -1625,3 +1625,9 @@ ul.standard-product-nav > li:hover {
 #standard_products_cont .bx-wrapper .bx-next:before {
   content: "\f054";
 }
+#standard_products_cont .show_more_btn_container {
+  text-align: center;
+}
+#standard_products_cont .get-standard-products {
+  border-radius: 4px;
+}

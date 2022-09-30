@@ -182,6 +182,7 @@ class OrderReturnCore extends ObjectModel
             }
 
             $objBookingDemands = new HotelBookingDemands();
+            $objStandardProductOrderDetail = new StandardProductOrderDetail();
             foreach ($returnDetails as &$bookingRow) {
                 $bookingRow['extra_demands_price_tax_incl'] = $objBookingDemands->getRoomTypeBookingExtraDemands(
                     $bookingRow['id_order'],
@@ -202,6 +203,18 @@ class OrderReturnCore extends ObjectModel
                     1,
                     0
                 );
+                $bookingRow['additional_services_tax_excl'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                    $id_order,
+                    0,
+                    0,
+                    $type_value['product_id'],
+                    $data_v['date_from'],
+                    $data_v['date_to'],
+                    $data_v['id_room'],
+                    1,
+                    0
+                );
+
                 if ($customerView) {
                     $dateJoin = $bookingRow['id_product'].'_'.strtotime($bookingRow['date_from']).strtotime($bookingRow['date_to']);
                     if (isset($returnsCustView[$dateJoin]['num_rooms'])) {
