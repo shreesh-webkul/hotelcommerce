@@ -17,7 +17,7 @@
 *  @license   https://store.webkul.com/license.html
 *}
 
-<div class="row" id="recommendation-wrapper-skeleton">
+<div id="recommendation-wrapper-skeleton">
     <script>
         loadRecommendation();
     </script>
@@ -38,5 +38,5 @@
     </div>
 </div>
 
-<div class="row" id="recommendation-wrapper" style="display:none">
+<div id="recommendation-wrapper" style="display:none">
 </div>
