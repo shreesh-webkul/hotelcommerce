@@ -3386,12 +3386,12 @@ exit;
                 break;
             case 'catalog-recommendation':
                 $protocols[] = 'http';
-                $post_data .= '&method=content&action=suggestion';
+                $post_data .= '&method=content&action=catalogRecommendation';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
             case 'dashboard-recommendation':
                 $protocols[] = 'http';
-                $post_data .= '&method=content&action=dashboardContent';
+                $post_data .= '&method=content&action=dashboardRecommendation';
                 $post_data .= defined('_PS_HOST_MODE_') ? '-od' : '';
                 break;
             case 'check-version':
