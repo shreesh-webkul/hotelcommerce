@@ -899,6 +899,17 @@ function init()
 		e.preventDefault();
 	});
 
+	$('#add_new_payment').on('click', function(e) {
+		$('#formAddPayment').show();
+		$(this).hide();
+	});
+
+	$('#cancle_add_payment').on('click', function(e) {
+		e.preventDefault();
+		$('#add_new_payment').show();
+		$('#formAddPayment').hide();
+	});
+
 	/*By webkul Code for the datepicker*/
 	$(".add_product_date_from").datepicker(
     {
