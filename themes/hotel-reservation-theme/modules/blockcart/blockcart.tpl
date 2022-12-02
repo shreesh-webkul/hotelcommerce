@@ -113,7 +113,7 @@
 														{foreach from=$cart_booking_data[$data_k]['date_diff'] key=data_k1 item=data_v}
 															<tr class="rooms_remove_container">
 																<td>
-																	{$data_v['data_form']|date_format:"%d %b %Y"}&nbsp;-&nbsp;{$data_v['data_to']|date_format:"%d %b %Y"}
+																	{$data_v['data_form']|date_format:"%d-%m-%Y"}&nbsp;-&nbsp;{$data_v['data_to']|date_format:"%d-%m-%Y"}
 																</td>
 																<td class="num_rooms_in_date">{$data_v['num_rm']}</td>
 																<td>{convertPrice price=$data_v['amount']}</td>

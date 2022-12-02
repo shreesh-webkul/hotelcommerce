@@ -761,12 +761,12 @@ abstract class PaymentModuleCore extends Module
                                     $objBookingDetail->email = $objHotelBranch->email;
                                     $objBookingDetail->check_in_time = $objHotelBranch->check_in;
                                     $objBookingDetail->check_out_time = $objHotelBranch->check_out;
-                                    if ($hotelAddress = $objHotelBranch->getAddress($objCartBkData->id_hotel)) {
-                                        $objHtlBkDtl->city = $hotelAddress['city'];
-                                        $objHtlBkDtl->state = $hotelAddress['state'];
-                                        $objHtlBkDtl->country = $hotelAddress['country'];
-                                        $objHtlBkDtl->zipcode = $hotelAddress['postcode'];
-                                        $objHtlBkDtl->phone = $hotelAddress['phone'];
+                                    if ($hotelAddress = $objHotelBranch->getAddress($objCartBookingData->id_hotel)) {
+                                        $objBookingDetail->city = $hotelAddress['city'];
+                                        $objBookingDetail->state = $hotelAddress['state'];
+                                        $objBookingDetail->country = $hotelAddress['country'];
+                                        $objBookingDetail->zipcode = $hotelAddress['postcode'];
+                                        $objBookingDetail->phone = $hotelAddress['phone'];
                                     }
                                 }
 

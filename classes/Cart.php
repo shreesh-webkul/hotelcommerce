@@ -4370,7 +4370,7 @@ class CartCore extends ObjectModel
         // lets validate the cart booking data first
         if (isset($bookingRows) && count($bookingRows)) {
             $objRoomType = new HotelRoomType();
-            $objBookingDtl = new HotelBookingDetail();
+            $objBookingDetail = new HotelBookingDetail();
             $errors = array();
             $idCustomer = $objCart->id_customer;
             $idCurrency = $objCart->id_currency;
@@ -4412,11 +4412,11 @@ class CartCore extends ObjectModel
                         }
 
                         if (!count($errors)) {
-                            $numDays = $objBookingDtl->getNumberOfDays($dateFrom, $dateTo);
+                            $numDays = $objBookingDetail->getNumberOfDays($dateFrom, $dateTo);
                             $prodQty = $prodQty * (int) $numDays;
                             $reqRooms = 1;
 
-                            $booking_params = array(
+                            $bookingParams = array(
                                 'date_from' => $dateFrom,
                                 'date_to' => $dateTo,
                                 'hotel_id' => $idHotel,
@@ -4425,7 +4425,7 @@ class CartCore extends ObjectModel
                                 'id_cart' => $idCart,
                                 'id_guest' => $idGuest,
                             );
-                            if ($hotelRoomData = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
+                            if ($hotelRoomData = $objBookingDetail->dataForFrontSearch($bookingParams)) {
                                 if (isset($hotelRoomData['stats']['num_avail'])) {
                                     $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                                     if ($totalAvailRooms < $reqRooms) {

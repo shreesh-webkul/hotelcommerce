@@ -460,8 +460,8 @@ class AdminOrdersControllerCore extends AdminController
                 }
 
                 if (!count($this->errors)) {
-                    $obj_booking_dtl = new HotelBookingDetail();
-                    $room_swapped = $obj_booking_dtl->reallocateRoomWithAvailableSameRoomType($current_room_id, $date_from, $date_to, $realloc_room_id);
+                    $objBookingDetail = new HotelBookingDetail();
+                    $room_swapped = $objBookingDetail->reallocateRoomWithAvailableSameRoomType($current_room_id, $date_from, $date_to, $realloc_room_id);
                     if (!$room_swapped) {
                         $this->errors[] = Tools::displayError('Some error occured. Please try again.');
                     } else {
@@ -495,8 +495,8 @@ class AdminOrdersControllerCore extends AdminController
                 }
 
                 if (!count($this->errors)) {
-                    $obj_booking_dtl = new HotelBookingDetail();
-                    $room_swapped = $obj_booking_dtl->swapRoomWithAvailableSameRoomType($current_room_id, $date_from, $date_to, $swapped_room_id);
+                    $objBookingDetail = new HotelBookingDetail();
+                    $room_swapped = $objBookingDetail->swapRoomWithAvailableSameRoomType($current_room_id, $date_from, $date_to, $swapped_room_id);
                     if (!$room_swapped) {
                         $this->errors[] = Tools::displayError('Some error occured. Please try again.');
                     } else {
@@ -1842,8 +1842,8 @@ class AdminOrdersControllerCore extends AdminController
             $id_hotel = $room_info_by_id_product['id_hotel'];
 
             if ($id_hotel) {
-                $obj_booking_dtl = new HotelBookingDetail();
-                $booking_params = array(
+                $objBookingDetail = new HotelBookingDetail();
+                $bookingParams = array(
                     'date_from' => $date_from,
                     'date_to' => $date_to,
                     'hotel_id' => $id_hotel,
@@ -1852,7 +1852,7 @@ class AdminOrdersControllerCore extends AdminController
                     'id_cart' => $id_cart,
                     'id_guest' => $id_guest,
                 );
-                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
+                $hotel_room_data = $objBookingDetail->dataForFrontSearch($bookingParams);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $req_rm) {
@@ -1950,7 +1950,7 @@ class AdminOrdersControllerCore extends AdminController
                     } else {
                         $objCartBookingData->adult = $roomTypeInfo['adult'];
                         $objCartBookingData->children = $roomTypeInfo['children'];
-                        $objCartBookingData->child_ages = '';
+                        $objCartBookingData->child_ages = json_encode(array());
                     }
                     $objCartBookingData->save();
                     ++$chkQty;
@@ -2769,6 +2769,7 @@ class AdminOrdersControllerCore extends AdminController
             $old_date_to,
             $new_date_from,
             $new_date_to,
+            $occupancy,
             $new_total_price
         )) {
             // update extra demands total prices if dates are changes (price calc method for each day)

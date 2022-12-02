@@ -176,15 +176,15 @@ class CartControllerCore extends FrontController
             $result = $objCartBooking->deleteCartBookingData($id_cart, $id_product, 0, 0, 0, 0);
             if ($roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($id_product)) {
                 if ($id_hotel = $roomTypeInfo['id_hotel']) {
-                    $obj_booking_dtl = new HotelBookingDetail();
-                    $booking_params = array(
+                    $objBookingDetail = new HotelBookingDetail();
+                    $bookingParams = array(
                         'date_from' => $date_from,
                         'date_to' => $date_to,
                         'hotel_id' => $id_hotel,
                         'id_room_type' => $id_product,
                         'only_search_data' => 1,
                     );
-                    if ($hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
+                    if ($hotel_room_data = $objBookingDetail->dataForFrontSearch($bookingParams)) {
                         $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                     }
                 }
@@ -292,13 +292,35 @@ class CartControllerCore extends FrontController
             return;
         }
 
-        $qty_to_check = $this->qty;
-        $cart_products = $this->context->cart->getProducts();
-
+        // valdiate occupancy if providede
+        if (Configuration::get('PS_FRONT_SEARCH_TYPE') == HotelBookingDetail::SEARCH_TYPE_OWS) {
+            foreach($occupancy as $key =>$roomOccupancy) {
+                if (!isset($roomOccupancy['adult']) || !$roomOccupancy['adult'] || !Validate::isUnsignedInt($roomOccupancy['adult'])) {
+                    $this->errors[] = sprintf(Tools::displayError('Invalid number of adults for Room %s.'), ($key + 1));
+                }
+                if (isset($roomOccupancy['children'])) {
+                    if (!Validate::isUnsignedInt($roomOccupancy['children'])) {
+                        $this->errors[] = sprintf(Tools::displayError('Invalid number of children for Room %s.'), ($key + 1));
+                    }
+                    if ($roomOccupancy['children'] > 0) {
+                        if (!isset($roomOccupancy['child_ages']) || ($roomOccupancy['children'] != count($roomOccupancy['child_ages'])) || !is_array($roomOccupancy['child_ages'])) {
+                            $this->errors[] = sprintf(Tools::displayError('Please provide all children age for Room %s.'), ($key + 1));
+                        } else {
+                            if (is_array($roomOccupancy['child_ages'])) {
+                                foreach($roomOccupancy['child_ages'] as $childAge) {
+                                    if (!Validate::isUnsignedInt($childAge)) {
+                                        $this->errors[] = sprintf(Tools::displayError('Invalid children age for Room %s.'), ($key + 1));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // By Webkul : This code is to check available quantity of Room before adding it to cart.
         // only check availability if qty is increasing
-        if (Module::isInstalled('hotelreservationsystem') && Module::isEnabled('hotelreservationsystem')) {
-            require_once _PS_MODULE_DIR_.'hotelreservationsystem/define.php';
+        if (!$this->errors) {
             $objRoomType = new HotelRoomType();
             if ($roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($this->id_product)) {
                 if ($id_hotel = $roomTypeInfo['id_hotel']) {
@@ -315,13 +337,24 @@ class CartControllerCore extends FrontController
                             $this->errors[] = Tools::displayError('You can\'t book room after date '.$maxOrdDate);
                         }
                     }
+                    foreach($occupancy as $key =>$roomOccupancy) {
+                        if ($roomOccupancy['adult'] > $roomTypeInfo['max_adults']) {
+                            $this->errors[] = sprintf(Tools::displayError('Room %s cannot have adults more than %s'), $key + 1, $roomTypeInfo['max_adults']);
+                        }
+                        if ($roomOccupancy['children'] > $roomTypeInfo['max_children']) {
+                            $this->errors[] = sprintf(Tools::displayError('Room %s cannot have children more than %s'), $key + 1, $roomTypeInfo['max_children']);
+                        }
+                        if ($roomOccupancy['adult'] + $roomOccupancy['children'] > $roomTypeInfo['max_guests']) {
+                            $this->errors[] = sprintf(Tools::displayError('Room %s cannot have total guests more than %s'), $key + 1, $roomTypeInfo['max_guests']);
+                        }
+                    }
                     if (!$this->errors) {
-                        $objBookingDtl = new HotelBookingDetail();
-                        $num_days = $objBookingDtl->getNumberOfDays($date_from, $date_to);
+                        $objBookingDetail = new HotelBookingDetail();
+                        $num_days = $objBookingDetail->getNumberOfDays($date_from, $date_to);
                         $req_rm = $this->qty;
                         $this->qty = $this->qty * (int) $num_days;
-                        $obj_booking_dtl = new HotelBookingDetail();
-                        $booking_params = array(
+                        $objBookingDetail = new HotelBookingDetail();
+                        $bookingParams = array(
                             'date_from' => $date_from,
                             'date_to' => $date_to,
                             'hotel_id' => $id_hotel,
@@ -330,7 +363,7 @@ class CartControllerCore extends FrontController
                             'id_cart' => $id_cart,
                             'id_guest' => $id_guest,
                         );
-                        if ($hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
+                        if ($hotel_room_data = $objBookingDetail->dataForFrontSearch($bookingParams)) {
                             if (isset($hotel_room_data['stats']['num_avail'])) {
                                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
                                 if (Tools::getValue('op', 'up') == 'up') {
@@ -353,6 +386,8 @@ class CartControllerCore extends FrontController
             }
         }
 
+        $cart_products = $this->context->cart->getProducts();
+        $qty_to_check = $this->qty;
         if (is_array($cart_products)) {
             foreach ($cart_products as $cart_product) {
                 if ((!isset($this->id_product_attribute) || $cart_product['id_product_attribute'] == $this->id_product_attribute) &&

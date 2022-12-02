@@ -148,10 +148,10 @@ var ajaxCart = {
         });
         //for product page 'add' button...
         if ($('.cart_block').length) {
-            $(document).off('click', '#add_to_cart button').on('click', '#add_to_cart button', function(e) {
+            $(document).off('click', '#add_to_cartadd_to_cart button').on('click', '#add_to_cart button', function(e) {
                 e.preventDefault();
-                var date_from = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_in').val()));
-                var date_to = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_out').val()));
+                var date_from = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_in').val()));
+                var date_to = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_out').val()));
                 var occupancy = getBookingOccupancyDetails($(this).closest('.booking_room_fields'));
                 if (occupancy) {
                     ajaxCart.add($('#product_page_product_id').val(), $('#idCombination').val(), true, null, occupancy, null, date_from, date_to);
@@ -216,8 +216,8 @@ var ajaxCart = {
 
             /*by webkul*/
             if (pagename == 'product') {
-                dateFrom = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_in').val()));
-                dateTo = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_out').val()));
+                dateFrom = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_in').val()));
+                dateTo = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_out').val()));
             } else if (pagename == 'category') {
                 dateFrom = $('#check_in_time').val();
                 dateTo = $('#check_out_time').val();
@@ -506,8 +506,8 @@ var ajaxCart = {
                 /*by webkul checking and setting availability of rooms*/
                 /*for product page add to cart quantity management*/
                 if (pagename == 'product') {
-                    var date_checkIn = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_in').val()));
-                    var date_checkOut = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate(ajaxCart.dateFormat, $('#room_check_out').val()));
+                    var date_checkIn = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_in').val()));
+                    var date_checkOut = $.datepicker.formatDate('yy-mm-dd', $.datepicker.parseDate('yy-mm-dd', $('#room_check_out').val()));
                     var product_page_id_product = $('#product_page_product_id').val();
                     if (idProduct == product_page_id_product && dateFrom < date_checkOut && dateTo >= date_checkIn) {
                         if (jsonData.avail_rooms <= room_warning_num) {
@@ -629,17 +629,17 @@ var ajaxCart = {
             data: 'controller=cart&delete=1&dateFrom=' + dateFrom + '&dateTo=' + dateTo + '&id_product=' + idProduct + '&ipa=' + ((idCombination != null && parseInt(idCombination)) ? idCombination : '') + ((customizationId && customizationId != null) ? '&id_customization=' + customizationId : '') + '&id_address_delivery=' + idAddressDelivery + '&token=' + static_token + '&ajax=true',
             success: function(jsonData) {
                 if (pagename == 'product') {
-                    if (jsonData.avail_rooms <= room_warning_num) {
-                        $('.num_quantity_alert').show();
-                    } else {
-                        $('.num_quantity_alert').hide();
-                    }
+                    // if (jsonData.avail_rooms <= room_warning_num) {
+                    //     $('.num_quantity_alert').show();
+                    // } else {
+                    //     $('.num_quantity_alert').hide();
+                    // }
 
-                    $(".max_avail_type_qty").val(jsonData.avail_rooms);
-                    $(".num_searched_avail_rooms").text(jsonData.avail_rooms);
-                    $('.sold_out_alert').hide();
-                    disableRoomTypeDemands(0);
-                    $('.unvail_rooms_cond_display').show();
+                    // $(".max_avail_type_qty").val(jsonData.avail_rooms);
+                    // $(".num_searched_avail_rooms").text(jsonData.avail_rooms);
+                    // $('.sold_out_alert').hide();
+                    // disableRoomTypeDemands(0);
+                    // $('.unvail_rooms_cond_display').show();
                 }
                 if (pagename == 'category') {
                     // for category page....
@@ -1038,12 +1038,16 @@ var ajaxCart = {
 
         //by webkul has to work on it more..
         if (pagename == 'product') {
-            $('#layer_cart_product_time_duration').text($('#room_check_in').val() + ' - ' + $('#room_check_out').val());
+            $('#layer_cart_product_time_duration').text(
+                $.datepicker.formatDate(ajaxCart.dateFormat, $.datepicker.parseDate('yy-mm-dd', $('#room_check_in').val())) + ' - ' + $.datepicker.formatDate(ajaxCart.dateFormat, $.datepicker.parseDate('yy-mm-dd', $('#room_check_out').val()))
+            );
             $('#layer_cart_product_quantity').text($('.quantity_wanted').val());
             $('#quantity_wanted').val(1);
         }
         if (pagename == 'category') {
-            $('#layer_cart_product_time_duration').text($('#check_in_time').val() + ' - ' + $('#check_out_time').val());
+            $('#layer_cart_product_time_duration').text(
+                $.datepicker.formatDate(ajaxCart.dateFormat, $.datepicker.parseDate('yy-mm-dd', $('#check_in_time').val())) + ' - ' + $.datepicker.formatDate(ajaxCart.dateFormat, $.datepicker.parseDate('yy-mm-dd', $('#check_out_time').val()))
+            );
             // @todo shreesh
             $('#layer_cart_product_quantity').text($('#quantity_wanted_' + product.id).val());
             $('#quantity_wanted_' + product.id).val(1);

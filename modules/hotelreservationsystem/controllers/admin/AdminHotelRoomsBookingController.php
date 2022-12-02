@@ -396,7 +396,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             } else {
                 $obj_cart_book_data->adult = $roomTypeInfo['adult'];
                 $obj_cart_book_data->children = $roomTypeInfo['children'];
-                $obj_cart_book_data->child_ages = '';
+                $obj_cart_book_data->child_ages = json_encode(array());
             }
             $obj_cart_book_data->save();
 

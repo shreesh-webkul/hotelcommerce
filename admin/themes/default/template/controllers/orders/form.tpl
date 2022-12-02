@@ -241,12 +241,13 @@
 			e.preventDefault();
 			var cart_row = $(this).closest('tr');
 			var params = {
-				id_booking_data: parseInt($(this).attr('data-id-booking-data')),
-				id_product: parseInt($(this).attr('data-id-product')),
-				id_room: parseInt($(this).attr('data-id-room')),
-				date_from: $(this).attr('data-date-from'),
-				date_to: $(this).attr('data-date-to'),
+				id_booking_data: parseInt($(cart_row).attr('data-id-booking-data')),
+				id_product: parseInt($(cart_row).attr('data-id-product')),
+				id_room: parseInt($(cart_row).attr('data-id-room')),
+				date_from: $(cart_row).attr('data-date-from'),
+				date_to: $(cart_row).attr('data-date-to'),
 				price: $(this).val(),
+				id_cart: id_cart
 			};
 			updateProductPrice(params, cart_row);
 		})
@@ -449,60 +450,63 @@
 					}
 					if (hasErrors == 0) {
 						$(occupancy_wrapper).parent().removeClass('open');
-						// $(occupancy_wrapper).siblings(".booking_guest_occupancy").parent().removeClass('has-error');
-
 						$(document).trigger( "QloApps:updateRoomOccupancy", [occupancy_wrapper]);
-					} else {
-						// $(occupancy_wrapper).siblings(".booking_guest_occupancy").parent().addClass('has-error');
 					}
 				}
 			}
 		});
 
-		$('.booking_occupancy_wrapper .add_new_occupancy_btn').on('click', function(e) {
+		$(document).on('QloApps:updateRoomOccupancy', function (e, occupancy_wrapper) {
 			e.preventDefault();
-
-			var booking_occupancy_wrapper = $(this).closest('.booking_occupancy_wrapper');
-			var occupancy_block = '';
-			var roomBlockIndex = parseInt($(booking_occupancy_wrapper).find(".occupancy_info_block").last().attr('occ_block_index'));
-			roomBlockIndex += 1;
-
-
-			var countRooms = parseInt($(booking_occupancy_wrapper).find('.occupancy_info_block').length);
-			countRooms += 1
-			occupancy_block += '<div class="occupancy_info_block" occ_block_index="'+roomBlockIndex+'">';
-				occupancy_block += '<div class="occupancy_info_head col-sm-12"><span class="room_num_wrapper">'+ room_txt + ' - ' + countRooms + '</span><a class="remove-room-link pull-right" href="#">' + remove_txt + '</a></div>';
-				occupancy_block += '<div class="row">';
-					occupancy_block += '<div class="form-group col-xs-6 occupancy_count_block">';
-						occupancy_block += '<div class="col-sm-12">';
-							occupancy_block += '<label>' + adults_txt + '</label>';
-							occupancy_block += '<input type="number" class="form-control num_occupancy num_adults" name="occupancy['+roomBlockIndex+'][adult]" value="1" min="1">';
-						occupancy_block += '</div>';
-					occupancy_block += '</div>';
-					occupancy_block += '<div class="form-group col-xs-6 occupancy_count_block">';
-						occupancy_block += '<div class="col-sm-12">';
-							occupancy_block += '<label>' + child_txt + '<span class="label-desc-txt">(' + below_txt + ' ' + max_child_age + ' ' + years_txt + ')</span></label>';
-							occupancy_block += '<input type="number" class="form-control num_occupancy num_children" name="occupancy['+roomBlockIndex+'][children]" value="0" min="0" max="'+max_child_in_room+'">';
-						occupancy_block += '</div>';
-					occupancy_block += '</div>';
-				occupancy_block += '</div>';
-				occupancy_block += '<div class="row children_age_info_block"  style="display:none">';
-					occupancy_block += '<div class="form-group col-sm-12">';
-						occupancy_block += '<label class="col-sm-12">' + all_children_txt + '</label>';
-						occupancy_block += '<div class="col-sm-12">';
-							occupancy_block += '<div class="row children_ages">';
-							occupancy_block += '</div>';
-						occupancy_block += '</div>';
-					occupancy_block += '</div>';
-				occupancy_block += '</div>';
-				occupancy_block += '<hr class="occupancy-info-separator">';
-			occupancy_block += '</div>';
-
-			$(booking_occupancy_wrapper).find('.booking_occupancy_inner').append(occupancy_block);
-
-			setRoomTypeGuestOccupancy(booking_occupancy_wrapper);
+			let cart_row = $(occupancy_wrapper).closest('tr');
+			let occupancy = getBookingOccupancyDetails(cart_row);
+			let params = {
+				id_cart: id_cart,
+				id_booking_data: parseInt($(cart_row).attr('data-id-booking-data')),
+				occupancy : occupancy.shift(),
+			};
+			updateProductOccupancy(params, cart_row);
 		});
 	}
+	function getBookingOccupancyDetails(bookingform)
+    {
+        let occupancy;
+            let selected_occupancy = $(bookingform).find(".occupancy_info_block.selected")
+            if (selected_occupancy.length) {
+                occupancy = [];
+                $(selected_occupancy).each(function(ind, element) {
+                    if (parseInt($(element).find('.num_adults').val())) {
+                        let child_ages = [];
+                        $(element).find('.guest_child_age').each(function(index) {
+                            if ($(this).val() > -1) {
+                                child_ages.push($(this).val());
+                            }
+                        });
+                        if ($(element).find('.num_children').val()) {
+                            if (child_ages.length != $(element).find('.num_children').val()) {
+                                $(bookingform).find('.booking_occupancy_wrapper').parent().addClass('open');
+                                occupancy = false;
+                                return false;
+                            }
+                        }
+                        occupancy.push({
+                            'adult': $(element).find('.num_adults').val(),
+                            'children': $(element).find('.num_children').val(),
+                            'child_ages': child_ages
+                        });
+                    } else {
+                        $(bookingform).find('.booking_occupancy_wrapper').parent().addClass('open');
+                        occupancy = false;
+                        return false;
+                    }
+                });
+            } else {
+                $(bookingform).find('.booking_occupancy_wrapper').parent().addClass('open');
+                occupancy = false;
+            }
+
+        return occupancy;
+    }
 	{/literal}
 
 	function setRoomTypeGuestOccupancy(booking_occupancy_wrapper)
@@ -597,7 +601,6 @@
 
 	function updateProductPrice(params, cart_row) {
 		$.extend(params, {
-			id_cart: id_cart,
 			price: new Number(params.price.replace(",",".")).toFixed(4).toString(),
 		});
 
@@ -619,6 +622,28 @@
 			}
 		});
 	}
+
+	function updateProductOccupancy(params, cart_row)
+	{
+		$.ajax({
+			type:"POST",
+			url: "{$link->getAdminLink('AdminCarts')|addslashes}",
+			async: true,
+			dataType: "JSON",
+			data: {
+				ajax: "1",
+				token: "{getAdminToken tab='AdminCarts'}",
+				tab: "AdminCarts",
+				action: "updateProductOccupancy",
+				params: params,
+			},
+			success : function(response) {
+				updateCartLine(response.curr_booking_info, cart_row);
+				updateCartSummaryData(response.cart_info);
+			}
+		});
+	}
+
 
 	function updateCartLine(data, cart_row) {
 		$(cart_row).find('.cart_line_total_rooms_price').html(data.amt_with_qty);

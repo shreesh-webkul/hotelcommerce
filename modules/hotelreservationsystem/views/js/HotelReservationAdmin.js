@@ -1112,15 +1112,6 @@ $(document).ready(function() {
         }
     });
 
-    // extra occupancy price rules
-    $("input[name='active_for_occupancy']").on('change', function () {
-        if (parseInt($(this).val())) {
-            $(".occupancy_rule_block").show(200);
-        } else {
-            $(".occupancy_rule_block").hide(200);
-        }
-    });
-
     function highlightDateBorder(elementVal, date)
     {
         if (elementVal) {

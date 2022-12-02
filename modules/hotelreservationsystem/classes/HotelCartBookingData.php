@@ -461,7 +461,7 @@ class HotelCartBookingData extends ObjectModel
                     } else {
                         $obj_htl_cart_booking_data->adult = $roomTypeInfo['adult'];
                         $obj_htl_cart_booking_data->children = $roomTypeInfo['children'];
-                        $obj_htl_cart_booking_data->child_ages = '';
+                        $obj_htl_cart_booking_data->child_ages = json_encode(array());
                     }
                     $obj_htl_cart_booking_data->save();
                     ++$chkQty;

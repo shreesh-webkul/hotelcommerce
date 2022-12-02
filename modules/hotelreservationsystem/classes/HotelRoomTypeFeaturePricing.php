@@ -34,11 +34,6 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
     public $impact_type;
     public $impact_value;
     public $active;
-    // occupancy wise pricing fields
-    public $active_for_occupancy;
-    public $adult_impact_value;
-	public $child_impact_value;
-	public $infant_impact_value;
     public $date_add;
     public $date_upd;
 
@@ -72,11 +67,6 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
             'impact_type' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'impact_value' => array('type' => self::TYPE_FLOAT, 'required' => true),
             'active' => array('type' => self::TYPE_INT),
-            // occupancy wise pricing fields
-            'active_for_occupancy' => array('type' => self::TYPE_INT, 'default' => 0),
-            'adult_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
-            'child_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
-            'infant_impact_value' => array('type' => self::TYPE_FLOAT, 'default' => 0),
             'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             'date_upd' => array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
             //lang fields
@@ -279,14 +269,14 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
             $currentDate = date('Y-m-d', $date);
             $nextDayDate = date('Y-m-d', strtotime('+1 day', strtotime($currentDate)));
             if ($id_product) {
-                $booking_params = array(
+                $bookingParams = array(
                     'date_from' => $currentDate,
                     'date_to' => $nextDayDate,
                     'hotel_id' => $id_hotel,
                     'id_room_type' => $id_product,
                     'only_search_data' => 1,
                 );
-                $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($booking_params);
+                $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($bookingParams);
                 if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                     $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                 } else {
@@ -308,14 +298,14 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                             $currentDate,
                             $nextDayDate
                         );
-                        $booking_params = array(
+                        $bookingParams = array(
                             'date_from' => $currentDate,
                             'date_to' => $nextDayDate,
                             'hotel_id' => $id_hotel,
                             'id_room_type' => $product['id_product'],
                             'only_search_data' => 1,
                         );
-                        $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($booking_params);
+                        $roomTypeAvailabilityInfo = $objBookingDetail->dataForFrontSearch($bookingParams);
                         if (isset($roomTypeAvailabilityInfo['stats']['num_avail'])) {
                             $totalAvailableRooms = $roomTypeAvailabilityInfo['stats']['num_avail'];
                         } else {
@@ -456,14 +446,14 @@ class HotelRoomTypeFeaturePricing extends ObjectModel
                                 $roomTypeInfo = $hotelRoomType->getRoomTypeInfoByIdProduct($id_product);
                                 $id_hotel = $roomTypeInfo['id_hotel'];
                                 if ($id_hotel) {
-                                    $booking_params = array(
+                                    $bookingParams = array(
                                         'date_from' => $dateFrom,
                                         'date_to' => $dateTo,
                                         'hotel_id' => $id_hotel,
                                         'id_room_type' => $id_product,
                                         'only_search_data' => 1,
                                     );
-                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->dataForFrontSearch($booking_params);
+                                    $roomTypeAvailabilityInfo = $hotelBookingDetail->dataForFrontSearch($bookingParams);
                                     $bookedRoomsInfo = $hotelRoomInformation->getRoomTypeBookedRoomsForDateRange(
                                         $id_hotel,
                                         $id_product,

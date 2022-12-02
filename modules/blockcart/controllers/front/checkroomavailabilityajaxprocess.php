@@ -31,7 +31,7 @@ class BlockcartCheckRoomAvailabilityAjaxProcessModuleFrontController extends Mod
                 )) {
                     if ($roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($idProduct)) {
                         if ($idHotel = $roomTypeInfo['id_hotel']) {
-                            $booking_params = array(
+                            $bookingParams = array(
                                 'date_from' => $dateFrom,
                                 'date_to' => $dateTo,
                                 'hotel_id' => $idHotel,
@@ -40,7 +40,7 @@ class BlockcartCheckRoomAvailabilityAjaxProcessModuleFrontController extends Mod
                                 'id_cart' => $idCart,
                                 'id_guest' => $idGuest,
                             );
-                            if ($hotelRoomData = $obj_booking_dtl->dataForFrontSearch($booking_params)) {
+                            if ($hotelRoomData = $objBookingDetail->dataForFrontSearch($bookingParams)) {
                                 $totalAvailRooms = $hotelRoomData['stats']['num_avail'];
                             }
                         }

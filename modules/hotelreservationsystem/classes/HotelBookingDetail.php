@@ -446,12 +446,13 @@ class HotelBookingDetail extends ObjectModel
 
                         if ($search_available) {
                             $roomTypeSearchData['data']['available'] = array();
+                            if (!isset($finalSearchResponse['stats']['num_avail'])) {
+                                $finalSearchResponse['stats']['num_avail'] = 0;
+                            }
                             if (isset($availableRoomTypes['roomTypes'][$idProduct])) {
 
                                 $roomTypeSearchData['data']['available'] = $availableRoomTypes['roomTypes'][$idProduct]['rooms'];
-                                if (!isset($finalSearchResponse['stats']['num_avail'])) {
-                                    $finalSearchResponse['stats']['num_avail'] = 0;
-                                }
+
                                 $finalSearchResponse['stats']['num_avail'] += count($roomTypeSearchData['data']['available']);
 
                                 $finalSearchResponse['stats']['max_avail_occupancy'] += count($roomTypeSearchData['data']['available']) * (int)$availableRoomTypes['roomTypes'][$idProduct]['maxOccupancy'];
@@ -1890,6 +1891,7 @@ class HotelBookingDetail extends ObjectModel
         $old_date_to,
         $new_date_from,
         $new_date_to,
+        $occupancy,
         $new_total_price = null
     ) {
         $rowByIdOrderIdRoom = Db::getInstance()->getRow('SELECT * FROM `'._DB_PREFIX_.'htl_booking_detail` WHERE `id_room`='.(int)$id_room.' AND `id_order`='.(int)$id_order);
@@ -1936,6 +1938,9 @@ class HotelBookingDetail extends ObjectModel
                 'date_from' => $new_date_from,
                 'date_to' => $new_date_to,
                 'quantity' => $newNumDays,
+                'adult' => $occupancy['adult'],
+                'children' => $occupancy['children'],
+                'child_ages' => json_encode($occupancy['child_ages']),
             ),
         );
 
@@ -1947,6 +1952,9 @@ class HotelBookingDetail extends ObjectModel
                 'total_price_tax_excl' => $newTotalPriceTE,
                 'total_price_tax_incl' => $newTotalPriceTI,
                 'total_paid_amount' => $totalPaidAmount,
+                'adult' => $occupancy['adult'],
+                'children' => $occupancy['children'],
+                'child_ages' => json_encode($occupancy['child_ages']),
             ),
         );
 
@@ -2017,6 +2025,8 @@ class HotelBookingDetail extends ObjectModel
                 $order_detail_data[$key]['paid_unit_price_tax_incl'] = $value['total_price_tax_incl'] / $num_days;
 
                 $order_detail_data[$key]['feature_price_diff'] = (float)($order_detail_data[$key]['unit_price_without_reduction_tax_incl'] - $order_detail_data[$key]['paid_unit_price_tax_incl']);
+
+                $order_detail_data[$key]['child_ages'] = json_decode($value['child_ages']);
 
                 // Check if this booking as any refund history then enter refund data
                 if ($refundInfo = OrderReturnCore::getOrdersReturnDetail($id_order, 0, $value['id'])) {
@@ -2276,8 +2286,8 @@ class HotelBookingDetail extends ObjectModel
         $date_to = date("Y-m-d", strtotime($params['date_to']));
         $id_product = $params['id_room_type'];
 
-        $obj_booking_dtl = new HotelBookingDetail();
-        $num_day = $obj_booking_dtl->getNumberOfDays($date_from, $date_to); //quantity of product
+        $objBookingDetail = new HotelBookingDetail();
+        $num_day = $objBookingDetail->getNumberOfDays($date_from, $date_to); //quantity of product
         $product = new Product($id_product, false, Configuration::get('PS_LANG_DEFAULT'));
         $obj_room_type = new HotelRoomType();
         $room_info_by_id_product = $obj_room_type->getRoomTypeInfoByIdProduct($id_product);
@@ -2296,8 +2306,8 @@ class HotelBookingDetail extends ObjectModel
                     }
                 }
                 /*END*/
-                $obj_booking_dtl = new HotelBookingDetail();
-                $booking_params = array(
+                $objBookingDetail = new HotelBookingDetail();
+                $bookingParams = array(
                     'date_from' => $date_from,
                     'date_to' => $date_to,
                     'hotel_id' => $id_hotel,
@@ -2306,7 +2316,7 @@ class HotelBookingDetail extends ObjectModel
                     'id_cart' => $id_cart,
                     'id_guest' => $this->context->cookie->id_guest,
                 );
-                $hotel_room_data = $obj_booking_dtl->dataForFrontSearch($booking_params);
+                $hotel_room_data = $objBookingDetail->dataForFrontSearch($bookingParams);
                 $total_available_rooms = $hotel_room_data['stats']['num_avail'];
 
                 if ($total_available_rooms < $params['req_qty']) {

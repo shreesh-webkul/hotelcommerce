@@ -263,7 +263,7 @@ $(document).ready(function(){
         }
     });
 
-	$('.booking_occupancy_wrapper .add_new_occupancy_btn').on('click', function(e) {
+	$(document).on('click', '.booking_occupancy_wrapper .add_new_occupancy_btn', function(e) {
         e.preventDefault();
 
         var booking_occupancy_wrapper = $(this).closest('.booking_occupancy_wrapper');
@@ -274,8 +274,8 @@ $(document).ready(function(){
 
         var countRooms = parseInt($(booking_occupancy_wrapper).find('.occupancy_info_block').length);
         countRooms += 1
-        if ($(booking_occupancy_wrapper).siblings('.max_avail_type_qty').val() > 0
-			&& countRooms <= $(booking_occupancy_wrapper).siblings('.max_avail_type_qty').val()
+        if ($(booking_occupancy_wrapper).find('.max_avail_type_qty').val() > 0
+			&& countRooms <= $(booking_occupancy_wrapper).find('.max_avail_type_qty').val()
 		) {
             occupancy_block += '<div class="occupancy_info_block" occ_block_index="'+roomBlockIndex+'">';
                 occupancy_block += '<div class="occupancy_info_head"><span class="room_num_wrapper">'+ room_txt + ' - ' + countRooms + '</span><a class="remove-room-link pull-right" href="#">' + remove_txt + '</a></div>';
@@ -339,7 +339,6 @@ $(document).ready(function(){
         setRoomTypeGuestOccupancy(booking_occupancy_wrapper);
     });
 
-
 	// The button to increment the product value
 	$(document).on('click', '.rm_quantity_up', function(e){
 		e.preventDefault();
@@ -352,6 +351,7 @@ $(document).ready(function(){
 		}
 		element.val(elementVal);
 		$(this).closest('.rm_qty_cont').find('.qty_count > span').text(elementVal);
+		$(document).trigger( "QloApps:updateRoomQuantity", [element]);
 	});
 
 	// The button to decrement the product value
@@ -359,13 +359,15 @@ $(document).ready(function(){
 		e.preventDefault();
 		var element = $(this).closest('.rm_qty_cont').find('.quantity_wanted');
 		var elementVal = parseInt(element.val()) - 1;
-		if (isNaN(elementVal) || elementVal < 1)
+		if (isNaN(elementVal) || elementVal < 1) {
 			elementVal = 1;
+		}
 
 		element.val(elementVal);
 		$(this).closest('.rm_qty_cont').find('.qty_count > span').text(elementVal);
-	});
+		$(document).trigger( "QloApps:updateRoomQuantity", [element]);
 
+	});
 });
 
 function setRoomTypeGuestOccupancy(booking_occupancy_wrapper)

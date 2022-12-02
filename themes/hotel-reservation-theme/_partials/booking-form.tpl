@@ -33,9 +33,8 @@
                     </div>
                 </div>
                 <div class="room_unavailability_date_error_div"></div>
-                {if $total_available_rooms > 0}
                     <div class="unvail_rooms_cond_display row">
-                        <div class="form-group col-sm-6"{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || $PS_CATALOG_MODE} style="display: none;"{/if}>
+                        <div class="form-group col-sm-12"{if !$product->available_for_order || $PS_CATALOG_MODE} style="display: none;"{/if}>
                             {if isset($occupancy_wise_search) && $occupancy_wise_search}
                                 <label class="control-label">{l s='Guests'}</label>
                                 {include file="./occupancy_field.tpl"}
@@ -45,6 +44,7 @@
                             {/if}
                         </div>
                     </div>
+                {if $total_available_rooms > 0}
                     {if isset($has_room_type_demands) && $has_room_type_demands}
                         <hr class="separator-hr-mg-10 unvail_rooms_cond_display">
                         <div class="row price_desc_block unvail_rooms_cond_display">

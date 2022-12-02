@@ -43,7 +43,7 @@
 				{if isset($cart_detail_data) && $cart_detail_data}
 					{assign var=curr_id value=$cart->id_currency|intval}
 					{foreach from=$cart_detail_data item=data}
-						<tr>
+						<tr  data-id-booking-data="{$data.id}" data-id-product="{$data.id_product}" data-id-room="{$data.id_room}" data-date-from="{$data.date_from}" data-date-to="{$data.date_to}" >
 							<td>{$data.room_num|escape:'html':'UTF-8'}</td>
 							<td><img src="{$data.image_link|escape:'html':'UTF-8'}" title="Room image" /></td>
 							<td>
@@ -71,7 +71,7 @@
 											<input type="hidden" class="max_adults" value="{if isset($data['room_type_info'])}{$data['room_type_info']['max_adults']|escape:'html':'UTF-8'}{/if}">
 											<input type="hidden" class="max_children" value="{if isset($data['room_type_info'])}{$data['room_type_info']['max_children']|escape:'html':'UTF-8'}{/if}">
 											<input type="hidden" class="max_guests" value="{if isset($data['room_type_info'])}{$data['room_type_info']['max_guests']|escape:'html':'UTF-8'}{/if}">
-											<div class="occupancy_info_block" occ_block_index="0">
+											<div class="occupancy_info_block selected" occ_block_index="0">
 												<div class="occupancy_info_head col-sm-12"><span class="room_num_wrapper">{l s='Room - 1'}</span></div>
 												<div class="row">
 													<div class="col-xs-6 occupancy_count_block">
@@ -120,7 +120,7 @@
 								{else}
 									{assign var=shown_room_type_price value=$data.product_price_tax_excl}
 								{/if}
-								<input type="text" class="room_unit_price" data-id-booking-data="{$data.id}" data-id-product="{$data.id_product}" data-id-room="{$data.id_room}" data-date-from="{$data.date_from}" data-date-to="{$data.date_to}" value="{$shown_room_type_price|escape:'html':'UTF-8'}">
+								<input type="text" class="room_unit_price" value="{$shown_room_type_price|escape:'html':'UTF-8'}">
 							</td>
 							<td>
 								{if isset($data.extra_demands) && $data.extra_demands}
