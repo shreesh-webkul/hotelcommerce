@@ -140,7 +140,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{foreach from=$booking_data['rm_data'][0]['data'] key=b_key item=b_val}
+						{foreach from=$booking_data['rm_data'][$product->id]['data'] key=b_key item=b_val}
 							{if ($b_key == 'available') && !empty($b_val)}
 								{foreach from=$b_val key=data_k item=data_v}
 									<tr>
