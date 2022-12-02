@@ -157,6 +157,7 @@ img/**
 # modules/*
 /modules/*/config.xml
 /modules/*/translations/*
+!/modules/*/translations/index.php
 
 /override/*
 !/override/.htaccess
@@ -229,6 +230,8 @@ admin/themes/default/css/screen.css
 !/mails/.htaccess
 !/mails/index.php
 !/mails/en/
+/mails/en/*
+!/mails/en/index.php
 
 /themes/hotel-reservation-theme/cache/*
 !/themes/hotel-reservation-theme/cache/
