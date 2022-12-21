@@ -860,6 +860,10 @@ class CartCore extends ObjectModel
                 if (Validate::isLoadedObject(
                     $objProduct = new Product($product['id_product'], false, $this->id_lang)
                 )) {
+                    // $address = Address::initialize($product['id_address_delivery']);
+                    // $product['id_hotel'] = $address->id_hotel;
+                    // $objHotelBranch = new HotelBranchInformation();
+                    // $product['hotel'] = $objHotelBranch->hotelBranchInfoById($product['id_hotel']);
                     $coverImageArr = $objProduct->getCover($product['id_product']);
                     if (!empty($coverImageArr)) {
                         $coverImg = $context->link->getImageLink(
@@ -1156,12 +1160,12 @@ class CartCore extends ObjectModel
                     return -1;
                 } else {
                     Db::getInstance()->execute('
-						UPDATE `'._DB_PREFIX_.'cart_product`
-						SET `quantity` = `quantity` '.$qty.', `date_add` = NOW()
-						WHERE `id_product` = '.(int)$id_product.
+                        UPDATE `'._DB_PREFIX_.'cart_product`
+                        SET `quantity` = `quantity` '.$qty.', `date_add` = NOW()
+                        WHERE `id_product` = '.(int)$id_product.
                         (!empty($id_product_attribute) ? ' AND `id_product_attribute` = '.(int)$id_product_attribute : '').'
-						AND `id_cart` = '.(int)$this->id.(Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery() ? ' AND `id_address_delivery` = '.(int)$id_address_delivery : '').'
-						LIMIT 1'
+                        AND `id_cart` = '.(int)$this->id.(Configuration::get('PS_ALLOW_MULTISHIPPING') && $this->isMultiAddressDelivery() ? ' AND `id_address_delivery` = '.(int)$id_address_delivery : '').'
+                        LIMIT 1'
                     );
                 }
             }
@@ -2261,6 +2265,7 @@ class CartCore extends ObjectModel
                         $idHotel = $productInfo['id_hotel'] ? $productInfo['id_hotel'] : 0;
 
                         $orderPackage[$id_address][$idHotel]['product_list'][] = $product;
+                        $orderPackage[$id_address][$idHotel]['id_hotel'] = $idHotel;
                         if (!isset($orderPackage[$id_address][$idHotel]['id_hotel'])) {
                             $orderPackage[$id_address][$idHotel]['id_hotel'] = $productInfo['id_hotel'];
                         }
@@ -2320,14 +2325,16 @@ class CartCore extends ObjectModel
                                 }
                             }
                         } else {
-
-                            if (isset($serviceProducts[$id_address]['products']) && $serviceProducts[$id_address]['products']) {
-                                $serviceProducts[$id_address]['products'][] = $product;
+                            // ppp($id_address);
+                            // ddd($product);
+                            if (isset($serviceProducts[$id_address]['product_list']) && $serviceProducts[$id_address]['product_list']) {
+                                $serviceProducts[$id_address]['product_list'][] = $product;
                             } else {
                                 $serviceProducts[$id_address] = array(
-                                    'products' => array(
+                                    'product_list' => array(
                                         $product
                                     ),
+                                    'id_hotel' => $id_address,
                                     'warehouse_list' => $package['warehouse_list'],
                                     'carrier_list' => $product['carrier_list'],
                                     'id_warehouse' => $package['id_warehouse'],
@@ -2348,43 +2355,49 @@ class CartCore extends ObjectModel
             }
         }
 
-        // add sevice products as new package if there are multiple hotels in cart
-        if ($numHotels > 1 || count($serviceProducts) > 1) {
-            foreach ($serviceProducts as $productsByAddress) {
-                if (isset($orderPackage[$id_address])) {
-                    $hotelWisePackageList[$id_address][] = array(
-                        'product_list' => $productsByAddress['products'],
-                        'carrier_list' => $productsByAddress['carrier_list'],
-                        'warehouse_list' =>  $productsByAddress['warehouse_list'],
-                        'id_warehouse' =>  $productsByAddress['id_warehouse'],
-                        'id_carrier' =>  $productsByAddress['id_carrier']
-
-                    );
-                }
-            }
-        } else if (!empty($serviceProducts)) {
-            $serviceProductsIdAddress = array_keys($serviceProducts)[0];
-            $productsByAddress = array_shift($serviceProducts);
-            if (isset($hotelWisePackageList[$serviceProductsIdAddress])) {
-                $hotelWisePackageList[$serviceProductsIdAddress][0]['product_list'] = array_merge(
-                    $hotelWisePackageList[$serviceProductsIdAddress][0]['product_list'],
-                    $productsByAddress['products']
-                );
-            } else {
-                $hotelWisePackageList[$id_address][] = array(
-                    'product_list' => $productsByAddress['products'],
-                    'carrier_list' => $productsByAddress['carrier_list'],
-                    'warehouse_list' =>  $productsByAddress['warehouse_list'],
-                    'id_warehouse' =>  $productsByAddress['id_warehouse'],
-                    'id_carrier' =>  $productsByAddress['id_carrier']
-
-                );
+        if (!empty($serviceProducts)) {
+            foreach ($serviceProducts as $id_address =>  $productsByAddress) {
+                $hotelWisePackageList[$id_address][] = $productsByAddress;
             }
         }
+        // add sevice products as new package if there are multiple hotels in cart
+        // if ($numHotels > 1 || count($serviceProducts) > 1) {
+        //     foreach ($serviceProducts as $productsByAddress) {
+        //         if (isset($orderPackage[$id_address])) {
+        //             $hotelWisePackageList[$id_address][] = array(
+        //                 'product_list' => $productsByAddress['products'],
+        //                 'carrier_list' => $productsByAddress['carrier_list'],
+        //                 'warehouse_list' =>  $productsByAddress['warehouse_list'],
+        //                 'id_warehouse' =>  $productsByAddress['id_warehouse'],
+        //                 'id_carrier' =>  $productsByAddress['id_carrier']
+
+        //             );
+        //         }
+        //     }
+        // } else if (!empty($serviceProducts)) {
+        //     $serviceProductsIdAddress = array_keys($serviceProducts)[0];
+        //     $productsByAddress = array_shift($serviceProducts);
+        //     if (isset($hotelWisePackageList[$serviceProductsIdAddress])) {
+        //         $hotelWisePackageList[$serviceProductsIdAddress][0]['product_list'] = array_merge(
+        //             $hotelWisePackageList[$serviceProductsIdAddress][0]['product_list'],
+        //             $productsByAddress['products']
+        //         );
+        //     } else {
+        //         $hotelWisePackageList[$id_address][] = array(
+        //             'product_list' => $productsByAddress['products'],
+        //             'carrier_list' => $productsByAddress['carrier_list'],
+        //             'warehouse_list' =>  $productsByAddress['warehouse_list'],
+        //             'id_warehouse' =>  $productsByAddress['id_warehouse'],
+        //             'id_carrier' =>  $productsByAddress['id_carrier']
+
+        //         );
+        //     }
+        // }
         $final_package_list = $hotelWisePackageList;
         // END $package_list hotel wise
+        // ddd($final_package_list);
         $cache[$cache_key] = $final_package_list;
-
+            // ddd($final_package_list);
         return $final_package_list;
     }
 
@@ -2499,6 +2512,9 @@ class CartCore extends ObjectModel
                         $carriers_instance[$id_carrier] = new Carrier($id_carrier);
                     }
 
+                    if (!isset($package['product_list'])) {
+                        ddd($package);
+                    }
                     $price_with_tax = $this->getPackageShippingCost((int)$id_carrier, true, $country, $package['product_list']);
                     $price_without_tax = $this->getPackageShippingCost((int)$id_carrier, false, $country, $package['product_list']);
                     if (is_null($best_price) || $price_with_tax < $best_price) {
@@ -2541,9 +2557,9 @@ class CartCore extends ObjectModel
                 $best_price_carrier[$id_carrier]['product_list'] = array_merge($best_price_carrier[$id_carrier]['product_list'], $packages[$id_package]['product_list']);
                 $best_price_carrier[$id_carrier]['instance'] = $carriers_instance[$id_carrier];
                 $real_best_price = !isset($real_best_price) || $real_best_price > $carriers_price[$id_address][$id_package][$id_carrier]['with_tax'] ?
-                    $carriers_price[$id_address][$id_package][$id_carrier]['with_tax'] : $real_best_price;
+                $carriers_price[$id_address][$id_package][$id_carrier]['with_tax'] : $real_best_price;
                 $real_best_price_wt = !isset($real_best_price_wt) || $real_best_price_wt > $carriers_price[$id_address][$id_package][$id_carrier]['without_tax'] ?
-                    $carriers_price[$id_address][$id_package][$id_carrier]['without_tax'] : $real_best_price_wt;
+                $carriers_price[$id_address][$id_package][$id_carrier]['without_tax'] : $real_best_price_wt;
             }
 
             // Add the delivery option with best price as best price

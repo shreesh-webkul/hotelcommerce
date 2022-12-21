@@ -1442,8 +1442,8 @@ class ProductCore extends ObjectModel
 					ON (image_shop.`id_product` = p.`id_product` AND image_shop.cover=1 AND image_shop.id_shop='.(int)$context->shop->id.')
 				LEFT JOIN `'._DB_PREFIX_.'image_lang` il
 					ON (image_shop.`id_image` = il.`id_image`
-					AND il.`id_lang` = '.(int)$idLang.')
-                WHERE pl.`id_lang` = '.(int)$idLang.' AND p.`booking_product` = 0
+					AND il.`id_lang` = '.(int)$idLang.')';
+        $sql .= 'WHERE pl.`id_lang` = '.(int)$idLang.' AND p.`booking_product` = 0
                 AND p.`service_product_type` = '.Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE.'
 				ORDER BY pl.`name`';
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
@@ -3033,11 +3033,11 @@ class ProductCore extends ObjectModel
         if ($id_address) {
             $address_infos = Address::getCountryAndState($id_address);
         } else {
-            if ($id_roomtype) {
-                $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_roomtype));
-            } else {
+            // if ($id_roomtype) {
+            //     $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_roomtype));
+            // } else {
                 $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_product));
-            }
+            // }
         }
 
         if ($address_infos['id_country']) {
@@ -3355,10 +3355,13 @@ class ProductCore extends ObjectModel
         return self::$_prices[$cache_id];
     }
 
-    public static function getIdAddressForTaxCalculation($id_product)
+    public static function getIdAddressForTaxCalculation($id_product, $id_hotel = false)
     {
         if (self::isBookingProduct($id_product)) {
             return HotelRoomType::getHotelIdAddressByIdProduct($id_product);
+        } else if ($id_hotel) {
+            $addressInfo = HotelBranchInformation::getAddress($id_hotel);
+            return $$addressInfo['id_address'];
         }
         return false;
     }

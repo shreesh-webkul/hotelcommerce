@@ -340,7 +340,6 @@ class AdminCartsControllerCore extends AdminController
                 $this->context->cart->recyclable = 0;
                 $this->context->cart->gift = 0;
             }
-
             /*if (!$this->context->cart->id_customer)
                 $this->context->cart->id_customer = $id_customer;*/
             if (Validate::isLoadedObject($this->context->cart) && $this->context->cart->OrderExists()) {

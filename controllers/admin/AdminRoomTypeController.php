@@ -4167,7 +4167,7 @@ class AdminRoomTypeControllerCore extends AdminController
         foreach ($idsHotel as $idHotel) {
             $objHotelBranchInfo = new HotelBranchInformation($idHotel, $this->context->language->id);
             if (Validate::isLoadedObject($objHotelBranchInfo)) {
-                $hotelAddressInfo = $objHotelBranchInfo->getAddress($idHotel);
+                $hotelAddressInfo = HotelBranchInformation::getAddress($idHotel);
                 $hotelInfo = array(
                     'id_hotel' => $objHotelBranchInfo->id,
                     'hotel_name' => $objHotelBranchInfo->hotel_name,

@@ -415,6 +415,7 @@ function initProductEvents()
 		$('.cancel_product_change_link:visible').trigger('click');
 		$('.cancel_room_change_link:visible').trigger('click');
 		$('.add_product_fields').show();
+		$('#customer_products_details').show();
 		//invoice field is hidden because has not to be edited by webkul
 		$('#add_product_product_invoice').hide();
 
@@ -431,6 +432,9 @@ function initProductEvents()
 	$('#cancelAddProduct').unbind('click').click(function() {
 		$('.order_action').show();
 		$('tr#new_product td').fadeOut('fast');
+		if (!($('#customer_products_details tbody tr').length > 1)) {
+			$('#customer_products_details').hide();
+		}
 	});
 
 	$("#add_product_product_name").autocomplete(admin_order_tab_link,
@@ -892,6 +896,9 @@ function initRoomEvents()
 	$('#cancelAddRoom').unbind('click').click(function() {
 		$('.order_action').show();
 		$('tr#new_room td').fadeOut('fast');
+		if (!($('#customer_products_details tbody tr').length > 1)) {
+			$('#customer_products_details').hide();
+		}
 	});
 
     $("#add_room_product_name").autocomplete(admin_order_tab_link,

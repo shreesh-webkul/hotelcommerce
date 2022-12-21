@@ -291,7 +291,7 @@ class ProductControllerCore extends FrontController
                     $hotel_policies = $hotel_info_by_id['policies'];
                     $hotel_name = $hotel_info_by_id['hotel_name'];
 
-                    $addressInfo = $obj_hotel_branch->getAddress($room_info_by_product_id['id_hotel']);
+                    $addressInfo = HotelBranchInformation::getAddress($room_info_by_product_id['id_hotel']);
                     $hotel_location = $addressInfo['city'].
                     ($addressInfo['id_state']?', '.$addressInfo['state']:'').', '.$addressInfo['country'];
 
@@ -425,16 +425,6 @@ class ProductControllerCore extends FrontController
                             'num_total_standard_products' => $numTotalStandardProducts
                         ));
                     }
-
-                    // $objStandardProductCartDetail = new StandardProductCartDetail();
-                    // $selectedProductsPrice = $objStandardProductCartDetail->getSelectedProductsTotalPrice(
-                    //     $room_info_by_product_id['id'],
-                    //     $date_from,
-                    //     $date_to,
-                    //     $this->product->minimal_quantity
-                    // );
-                    // $total_price += $selectedProductsPrice;
-                    // $demands_price += $selectedProductsPrice;
 
                     // send all data of the hotel and room type related
                     $this->context->smarty->assign(

@@ -521,7 +521,6 @@ class OrderOpcControllerCore extends ParentOrderController
                     $this->context->smarty->assign('cart_normal_data', $normalCartProduct);
                 }
 
-
                 // For Advanced Payment work
                 $objAdvPayment = new HotelAdvancedPayment();
                 if ($objAdvPayment->isAdvancePaymentAvailableForCurrentCart()) {

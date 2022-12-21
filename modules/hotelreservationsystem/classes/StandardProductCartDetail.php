@@ -46,49 +46,6 @@ class StandardProductCartDetail extends ObjectModel
         );
     }
 
-    public function getSelectedProductsTotalPrice($idRoomType, $dateFrom, $dateTo, $quantity, $id_cart = false)
-    {
-        $context = Context::getContext();
-
-        $selectedProducts = Db::getInstance()->executeS(
-            'SELECT * FROM `'._DB_PREFIX_.'htl_standard_product_cart_detail`
-            WHERE `id_room_type` = '.(int)$idRoomType.'
-            AND `date_from` = \''.pSQL($dateFrom).'\' AND `date_to` = \''.pSQL($dateTo).'\'
-            AND `id_guest` = '.(int)$context->cart->id_guest
-            .($id_cart ? ' AND `id_cart = `'.(int)$id_cart: '')
-        );
-
-        $totalPrice = 0;
-        if (!empty($selectedProducts)) {
-            $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
-            foreach ($selectedProducts as $product) {
-                $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
-                $price = Product::getPriceStatic(
-                    (int)$product['id_product'],
-                    $useTax,
-                    null,
-                    6,
-                    null,
-                    false,
-                    true,
-                    $qty,
-                    false,
-                    null,
-                    null,
-                    null,
-                    $specificPrice,
-                    true,
-                    true,
-                    null,
-                    true,
-                    $idRoomType
-                );
-                $totalPrice += ($price * $qty);
-            }
-        }
-        return $totalPrice;
-    }
-
     public function addStandardProductInCart(
         $idProduct,
         $quantity,

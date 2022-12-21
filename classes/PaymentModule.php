@@ -294,7 +294,9 @@ abstract class PaymentModuleCore extends Module
                     $order->id_customer = (int)$this->context->cart->id_customer;
                     $order->id_address_invoice = (int)$this->context->cart->id_address_invoice;
                     $order->id_address_delivery = (int)$id_address;
-                    $order->id_address_tax = (int)Product::getIdAddressForTaxCalculation($order->product_list[0]['id_product']);
+                    $addressInfo = HotelBranchInformation::getAddress($package['id_hotel']);
+
+                    $order->id_address_tax = $addressInfo['id_address'];
                     $order->id_currency = $this->context->currency->id;
                     $order->id_lang = (int)$this->context->cart->id_lang;
                     $order->id_cart = (int)$this->context->cart->id;
@@ -486,7 +488,7 @@ abstract class PaymentModuleCore extends Module
                     $objProduct = new Product();
 
                     foreach ($order->product_list as $product) {
-                       $price = Product::getPriceStatic((int)$product['id_product'], false, ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null), 6, null, false, true, $product['cart_quantity'], false, (int)$order->id_customer, (int)$order->id_cart);
+                        $price = Product::getPriceStatic((int)$product['id_product'], false, ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null), 6, null, false, true, $product['cart_quantity'], false, (int)$order->id_customer, (int)$order->id_cart);
                         $price_wt = Product::getPriceStatic((int)$product['id_product'], true, ($product['id_product_attribute'] ? (int)$product['id_product_attribute'] : null), 2, null, false, true, $product['cart_quantity'], false, (int)$order->id_customer, (int)$order->id_cart);
 
 
@@ -765,7 +767,7 @@ abstract class PaymentModuleCore extends Module
                                     $objBookingDetail->email = $objHotelBranch->email;
                                     $objBookingDetail->check_in_time = $objHotelBranch->check_in;
                                     $objBookingDetail->check_out_time = $objHotelBranch->check_out;
-                                    if ($hotelAddress = $objHotelBranch->getAddress($objCartBookingData->id_hotel)) {
+                                    if ($hotelAddress = HotelBranchInformation::getAddress($objCartBookingData->id_hotel)) {
                                         $objBookingDetail->city = $hotelAddress['city'];
                                         $objBookingDetail->state = $hotelAddress['state'];
                                         $objBookingDetail->country = $hotelAddress['country'];

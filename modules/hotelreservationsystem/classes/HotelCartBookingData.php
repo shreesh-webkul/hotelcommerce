@@ -1026,7 +1026,7 @@ class HotelCartBookingData extends ObjectModel
                                 1,
                                 $roomDetail['id_hotel']
                             )) {
-                                $addressInfo = $objHotelBranch->getAddress($roomDetail['id_hotel']);
+                                $addressInfo = HotelBranchInformation::getAddress($roomDetail['id_hotel']);
 
                                 $hotelInfo['location'] = $hotelInfo['hotel_name'].', '.$addressInfo['city'].
                                 ($addressInfo['id_state']?', '.$addressInfo['state']:'').', '.

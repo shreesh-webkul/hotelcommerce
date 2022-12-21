@@ -30,9 +30,9 @@
                     {include file='controllers/orders/_product_line.tpl'}
                 {/foreach}
             {else}
-                <tr>
+                {* <tr>
                     <td>{l s='No Data Found.'}</td>
-                </tr>
+                </tr> *}
             {/if}
             {* Include product line partial *}
             {include file='controllers/orders/_new_room.tpl'}

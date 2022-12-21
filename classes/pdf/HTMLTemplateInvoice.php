@@ -623,6 +623,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
         // code to send name of the taxes applied on the order to show names od taxes in the invoice for GST
         $showTaxName = 0;
+
         if ($tax_breakdowns = $this->getTaxBreakdown()) {
             if (Configuration::get('PS_INVOICE_TAXES_BREAKDOWN')) {
                 $showTaxName = 1;
@@ -646,7 +647,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
             'tax_exempt' => $tax_exempt,
             'use_one_after_another_method' => $this->order_invoice->useOneAfterAnotherTaxComputationMethod(),
             'display_tax_bases_in_breakdowns' => $this->order_invoice->displayTaxBasesInProductTaxesBreakdown(),
-            'product_tax_breakdown' => $this->order_invoice->getProductTaxesBreakdown($this->order),
+            // 'product_tax_breakdown' => $this->order_invoice->getProductTaxesBreakdown($this->order),
             'shipping_tax_breakdown' => $this->order_invoice->getShippingTaxesBreakdown($this->order),
             'ecotax_tax_breakdown' => $this->order_invoice->getEcoTaxTaxesBreakdown(),
             'wrapping_tax_breakdown' => $this->order_invoice->getWrappingTaxesBreakdown(),

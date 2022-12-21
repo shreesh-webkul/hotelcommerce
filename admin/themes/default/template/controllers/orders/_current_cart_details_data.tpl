@@ -25,90 +25,86 @@
 	<div class="row">
 		<div class="col-lg-12">
 			<table class="table" id="customer_cart_details_table">
-				<thead>
-					<tr>
-						<th><span class="title_box">{l s='Room No.'}</span></th>
-						<th><span class="title_box">{l s='Room Image'}</th>
-						<th><span class="title_box">{l s='Room Type'}</span></th>
-						<th><span class="title_box">{l s='Duration'}</span></th>
-						<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
-						<th><span class="title_box">{l s='Additinal Services (tax excl)'}</span></th>
-						<th><span class="title_box">{l s='Total Rooms Price (tax excl)'}</span></th>
-						<th><span class="title_box">{l s='Total Price (tax excl)'}</span></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
 				{if isset($cart_detail_data) && $cart_detail_data}
-					{assign var=curr_id value=$cart->id_currency|intval}
-					{foreach from=$cart_detail_data item=data}
+					<thead>
 						<tr>
-							<td>{$data.room_num|escape:'html':'UTF-8'}</td>
-							<td><img src="{$data.image_link|escape:'html':'UTF-8'}" title="Room image" /></td>
-							<td>
-								<p>{$data.room_type|escape:'html':'UTF-8'}</p>
-								{if isset($data.selected_demands) && $data.selected_demands}
-									<ul class="extra-demand-list">
-									{foreach $data.selected_demands as $selDemand}
-										<li>
-											{$selDemand.name|escape:'html':'UTF-8'}
-										</li>
-									{/foreach}
-									</ul>
-								{/if}
-							</td>
-							<td>{$data.date_from|escape:'html':'UTF-8'|date_format:"%d-%m-%Y"}&nbsp;-&nbsp; {$data.date_to|escape:'html':'UTF-8'|date_format:"%d-%m-%Y"}</td>
-							<td id="cart_detail_data_unit_price_{$data.id|escape:'html':'UTF-8'}">
-								<span class="product_original_price {if $data.feature_price_diff > 0}room_type_old_price{/if}" {if $data.feature_price_diff < 0} style="display:none;"{/if}>
-									{displayPrice price=$data.product_price_tax_excl|escape:'html':'UTF-8'}
-								</span>&nbsp;
-								<span class="room_type_current_price" {if !$data.feature_price_diff}style="display:none;"{/if}>
-									{displayPrice price=$data.feature_price_tax_excl|escape:'html':'UTF-8'}
-								</span>
-							</td>
-							<td>
-								{if (isset($data.extra_demands) && $data.extra_demands) || (isset($data.additional_service) && $data.additional_service)}
-									{displayPrice price=($data.demand_price + $data.additional_service_price)|escape:'html':'UTF-8'}
-								{else}
-									{displayPrice price=0}
-								{/if}
-							</td>
-							<td id="cart_detail_data_price_{$data.id|escape:'html':'UTF-8'}">{displayPrice price=$data.amt_with_qty}</td>
-							<td>
-								{if isset($data.extra_demands) && $data.extra_demands}
-									{displayPrice price=$data.amt_with_qty|escape:'html':'UTF-8'+$data.demand_price|escape:'html':'UTF-8'}
-								{else}
-									{displayPrice price=$data.amt_with_qty|escape:'html':'UTF-8'}
-								{/if}
-							</td>
-							<td>
-								<button class="delete_hotel_cart_data btn btn-danger" data-id_room={$data.id_room|escape:'html':'UTF-8'} data-id_product={$data.id_product|escape:'html':'UTF-8'} data-id = {$data.id|escape:'html':'UTF-8'} data-id_cart = {$data.id_cart|escape:'html':'UTF-8'} data-date_to = {$data.date_to|escape:'html':'UTF-8'} data-date_from = {$data.date_from|escape:'html':'UTF-8'}>
-									<i class="icon-trash"></i>&nbsp;{l s='Delete'}
-								</button>
-								{if (isset($data.extra_demands) && $data.extra_demands) || isset($data.additional_service) && $data.additional_service}
-									<br />
-									<a href="#" id_room={$data.id_room|escape:'html':'UTF-8'} date_from="{$data.date_from|escape:'html':'UTF-8'}" date_to="{$data.date_to|escape:'html':'UTF-8'}" id_product="{$data.id_product|escape:'html':'UTF-8'}" id_cart="{$data.id_cart|escape:'html':'UTF-8'}" class="open_rooms_extra_demands btn btn-success" title="{l s='Click here to add or remove the additinal facilities of this room type.'}">
-										<i class="icon-plus"></i>&nbsp;{l s='Facilities'}
-									</a>
-								{/if}
-							</td>
+							<th><span class="title_box">{l s='Room No.'}</span></th>
+							<th><span class="title_box">{l s='Room Image'}</th>
+							<th><span class="title_box">{l s='Room Type'}</span></th>
+							<th><span class="title_box">{l s='Duration'}</span></th>
+							<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Additinal Services (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Total Rooms Price (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Total Price (tax excl)'}</span></th>
+							<th></th>
 						</tr>
-					{/foreach}
-				{else}
-					<tr>
-						<td colspan="9">{l s='No Room Found in the cart.'}</td>
-					</tr>
+					</thead>
+					<tbody>
+						{assign var=curr_id value=$cart->id_currency|intval}
+						{foreach from=$cart_detail_data item=data}
+							<tr>
+								<td>{$data.room_num|escape:'html':'UTF-8'}</td>
+								<td><img src="{$data.image_link|escape:'html':'UTF-8'}" title="Room image" /></td>
+								<td>
+									<p>{$data.room_type|escape:'html':'UTF-8'}</p>
+									{if isset($data.selected_demands) && $data.selected_demands}
+										<ul class="extra-demand-list">
+										{foreach $data.selected_demands as $selDemand}
+											<li>
+												{$selDemand.name|escape:'html':'UTF-8'}
+											</li>
+										{/foreach}
+										</ul>
+									{/if}
+								</td>
+								<td>{$data.date_from|escape:'html':'UTF-8'|date_format:"%d-%m-%Y"}&nbsp;-&nbsp; {$data.date_to|escape:'html':'UTF-8'|date_format:"%d-%m-%Y"}</td>
+								<td id="cart_detail_data_unit_price_{$data.id|escape:'html':'UTF-8'}">
+									<span class="product_original_price {if $data.feature_price_diff > 0}room_type_old_price{/if}" {if $data.feature_price_diff < 0} style="display:none;"{/if}>
+										{displayPrice price=$data.product_price_tax_excl|escape:'html':'UTF-8'}
+									</span>&nbsp;
+									<span class="room_type_current_price" {if !$data.feature_price_diff}style="display:none;"{/if}>
+										{displayPrice price=$data.feature_price_tax_excl|escape:'html':'UTF-8'}
+									</span>
+								</td>
+								<td>
+									{if (isset($data.extra_demands) && $data.extra_demands) || (isset($data.additional_service) && $data.additional_service)}
+										{displayPrice price=($data.demand_price + $data.additional_service_price)|escape:'html':'UTF-8'}
+									{else}
+										{displayPrice price=0}
+									{/if}
+								</td>
+								<td id="cart_detail_data_price_{$data.id|escape:'html':'UTF-8'}">{displayPrice price=$data.amt_with_qty}</td>
+								<td>
+									{if isset($data.extra_demands) && $data.extra_demands}
+										{displayPrice price=$data.amt_with_qty|escape:'html':'UTF-8'+$data.demand_price|escape:'html':'UTF-8'}
+									{else}
+										{displayPrice price=$data.amt_with_qty|escape:'html':'UTF-8'}
+									{/if}
+								</td>
+								<td>
+									<button class="delete_hotel_cart_data btn btn-danger" data-id_room={$data.id_room|escape:'html':'UTF-8'} data-id_product={$data.id_product|escape:'html':'UTF-8'} data-id = {$data.id|escape:'html':'UTF-8'} data-id_cart = {$data.id_cart|escape:'html':'UTF-8'} data-date_to = {$data.date_to|escape:'html':'UTF-8'} data-date_from = {$data.date_from|escape:'html':'UTF-8'}>
+										<i class="icon-trash"></i>&nbsp;{l s='Delete'}
+									</button>
+									{if (isset($data.extra_demands) && $data.extra_demands) || isset($data.additional_service) && $data.additional_service}
+										<br />
+										<a href="#" id_room={$data.id_room|escape:'html':'UTF-8'} date_from="{$data.date_from|escape:'html':'UTF-8'}" date_to="{$data.date_to|escape:'html':'UTF-8'}" id_product="{$data.id_product|escape:'html':'UTF-8'}" id_cart="{$data.id_cart|escape:'html':'UTF-8'}" class="open_rooms_extra_demands btn btn-success" title="{l s='Click here to add or remove the additinal facilities of this room type.'}">
+											<i class="icon-plus"></i>&nbsp;{l s='Facilities'}
+										</a>
+									{/if}
+								</td>
+							</tr>
+						{/foreach}
+					</tbody>
 				{/if}
-				</tbody>
 				{if isset($cart_normal_data) && $cart_normal_data}
 					<thead>
 						<tr>
 							<th><span class="title_box">{l s='Image'}</th>
-							<th colspan="2"><span class="title_box">{l s='Name'}</span></th>
-							<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Name'}</span></th>
+							<th colspan="2"><span class="title_box">{l s='Hotel Name'}</span></th>
+							<th colspan="2"><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
 							<th><span class="title_box">{l s='Quantity'}</span></th>
-							<th></th>
-							<th colspan="2"><span class="title_box">{l s='Total Price (Tax incl.)'}</span></th>
+							<th><span class="title_box">{l s='Total Price (Tax incl.)'}</span></th>
 							<th></th>
 						</tr>
 					</thead>
@@ -116,11 +112,11 @@
 						{foreach $cart_normal_data as $product}
 							<tr>
 								<td><img src="{$product.cover_img|escape:'html':'UTF-8'}" class="img-responsive" /></td>
-								<td colspan="2"><p>{$product.name|escape:'html':'UTF-8'}</p></td>
-								<td>{displayPrice price=$product.price}</td>
+								<td><p>{$product.name|escape:'html':'UTF-8'}</p></td>
+								{* <td colspan="2">{$product.hotel.hotel_name}</td> *}
+								<td colspan="2">{displayPrice price=$product.price}</td>
 								<td>{$product.cart_quantity|escape:'htmlall':'UTF-8'}</td>
-								<td></td>
-								<td colspan="2">{displayPrice price=$product.total}</td>
+								<td>{displayPrice price=$product.total}</td>
 								<td>
 									<button class="delete_service_product btn btn-danger" data-id_product={$product.id_product|escape:'html':'UTF-8'} data-id_cart = {$cart->id|escape:'html':'UTF-8'}>
 										<i class="icon-trash"></i>&nbsp;{l s='Delete'}
@@ -165,7 +161,7 @@
 	#rooms_extra_demands .demand_header {
 		padding: 10px;
 		color: #333;
-    	border-bottom: 1px solid #ddd;}
+		border-bottom: 1px solid #ddd;}
 	#rooms_extra_demands .rooms_extra_demands_head {
 		margin-bottom: 18px;}
 	#rooms_extra_demands .room_demand_block {
@@ -220,7 +216,7 @@
 			var roomDemands = [];
 			// get the selected extra demands by customer
 			$(this).closest('.room_demand_detail').find('input:checkbox.id_room_type_demand:checked').each(function () {
-				roomDemands.push({
+		 		roomDemands.push({
 					'id_global_demand':$(this).val(),
 					'id_option': $(this).closest('.room_demand_block').find('.id_option').val()
 				});

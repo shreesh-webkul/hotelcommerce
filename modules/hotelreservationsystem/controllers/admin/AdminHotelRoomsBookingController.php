@@ -160,7 +160,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $this->id_cart = $this->context->cart->id;
         $this->id_guest = $this->context->cookie->id_guest;
         $this->booking_product = $booking_product;
-        $this->hotel_id = $hotel_id;
+        $this->id_hotel = $hotel_id;
         $this->room_type = $room_type;
         $this->date_from = $date_from;
         $this->date_to = $date_to;
@@ -194,7 +194,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $this->context->employee->id_profile,
             1
         );
-        $all_room_type = $obj_rm_type->getRoomTypeByHotelId($this->hotel_id, Configuration::get('PS_LANG_DEFAULT'), 1);
+        $all_room_type = $obj_rm_type->getRoomTypeByHotelId($this->id_hotel, Configuration::get('PS_LANG_DEFAULT'), 1);
         // $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
 
         $this->tpl_view_vars = array(
@@ -204,7 +204,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'date_from' => $this->date_from,
             'date_to' => $this->date_to,
             'booking_product' => $this->booking_product,
-            'hotel_id' => $this->hotel_id,
+            'hotel_id' => $this->id_hotel,
             'room_type' => $this->room_type,
         );
     }
@@ -229,8 +229,6 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             if ($normalCartProduct = $this->context->cart->getServiceProducts($cartProducts)) {
                 $smartyVars['cart_normal_data'] = $normalCartProduct;
             }
-
-
         }
         $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
         $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
@@ -264,7 +262,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $booking_data = $this->getAllBookingDataInfo(
             $this->date_from,
             $this->date_to,
-            $this->hotel_id,
+            $this->id_hotel,
             $this->room_type,
             $adult,
             $children,
@@ -275,7 +273,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
 
         //To show info of every date
         $bookingParams = array();
-        $bookingParams['hotel_id'] = $this->hotel_id;
+        $bookingParams['hotel_id'] = $this->id_hotel;
         $bookingParams['room_type'] = $this->room_type;
         $bookingParams['adult'] = $adult;
         $bookingParams['children'] = $children;
@@ -331,7 +329,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
     {
         $objProduct = new Product();
         $serviceProducts = $objProduct->getServiceProducts($this->context->language->id);
-        $serviceProducts = Product::getProductsProperties($this->context->language->id, $serviceProducts);
+        $hotelAddressInfo = HotelBranchInformation::getAddress($this->id_hotel);
+        // $serviceProducts = Product::getProductsProperties($this->context->language->id, $serviceProducts);
         $this->context->smarty->assign(array(
             'service_products' => $serviceProducts
         ));
@@ -636,15 +635,16 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $rm_amount = $roomTypeDateRangePrice['total_price_tax_incl'];
 
             $cart_data = array('room_num' => $obj_rm_info->room_num,
-                                'room_type' => Product::getProductName((int)$id_product),
-                                'date_from' => date('Y-M-d', strtotime($date_from)),
-                                'date_to' => date('Y-M-d', strtotime($date_to)),
-                                'amount' => $rm_amount,
-                                'qty' => $num_day,
-                                'total_products_in_cart' => (int)$rms_in_cart + (int)$products_in_cart,
-                                'total_amount' => $total_amount,
-                                'booking_stats' => $booking_stats,
-                                'id_cart_book_data' => $objHotelCartBookingData->id);
+                'room_type' => Product::getProductName((int)$id_product),
+                'date_from' => date('Y-M-d', strtotime($date_from)),
+                'date_to' => date('Y-M-d', strtotime($date_to)),
+                'amount' => $rm_amount,
+                'qty' => $num_day,
+                'total_products_in_cart' => (int)$rms_in_cart + (int)$products_in_cart,
+                'total_amount' => $total_amount,
+                'booking_stats' => $booking_stats,
+                'id_cart_book_data' => $objHotelCartBookingData->id
+            );
 
             if ($objHotelCartBookingData->id) {
                 die(json_encode($cart_data));

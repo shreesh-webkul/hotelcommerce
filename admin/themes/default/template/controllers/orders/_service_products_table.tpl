@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-lg-12">
-        <table class="table" id="customer_cart_details">
+        <table class="table" id="customer_products_details" {if !$order_service_products}style="display:none"{/if}>
             <thead>
                 <tr>
                     {if $refund_allowed}
@@ -29,9 +29,9 @@
                     {include file='controllers/orders/_service_product_line.tpl'}
                 {/foreach}
             {else}
-                <tr>
+                {* <tr>
                     <td>{l s='No Data Found.'}</td>
-                </tr>
+                </tr> *}
             {/if}
             {* Include product line partial *}
             {include file='controllers/orders/_new_product.tpl'}

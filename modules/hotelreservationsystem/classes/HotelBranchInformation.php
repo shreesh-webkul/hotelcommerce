@@ -371,7 +371,7 @@ class HotelBranchInformation extends ObjectModel
      * @param int $id_lang
      * @return array
      */
-    public function getAddress($id_hotel, $id_lang = false)
+    public static function getAddress($id_hotel, $id_lang = false)
     {
         if (!$id_lang)
             $id_lang = Context::getContext()->language->id;

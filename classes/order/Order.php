@@ -2296,7 +2296,7 @@ class OrderCore extends ObjectModel
      * @param $limitToOrderDetails Optional array of OrderDetails to take into account. False by default to take all OrderDetails from the current Order.
      * @return array A list of tax rows applied to the given OrderDetails (or all OrderDetails linked to the current Order).
      */
-    public function getProductTaxesDetails($limitToOrderDetails = false)
+    public function getProductTaxesDetails($limitToOrderDetails = false, $bookingProducts = null, $product_service_type = null)
     {
         $round_type = $this->round_type;
         if ($round_type == 0) {
@@ -2313,7 +2313,11 @@ class OrderCore extends ObjectModel
         $product_specific_discounts = array();
 
         $expected_total_base = $this->total_products - $this->total_discounts_tax_excl;
-        $expected_total_base = (float)$this->getTotalProductsWithoutTaxes($limitToOrderDetails);
+        $expected_total_base = (float)$this->getTotalProductsWithoutTaxes(
+            $limitToOrderDetails,
+            $bookingProducts,
+            $product_service_type
+        );
 
         foreach ($this->getCartRules() as $order_cart_rule) {
             if ($order_cart_rule['free_shipping'] && $free_shipping_tax === 0) {
@@ -2342,7 +2346,11 @@ class OrderCore extends ObjectModel
         $breakdown = array();
 
         // Get order_details
-        $order_details = $limitToOrderDetails ? $limitToOrderDetails : $this->getOrderDetailList();
+        if ($limitToOrderDetails !== false) {
+            $order_details = $limitToOrderDetails;
+        } else {
+            $order_details = $this->getOrderDetailList();
+        }
         $expected_total_tax = (float)$this->getTotalProductsWithTaxes($limitToOrderDetails) - (float)$this->getTotalProductsWithoutTaxes($limitToOrderDetails);
 
         $order_ecotax_tax = 0;

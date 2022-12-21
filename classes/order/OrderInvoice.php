@@ -417,7 +417,8 @@ class OrderInvoiceCore extends ObjectModel
         $order_detail = array_filter($order_detail, function($v) {
             return $v['is_booking_product'];
         });
-        $details = $order->getProductTaxesDetails($order_detail);
+        $details = $order->getProductTaxesDetails($order_detail, true);
+
         if ($sum_composite_taxes) {
             $grouped_details = array();
             foreach ($details as $row) {
@@ -476,7 +477,8 @@ class OrderInvoiceCore extends ObjectModel
         $order_detail = array_filter($order_detail, function($v) {
             return (!$v['is_booking_product'] && $v['product_service_type'] == Product::SERVICE_PRODUCT_WITH_ROOMTYPE);
         });
-        $details = $order->getProductTaxesDetails($order_detail);
+        $details = $order->getProductTaxesDetails($order_detail, false, Product::SERVICE_PRODUCT_WITH_ROOMTYPE);
+
         if ($sum_composite_taxes) {
             $grouped_details = array();
             foreach ($details as $row) {
@@ -535,7 +537,8 @@ class OrderInvoiceCore extends ObjectModel
         $order_detail = array_filter($order_detail, function($v) {
             return (!$v['is_booking_product'] && $v['product_service_type'] == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE);
         });
-        $details = $order->getProductTaxesDetails($order_detail);
+        $details = $order->getProductTaxesDetails($order_detail, false, Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE);
+
         if ($sum_composite_taxes) {
             $grouped_details = array();
             foreach ($details as $row) {
