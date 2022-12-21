@@ -215,6 +215,83 @@ class CategoryControllerCore extends FrontController
             'body_classes'         => array($this->php_self.'-'.$this->category->id, $this->php_self.'-'.$this->category->link_rewrite)
         ));*/
     }
+    public function displayAjaxGetSearchResults()
+    {
+        $response = array(
+            'success' => false
+        );
+        $date_from = Tools::getValue('date_from');
+        $date_to = Tools::getValue('date_to');
+        $htl_id_category = Tools::getValue('id_category');
+
+        $sort_by = Tools::getValue('sort_by');
+        $sort_value = Tools::getValue('sort_value');
+        $filter_data = Tools::getValue('filter_data');
+
+        $adult = 0;
+        $child = 0;
+        $ratting = -1;
+        $amenities = 0;
+        $price = 0;
+
+        if (!empty($filter_data)) {
+            foreach ($filter_data as $key => $value) {
+                if ($key == 'adult') {
+                    $adult = min($value);
+                } elseif ($key == 'children') {
+                    $child = min($value);
+                } elseif ($key == 'ratting') {
+                    $ratting = min($value);
+                } elseif ($key == 'amenities') {
+                    $amenities = array();
+                    foreach ($value as $a_k => $a_v) {
+                        $amenities[] = $a_v;
+                    }
+                } elseif ($key == 'price') {
+                    $price = array();
+                    $price['from'] = $value[0];
+                    $price['to'] = $value[1];
+                }
+            }
+        }
+
+        $id_hotel = HotelBranchInformation::getHotelIdByIdCategory($htl_id_category);
+
+        $id_cart = $this->context->cart->id;
+        $id_guest = $this->context->cookie->id_guest;
+
+        $obj_booking_dtl = new HotelBookingDetail();
+        $booking_data = $obj_booking_dtl->DataForFrontSearch($date_from, $date_to, $id_hotel, 0, 0, $adult, $child, $ratting, $amenities, $price, $id_cart, $id_guest);
+        // reset array keys from 0
+        $booking_data['rm_data'] = array_values($booking_data['rm_data']);
+        if ($sort_by && $sort_value) {
+            $indi_arr = array();
+
+            if ($sort_value == 1) {
+                $direction = SORT_ASC;
+            } elseif ($sort_value == 2) {
+                $direction = SORT_DESC;
+            }
+            foreach ($booking_data['rm_data'] as $s_k => $s_v) {
+                if ($sort_by == 1) {
+                    $indi_arr[$s_k] = $s_v['ratting'];
+                } elseif ($sort_by == 2) {
+                    $indi_arr[$s_k] = $s_v['price'];
+                }
+            }
+
+            array_multisort($indi_arr, $direction, $booking_data['rm_data']);
+        }
+        $this->context->smarty->assign(array('booking_data' => $booking_data));
+        if ($roomsList = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/room_type_list.tpl')) {
+            $response['success'] = true;
+            $response['data']['rooms_list'] = $roomsList;
+        } else {
+            $response['errors'][] = Tools::displayError('Room list not found');
+        }
+
+        $this->ajaxDie(json_encode($response));
+    }
 
     public function displayAjaxFilterResults()
     {

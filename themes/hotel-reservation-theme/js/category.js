@@ -148,3 +148,25 @@ $(document).on('focusout', '.cat_quantity_wanted', function(e)
 		}
 	});*/
 /*End*/
+
+function refreshSearchResult()
+{
+	const data = {"ajax": 1, "action" :'getSearchResults'}
+	$(document).trigger( "refreshSearchResult", data);
+	$.ajax(
+		{
+            url: window.location.href,
+            type: 'POST',
+            dataType: 'JSON',
+            data: data,
+            success: function (result)
+            {
+            	if (result.success) {
+            		$('#category_data_cont').html(result.data.rooms_list);
+            	} else {
+					var html = '<div class="noRoomsAvailAlert">'+noRoomAvailTxt+'</div>';
+					$('#category_data_cont').html(html);
+				}
+            }
+        });
+}

@@ -68,4 +68,5 @@
     {addJsDef currency_prefix = $currency->prefix}
     {addJsDef currency_suffix = $currency->suffix}
     {addJsDef max_order_date = $max_order_date}
+	{addJsDefL name=noRoomAvailTxt}{l s='No room available' js=1}{/addJsDefL}
 {/strip}

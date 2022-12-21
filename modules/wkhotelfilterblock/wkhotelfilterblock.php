@@ -199,7 +199,6 @@ class wkhotelfilterblock extends Module
     public function hookDisplayLeftColumn()
     {
         if ($this->context->controller->php_self == 'category') {
-            Media::addJsDef(array('noRoomAvailTxt' => $this->l('No room available')));
 
             $this->context->controller->addJS($this->_path.'/views/js/wkhotelfilterblock.js');
             $this->context->controller->addCSS($this->_path.'/views/css/wkhotelfilterblock.css');

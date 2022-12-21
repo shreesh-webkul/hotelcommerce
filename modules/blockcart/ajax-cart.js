@@ -387,19 +387,7 @@ var ajaxCart = {
                 }
 
                 if (pagename == 'category') {
-                    if (jsonData.avail_rooms <= room_warning_num) {
-                        $(".cat_remain_rm_qty_" + idProduct).closest('.rm_left').show();
-                    } else {
-                        $("cat_remain_rm_qty_" + idProduct).closest('.rm_left').hide();
-                    }
-
-                    /*for category page add to cart quantity management*/
-
-                    $(".cat_remain_rm_qty_" + idProduct).text(jsonData.avail_rooms);
-                    if (jsonData.avail_rooms == 0) {
-                        $(".cat_remain_rm_qty_" + idProduct).closest('.room_cont').hide();
-                    }
-                    //$('#cat_quantity_wanted_'+idProduct).val(1);
+                    refreshSearchResult();
                 }
 
 
@@ -528,19 +516,7 @@ var ajaxCart = {
                 }
 
                 if (pagename == 'category') {
-                    if (jsonData.avail_rooms <= room_warning_num) {
-                        $(".cat_remain_rm_qty_" + idProduct).closest('.rm_left').show();
-                    } else {
-                        $("cat_remain_rm_qty_" + idProduct).closest('.rm_left').hide();
-                    }
-
-                    /*for category page add to cart quantity management*/
-
-                    $(".cat_remain_rm_qty_" + idProduct).text(jsonData.avail_rooms);
-                    if (jsonData.avail_rooms == 0) {
-                        $(".cat_remain_rm_qty_" + idProduct).closest('.room_cont').hide();
-                    }
-                    //$('#cat_quantity_wanted_'+idProduct).val(1);
+                    refreshSearchResult();
                 }
 
                 ajaxCart.updateCart(jsonData);
@@ -641,17 +617,7 @@ var ajaxCart = {
                     $('.unvail_rooms_cond_display').show();
                 }
                 if (pagename == 'category') {
-                    // for category page....
-                    $(".cat_remain_rm_qty_" + idProduct).text(jsonData.avail_rooms);
-
-                    $(".cat_remain_rm_qty_" + idProduct).closest('.room_cont').show(0, function() {
-
-                        if (jsonData.avail_rooms <= room_warning_num) {
-                            $(".cat_remain_rm_qty_" + idProduct).closest('.rm_left').show();
-                        } else {
-                            $(".cat_remain_rm_qty_" + idProduct).closest('.rm_left').hide();
-                        }
-                    });
+                    refreshSearchResult();
                 }
                 if (pagename == 'orderopc') {
                     location.reload();
