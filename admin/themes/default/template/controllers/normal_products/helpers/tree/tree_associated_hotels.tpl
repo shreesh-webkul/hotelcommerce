@@ -136,7 +136,7 @@
 				{literal}
 				$.get(
 					'ajax-tab.php',
-					{controller:'AdminProducts',token:currentToken,action:'getCategoryTree', fullTree:1, selected:selected},
+					{controller:'AdminNormalProducts',token:currentToken,action:'getCategoryTree', fullTree:1, selected:selected},
 					function(content) {
 				{/literal}
 						$('#{$id|escape:'html':'UTF-8'}').html(content);

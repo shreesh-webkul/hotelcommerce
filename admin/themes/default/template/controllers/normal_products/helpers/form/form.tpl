@@ -79,6 +79,10 @@
 			var product_type_virtual = {Product::PTYPE_VIRTUAL|intval};
 			var product_type_simple = {Product::PTYPE_SIMPLE|intval};
 
+			var with_room_type = {Product::SERVICE_PRODUCT_WITH_ROOMTYPE|intval};
+			var without_room_type = {Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE|intval};
+
+
 			var has_combinations = {$has_combinations|intval};
 
 			var empty_pack_msg = '{l s='This pack is empty. You will need to add at least one product to the pack before you can save.' js=1}';
@@ -114,6 +118,7 @@
 				}
 				else if (product_type == product_type_virtual)
 				{
+					$('#hotel_selection').show();
 					$('a[id*="Quantities"]').hide();
 					$('a[id*="Configuration"]').show();
 					$('a[id*="Booking"]').show();
@@ -125,6 +130,7 @@
 				}
 				else
 				{
+					$('#hotel_selection').hide();
 					$('a[id*="Quantities"]').show();
 					$('a[id*="Configuration"]').hide();
 					$('a[id*="Occupancy"]').hide();
@@ -132,8 +138,8 @@
 					$('a[id*="ModuleHotelreservationsystem"]').hide();
 					$('a[id*="Pack"]').hide();
 					$('a[id*="VirtualProduct"]').hide();
-				} *}
-				{* updateTextInfo(product_type); *}
+				}
+				updateTextInfo(product_type); *}
 
 				{* $('#desc-product-newCombination').hide(); *}
 
@@ -151,12 +157,12 @@
 					var split_position = id.indexOf('-') + 1;
 					var btn_name = id.substr(split_position);
 
-					{* if ((btn_name == 'VirtualProduct' || btn_name == 'Pack') && $('#name_' + id_lang_default).val() == '')
+					if ((btn_name == 'VirtualProduct' || btn_name == 'Pack') && $('#name_' + id_lang_default).val() == '')
 					{
 						alert(missing_product_name);
 						$('#name_' + id_lang_default).focus();
 						return false;
-					} *}
+					}
 
 					$('#key_tab').val(btn_name);
 
@@ -177,7 +183,7 @@
 					});
 
 					var languages = new Array();
-					{* if (btn_name == "Combinations")
+					if (btn_name == "Combinations")
 					{
 						$('#desc-product-new').hide();
 						$('#desc-product-newCombination').show();
@@ -188,12 +194,12 @@
 						handleSaveButtons();
 					}
 					else
-					{ *}
+					{
 						$('#desc-product-newCombination').hide();
 						// if pack is enabled, save button are visible only if pack is valid
 						if ($("input[name='id_product']").val() != 0 || btn_name != 'Informations')
 							handleSaveButtons();
-					{* } *}
+					}
 
 					$('.label-tooltip').tooltip();
 				});
@@ -238,28 +244,28 @@
 				$('.productTabs').show();
 				$('#product-tab-content-wait').hide();
 
-				{* function checkIfProductTypeIsPack() {
+				function checkIfProductTypeIsPack() {
 					var typeIsPack = $('#pack_product').is(':checked');
 					if (typeIsPack && $('#inputPackItems').val()=='' ) {
 						$('.pack-empty-warning').removeClass('alert-warning').addClass('alert-danger');
 						$('#curPackItemName').select2('open');
 					}
 					return typeIsPack;
-				} *}
+				}
 				$("#product_form").validate({
 					ignore: '.updateCurrentText',
-					{* rules: {
+					rules: {
 						inputPackItems: {
 							required: {
 								depends: checkIfProductTypeIsPack
 							},
 						}
-					}, *}
-					{* messages: {
+					},
+					messages: {
 						inputPackItems: {
 							required: ""
 						}
-					}, *}
+					},
 					// override jquery validate plugin defaults for bootstrap 3
 					highlight: function(element) {
 						$(element).closest('.form-group').addClass('has-error');

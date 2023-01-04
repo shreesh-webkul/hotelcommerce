@@ -67,10 +67,10 @@
       <class_name>AdminStock</class_name>
     </tab>
     <tab id="Room_Types" id_parent="Catalog" active="1" hide_host_mode="0">
-      <class_name>AdminRoomType</class_name>
+      <class_name>AdminProducts</class_name>
     </tab>
     <tab id="Products" id_parent="Catalog" active="1" hide_host_mode="0">
-      <class_name>AdminProducts</class_name>
+      <class_name>AdminNormalProducts</class_name>
     </tab>
     <tab id="Categories" id_parent="Catalog" active="1" hide_host_mode="0">
       <class_name>AdminCategories</class_name>

@@ -216,7 +216,7 @@ function loadPack() {
 	var id_product = $('input[name=id_product]').first().val();
 	var data;
 	$.ajax({
-		url : "index.php?controller=AdminProducts" + "&token=" + token + "&id_product=" + id_product + "&action=Pack" + "&updateproduct" + "&ajax=1" + '&rand=' + new Date().getTime(),
+		url : "index.php?controller=AdminNormalProducts" + "&token=" + token + "&id_product=" + id_product + "&action=Pack" + "&updateproduct" + "&ajax=1" + '&rand=' + new Date().getTime(),
 		async : true,
 		cache: false, // cache needs to be set to false or IE will cache the page with outdated product values
 		type: 'GET',
@@ -890,7 +890,7 @@ product_tabs['Associations'] = new function(){
 					ajaxProductManufacturers:"1",
 					ajax : '1',
 					token : token,
-					controller : 'AdminProducts',
+					controller : 'AdminNormalProducts',
 					action : 'productManufacturers'
 				},
 				success: function(j) {
@@ -1479,7 +1479,7 @@ product_tabs['Quantities'] = new function(){
 		data.id_product = id_product;
 		data.token = token;
 		data.ajax = 1;
-		data.controller = "AdminProducts";
+		data.controller = "AdminNormalProducts";
 		data.action = "productQuantity";
 
 		$.ajax({

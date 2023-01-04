@@ -54,7 +54,7 @@
         <input id="is_occupancy_submit" type="hidden" name="is_occupancy_submit" class="form-control" value="0">
 
 		<div class="panel-footer">
-			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default">
+			<a href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default">
 				<i class="process-icon-cancel"></i>
 				{l s='Cancel'}
 			</a>

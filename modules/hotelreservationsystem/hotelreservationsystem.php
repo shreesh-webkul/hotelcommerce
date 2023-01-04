@@ -367,7 +367,7 @@ class hotelreservationsystem extends Module
         }
     }
 
-    public function hookDisplayAdminRoomTypeExtra($params)
+    public function hookDisplayAdminProductsExtra($params)
     {
         if ($idProduct = Tools::getValue('id_product')) {
             $objGlobalDemand = new HotelRoomTypeGlobalDemand();
@@ -694,7 +694,7 @@ class hotelreservationsystem extends Module
                 'addWebserviceResources',
                 'actionObjectLanguageAddAfter',
                 'actionAdminControllerSetMedia',
-                'displayAdminRoomTypeExtra',
+                'displayAdminProductsExtra',
                 'actionProductUpdate',
                 'actionObjectProfileAddAfter',
                 'actionObjectProfileDeleteBefore',

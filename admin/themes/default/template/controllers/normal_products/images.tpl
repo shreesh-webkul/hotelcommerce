@@ -35,7 +35,7 @@
 			<label class="control-label col-lg-3 file_upload_label">
 				<span class="label-tooltip" data-toggle="tooltip"
 					title="{l s='Format:'} JPG, GIF, PNG. {l s='Filesize:'} {$max_image_size|string_format:"%.2f"} {l s='MB max.'}">
-					{if isset($id_image)}{l s='Edit this room type\'s image:'}{else}{l s='Add a new image to this room type'}{/if}
+					{if isset($id_image)}{l s='Edit this product\'s image:'}{else}{l s='Add a new image to this product'}{/if}
 				</span>
 			</label>
 			<div class="col-lg-9">
@@ -156,7 +156,7 @@
 		</tr>
 	</table>
 	<div class="panel-footer">
-		<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
+		<a href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
 		<button type="submit" name="submitAddproduct" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save'}</button>
 		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 	</div>
@@ -279,7 +279,7 @@
 						"id_product" : {/literal}{$id_product}{literal},
 						"id_category" : {/literal}{$id_category_default}{literal},
 						"token" : "{/literal}{$token|escape:'html':'UTF-8'}{literal}",
-						"tab" : "AdminProducts",
+						"tab" : "AdminNormalProducts",
 						"ajax" : 1 }, afterDeleteProductImage
 				);
 			});
@@ -302,7 +302,7 @@
 					"id_image":id,
 					"id_product" : {/literal}{$id_product}{literal},
 					"token" : "{/literal}{$token|escape:'html':'UTF-8'}{literal}",
-					"controller" : "AdminProducts",
+					"controller" : "AdminNormalProducts",
 					"ajax" : 1 }
 				);
 			});
@@ -322,7 +322,7 @@
 					"id_shop": id_shop,
 					"active":active,
 					"token" : "{/literal}{$token|escape:'html':'UTF-8'}{literal}",
-					"tab" : "AdminProducts",
+					"tab" : "AdminNormalProducts",
 					"ajax" : 1
 				});
 			});
@@ -334,7 +334,7 @@
 					"action":"updateImagePosition",
 					"json":json,
 					"token" : "{/literal}{$token|escape:'html':'UTF-8'}{literal}",
-					"tab" : "AdminProducts",
+					"tab" : "AdminNormalProducts",
 					"ajax" : 1
 				});
 			}

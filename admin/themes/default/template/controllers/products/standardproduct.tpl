@@ -58,7 +58,7 @@
                                 <td class="text-right">
                                     <a href="#" class="btn btn-default button-edit-price field-view"><i class="icon-pencil"></i></a>
                                     <span class="field-edit" style="display:none">
-                                        <a href="#" class="btn btn-default btn-save" data-roomtype_url="{$link->getAdminLink('AdminRoomType', true)|addslashes}" data-id_product="{$product.id_product|escape:'html':'UTF-8'}" data-id_room_type_standard_product_price="{$product.id_room_type_standard_product_price|escape:'html':'UTF-8'}"><i class="icon-save"></i> {l s='save'}</a>
+                                        <a href="#" class="btn btn-default btn-save" data-roomtype_url="{$link->getAdminLink('AdminProducts', true)|addslashes}" data-id_product="{$product.id_product|escape:'html':'UTF-8'}" data-id_room_type_standard_product_price="{$product.id_room_type_standard_product_price|escape:'html':'UTF-8'}"><i class="icon-save"></i> {l s='save'}</a>
                                         <a href="#" class="btn btn-default btn-cancel"><i class="icon-times"></i></a>
                                     </span>
                                 </td>

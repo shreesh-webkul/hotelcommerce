@@ -45,6 +45,7 @@
 
 		<tbody>
 		{foreach from=$available_features item=available_feature}
+
 			<tr>
 				{foreach from=$available_feature.featureValues item=value}
 				<td>

@@ -116,7 +116,7 @@
 		</div>
 
 		<div class="panel-footer">
-			<a href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default">
+			<a href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}{if isset($smarty.request.page) && $smarty.request.page > 1}&amp;submitFilterproduct={$smarty.request.page|intval}{/if}" class="btn btn-default">
 				<i class="process-icon-cancel"></i>
 				{l s='Cancel'}
 			</a>
@@ -240,7 +240,7 @@ $(document).ready(function()
 	            {
 	                if (check_calendar_var)
 	                    $.ajax({
-	                        url: "{$link->getAdminLink('AdminProducts')|addslashes}",
+	                        url: "{$link->getAdminLink('AdminNormalProducts')|addslashes}",
 	                        data: {
 	                            ajax:true,
 	                            action:'ProductRoomsBookingDetailsOnMonthChange',
