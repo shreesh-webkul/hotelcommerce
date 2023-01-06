@@ -1,16 +1,4 @@
 #block_top_menu {
-  padding-right: 0; }
-  #block_top_menu > ul > li {
-    padding-right: 0;}
-    #block_top_menu > ul > li > a {
-      color: #fff;
-      font-size: 17px;
-      line-height: 1.42;
-      font-weight: 400;
-      padding: 6px 12px;
-      display: block;
-    }
-    ul.top-menu-nav > li > a {
-      text-transform: capitalize;
-    }
+  padding-top: 25px; }
+
 /*# sourceMappingURL=blocktopmenu.css.map */
