@@ -35,7 +35,7 @@
                 </tr> *}
             {/if}
             {* Include product line partial *}
-            {include file='controllers/orders/_new_room.tpl'}
+            {include file='controllers/orders/_new_product.tpl'}
             </tbody>
         </table>
     </div>
