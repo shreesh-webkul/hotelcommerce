@@ -22,14 +22,14 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-<tr id="new_room" style="display:none">
+<tr id="new_product" style="display:none">
 	<td style="display:none;" colspan="2" class="text-center">
-		<input type="hidden" id="add_room_product_id" name="add_product[product_id]" value="0" />
+		<input type="hidden" id="add_product_product_id" name="add_product[product_id]" value="0" />
 
 		<div class="form-group">
 			<label>{l s='Room Type:'}</label>
 			<div class="input-group">
-				<input type="text" id="add_room_product_name" value=""/>
+				<input type="text" id="add_product_product_name" value=""/>
 				<div class="input-group-addon">
 					<i class="icon-search"></i>
 				</div>
@@ -69,7 +69,7 @@
 			<div class="row">
 				<div class="input-group fixed-width-xl">
 					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
-					<input type="text" name="add_product[product_price_tax_excl]" id="add_room_product_price_tax_excl" value="" readonly="true" />
+					<input type="text" name="add_product[product_price_tax_excl]" id="add_product_product_price_tax_excl" value="" readonly="true" />
 					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
 				</div>
 			</div>
@@ -77,7 +77,7 @@
 			<div class="row">
 				<div class="input-group fixed-width-xl">
 					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
-					<input type="text" name="add_product[product_price_tax_incl]" id="add_room_product_price_tax_incl" value="" readonly="true" />
+					<input type="text" name="add_product[product_price_tax_incl]" id="add_product_product_price_tax_incl" value="" readonly="true" />
 					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
 				</div>
 			</div>
@@ -85,17 +85,17 @@
 	</td>
 	<td style="display:none;" class="productQuantity text-center">
 		<center>
-			<input type="number" class="form-control fixed-width-sm" name="add_product[product_quantity]" id="add_room_product_quantity" value="1" disabled="disabled" min="1"/>
+			<input type="number" class="form-control fixed-width-sm" name="add_product[product_quantity]" id="add_product_product_quantity" value="1" disabled="disabled" min="1"/>
 		</center>
 	</td>
 	{*{if ($order->hasBeenPaid())}<td style="display:none;" class="productQuantity"></td>{/if}
 	{if $display_warehouse}<td></td>{/if}
 	{if ($order->hasBeenDelivered())}<td style="display:none;" class="productQuantity"></td>{/if}
-	<td style="display:none;" class="productQuantity" id="add_room_product_stock">0</td>*}
-	<td style="display:none;" id="add_room_product_total"  class="text-center">{displayPrice price=0 currency=$currency->id}</td>
+	<td style="display:none;" class="productQuantity" id="add_product_product_stock">0</td>*}
+	<td style="display:none;" id="add_product_product_total"  class="text-center">{displayPrice price=0 currency=$currency->id}</td>
 	<td style="display:none;" colspan="2"  class="text-center">
 		{if sizeof($invoices_collection)}
-		<select class="form-control" name="add_product[invoice]" id="add_room_product_invoice" disabled="disabled">
+		<select class="form-control" name="add_product[invoice]" id="add_product_product_invoice" disabled="disabled">
 			<optgroup class="existing" label="{l s='Existing'}">
 				{foreach from=$invoices_collection item=invoice}
 				<option value="{$invoice->id}">{$invoice->getInvoiceNumberFormatted($current_id_lang)}</option>
@@ -108,11 +108,11 @@
 		{/if}
 	</td>
 	<td style="display:none;"  class="text-center">
-		<button type="button" class="btn btn-default" id="cancelAddRoom">
+		<button type="button" class="btn btn-default" id="cancelAddProduct">
 			<i class="icon-remove text-danger"></i>
 			{l s='Cancel'}
 		</button>
-		<button type="button" class="btn btn-default" id="submitAddRoom" disabled="disabled">
+		<button type="button" class="btn btn-default" id="submitAddProduct" disabled="disabled">
 			<i class="icon-ok text-success"></i>
 			{l s='Add'}
 		</button>

@@ -1848,7 +1848,7 @@ class AdminOrdersControllerCore extends AdminController
         }
     }
 
-    public function ajaxProcessAddProductOnOrder()
+    public function ajaxProcessAddServiceProductOnOrder()
     {
         // Load object
         $order = new Order((int)Tools::getValue('id_order'));
@@ -2202,7 +2202,7 @@ class AdminOrdersControllerCore extends AdminController
         )));
     }
 
-    public function ajaxProcessAddRoomOnOrder()
+    public function ajaxProcessAddProductOnOrder()
     {
         // Load object
         $id_order = (int) Tools::getValue('id_order');
