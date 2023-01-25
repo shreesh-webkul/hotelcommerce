@@ -334,6 +334,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'id_guest' => $this->id_guest,
         );
         $objHotelCartBookingData = new HotelCartBookingData();
+        $objHotelProductCartDetail = new HotelProductCartDetail();
 
         if ($cartProducts = $this->context->cart->getProducts()) {
             if ($cart_bdata = $objHotelCartBookingData->getCartBookingDetailsByIdCartIdGuest(
@@ -343,9 +344,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             )) {
                 $smartyVars['cart_bdata'] = $cart_bdata;
             }
-            if ($normalCartProduct = $this->context->cart->getServiceProducts($cartProducts)) {
-                $smartyVars['cart_normal_data'] = $normalCartProduct;
-            }
+            // $objHotelProductCartDetail->getHotelProducts($this->context->cart->id);
+            // if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id)) {
+            //     $smartyVars['cart_normal_data'] = $normalCartProduct;
+            // }
         }
         $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
         $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
@@ -552,24 +554,12 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         }
 
         if (empty($this->errors)) {
-            if ($opt) {
-                $direction = 'up';
-                if ($this->context->cart->updateQty($quantity, $product->id, null, false, $direction, $hotelIdAddress)) {
-                    $response = array(
-                        'status' => true,
-                        'total_amount' => $this->context->cart->getOrderTotal()
-                    );
-                    die(json_encode($response));
-                }
-            } else {
-                if ($this->context->cart->deleteProduct($id_product)) {
-                    $response = array(
-                        'status' => true,
-                        'total_amount' => $this->context->cart->getOrderTotal()
-                    );
-                    die(json_encode($response));
-                }
-
+            $objHotelProductCartDetail = new HotelProductCartDetail();
+            if ($objHotelProductCartDetail->updateProduct($product->id, $quantity, $opt, $id_hotel)) {
+                $response = array(
+                    'status' => true,
+                    'total_amount' => $this->context->cart->getOrderTotal()
+                );
             }
         } else {
             $response['errors'] = $this->errors;

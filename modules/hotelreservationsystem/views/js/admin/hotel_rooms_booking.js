@@ -790,7 +790,7 @@ $(document).ready(function() {
                 id_hotel: id_hotel,
                 qty: qty,
                 search_id_prod: search_id_prod,
-                opt: 1,
+                opt: 'up',
             },
             success: function(result) {
                 if (result.status) {

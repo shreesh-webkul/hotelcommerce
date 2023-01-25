@@ -18,53 +18,67 @@
 *  @license   https://store.webkul.com/license.html
 */
 
-class StandardProductCartDetail extends ObjectModel
+class HotelProductCartDetail extends ObjectModel
 {
-    public $id_product;
-    public $quantity;
+    public $id_hotel_product_cart_detail;
     public $id_cart;
-    public $htl_cart_booking_id;
+    public $id_product;
+    public $id_hotel;
+    public $quantity;
 
     public static $definition = array(
-        'table' => 'htl_standard_product_cart_detail',
-        'primary' => 'id_standard_product_cart_detail',
+        'table' => 'htl_hotel_product_cart_detail',
+        'primary' => 'id_hotel_product_cart_detail',
         'fields' => array(
-            'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'quantity' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
             'id_cart' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'htl_cart_booking_id' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'id_hotel' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'quantity' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
         ),
     );
 
     public function alreadyExists(
         $idProduct,
-        $idHtlCartData
+        $idHotel,
+        $idCart
     ) {
         return Db::getInstance()->getValue(
-            'SELECT `id_standard_product_cart_detail` FROM `'._DB_PREFIX_.'htl_standard_product_cart_detail`
-            WHERE `id_product` = '.(int)$idProduct.' AND `htl_cart_booking_id` = '.(int)$idHtlCartData
+            'SELECT `id_hotel_product_cart_detail` FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail`
+            WHERE `id_cart` = '.(int)$idCart.' AND `id_product` = '.(int)$idProduct.' AND `id_hotel` = '.(int)$idHotel
         );
     }
 
-    public function addStandardProductInCart(
+    public function updateProduct($idProduct, $quantity, $opt, $idHotel)
+    {
+        if ($opt == 'up') {
+            return $this->addHotelProductInCart($idProduct, $quantity, $idHotel);
+        } else {
+            // return $this->context->cart->deleteProduct($idProduct);
+        }
+    }
+
+    public function addHotelProductInCart(
         $idProduct,
         $quantity,
-        $idCart,
-        $idHtlCartData
+        $idHotel
     ) {
-        if ($this->alreadyExists($idProduct, $idHtlCartData)) {
-            return false;
+        $context = context::getContext();
+        $idCart = $context->cart->id;
+        if ($idHotelProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
+            $objHotelProductCartDetail = new HotelProductCartDetail($idHotelProductCartDetail);
+            $objHotelProductCartDetail->quantity += $quantity;
         } else {
-            $objStandardProductCartDetail = new StandardProductCartDetail();
-            $objStandardProductCartDetail->id_product = $idProduct;
-            $objStandardProductCartDetail->quantity = $quantity;
-            $objStandardProductCartDetail->id_cart = $idCart;
-            $objStandardProductCartDetail->htl_cart_booking_id = $idHtlCartData;
-            if ($objStandardProductCartDetail->save()) {
-                $objCart = new Cart($idCart);
-                $objCart->updateQty((int)($quantity), $idProduct);
-            }
+            $objHotelProductCartDetail = new HotelProductCartDetail();
+            $objHotelProductCartDetail->id_product = $idProduct;
+            $objHotelProductCartDetail->quantity = $quantity;
+            $objHotelProductCartDetail->id_hotel = $idHotel;
+            $objHotelProductCartDetail->id_cart = $idCart;
+
         }
+        if ($objHotelProductCartDetail->save()) {
+            return $context->cart->updateQty($quantity, $idProduct);
+        }
+        return false;
     }
 
     public function removeStandardProductByIdHtlCartBooking($htlCartBookingId)
@@ -88,14 +102,10 @@ class StandardProductCartDetail extends ObjectModel
         return true;
     }
 
-    public function getStandardProductsInCart(
+    public function getHotelProducts(
         $idCart,
         $idProduct = 0,
         $idHotel = 0,
-        $roomTypeIdProduct = 0,
-        $dateFrom = 0,
-        $dateTo = 0,
-        $htlCartBookingId = 0,
         $getTotalPrice = 0,
         $useTax = null,
         $id_address = null
@@ -103,42 +113,28 @@ class StandardProductCartDetail extends ObjectModel
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
 
-        $sql = 'SELECT scd.`id_product`, scd.`quantity`, cbd.`id_cart`, cbd.`id` as `htl_cart_booking_id` ,
-            cbd.`id_product` as `room_type_id_product`, cbd.`adults`, cbd.`children`';
-        if (!$getTotalPrice) {
-            $sql .= ', cbd.`id_guest`, cbd.`id_customer`,
-                cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
-        }
-        $sql .= ' FROM `'._DB_PREFIX_.'htl_cart_booking_data` cbd
-            LEFT JOIN `'._DB_PREFIX_.'htl_standard_product_cart_detail` scd ON(scd.`htl_cart_booking_id` = cbd.`id`)
-            WHERE 1';
-        if ($idCart) {
-            $sql .= ' AND cbd.`id_cart`='.(int) $idCart;
-        }
+        $sql = 'SELECT hpcd.`id_product`, hpcd.`quantity`, hpcd.`id_hotel`';
+        // if (!$getTotalPrice) {
+        //     $sql .= ', cbd.`id_guest`, cbd.`id_customer`,
+        //         cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
+        // }
+        $sql .= ' FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd
+            WHERE hpcd.`id_cart`='.(int) $idCart;
+
         if ($idProduct) {
-            $sql .= ' AND scd.`id_product`='.(int) $idProduct;
+            $sql .= ' AND hpcd.`id_product`='.(int) $idProduct;
         }
         if ($idHotel) {
-            $sql .= ' AND cbd.`id_hotel`='.(int) $idHotel;
+            $sql .= ' AND hpcd.`id_hotel`='.(int) $idHotel;
         }
-        if ($roomTypeIdProduct) {
-            $sql .= ' AND cbd.`id_product`='.(int) $roomTypeIdProduct;
-        }
-        if ($dateFrom && $dateTo) {
-            $sql .= ' AND cbd.`date_from` = \''.pSQL($dateFrom).'\' AND cbd.`date_to` = \''.pSQL($dateTo).'\'';
-        }
-        if ($htlCartBookingId) {
-            $sql .= ' AND cbd.`id`='.(int) $htlCartBookingId;
-        }
-        $sql .= ' ORDER BY cbd.`id`';
 
         if ($getTotalPrice) {
             $totalPrice = 0;
         }
-        $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-        $objHotelRoomType = new HotelRoomType();
-        $selectedStandardProducts = array();
-
+        // $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
+        // $objHotelRoomType = new HotelRoomType();
+        // $selectedStandardProducts = array();
+        ddd(Db::getInstance()->executeS($sql));
         if ($standardProducts = Db::getInstance()->executeS($sql)) {
             foreach ($standardProducts as $product) {
                 if ($getTotalPrice) {

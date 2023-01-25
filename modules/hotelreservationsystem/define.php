@@ -51,6 +51,8 @@ require_once 'classes/HotelRoomTypeStandardProduct.php';
 require_once 'classes/HotelRoomTypeStandardProductPrice.php';
 require_once 'classes/StandardProductCartDetail.php';
 require_once 'classes/StandardProductOrderDetail.php';
+require_once 'classes/HotelProductCartDetail.php';
+
 
 require_once 'classes/HotelSettingsLink.php';
 

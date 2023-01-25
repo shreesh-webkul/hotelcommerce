@@ -371,6 +371,16 @@ class HotelReservationSystemDb
                 KEY `id_product` (`id_product`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
+            "CREATE TABLE `"._DB_PREFIX_."htl_hotel_product_cart_detail` (
+                `id_hotel_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `id_cart` int(11) unsigned NOT NULL,
+                `id_product` int(11) UNSIGNED NOT NULL,
+                `id_hotel` int(11) UNSIGNED NOT NULL,
+                `quantity` int(11) UNSIGNED NOT NULL,
+                PRIMARY KEY (`id_hotel_product_cart_detail`),
+                KEY `id_product` (`id_product`)
+            ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
+
             "CREATE TABLE `"._DB_PREFIX_."htl_standard_product_cart_detail` (
                 `id_standard_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_room_type` int(11) UNSIGNED NOT NULL,
