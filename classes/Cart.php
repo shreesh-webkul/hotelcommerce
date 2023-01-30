@@ -2981,7 +2981,7 @@ class CartCore extends ObjectModel
 
     public static function getIdAddressForTaxCalculation($id_product, $id_hotel = false)
     {
-        if (self::isBookingProduct($id_product)) {
+        if (Product::isBookingProduct($id_product)) {
             return HotelRoomType::getHotelIdAddressByIdProduct($id_product);
         } else if ($id_hotel) {
             $addressInfo = HotelBranchInformation::getAddress($id_hotel);

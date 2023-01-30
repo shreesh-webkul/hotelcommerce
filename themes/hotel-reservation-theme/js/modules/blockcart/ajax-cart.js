@@ -383,11 +383,6 @@ var ajaxCart = {
         // }
         req.append('standardProducts', JSON.stringify(getRoomsStandardProducts()) );
 
-        // $('#additional_products input').each(function(){
-        //     req.append('standard_products['+ $(this).data('id_product')+']', $(this).val());
-        // });
-        // get the selected extra demands by customer
-
         //send the ajax request to the server
         $.ajax({
             type: 'POST',
@@ -401,7 +396,6 @@ var ajaxCart = {
             data: req,
             contentType: false,
             processData: false,
-            // data: 'controller=cart&add=1&dateFrom=' + dateFrom + '&dateTo=' + dateTo + '&ajax=true'+(occupancy_required_for_booking ? '&occupancy=' + JSON.stringify(occupancy) : '&qty=' + occupancy) + '&id_product=' + idProduct + '&roomDemands=' + JSON.stringify(roomDemands) + '&token=' + static_token + ((parseInt(idCombination) && idCombination != null) ? '&ipa=' + parseInt(idCombination) : '' + '&id_customization=' + ((typeof customizationId !== 'undefined') ? customizationId : 0)),
             success: function(jsonData, textStatus, jqXHR) {
                 /*by webkul checking and setting availability of rooms*/
                 /*for product page add to cart quantity management*/
