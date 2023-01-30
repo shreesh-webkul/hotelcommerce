@@ -3452,7 +3452,7 @@ class AdminNormalProductsControllerCore extends AdminController
             ));
 
             // get hotel address for this room type
-            $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($obj->id));
+            $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($obj->id));
         } else {
             $this->displayWarning($this->l('You must save this product before adding specific pricing'));
             $product->id_tax_rules_group = (int)Product::getIdTaxRulesGroupMostUsed();

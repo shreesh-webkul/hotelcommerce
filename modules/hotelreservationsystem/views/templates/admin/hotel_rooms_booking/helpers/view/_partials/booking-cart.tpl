@@ -52,10 +52,10 @@
                                                 <tr>
                                                     <td>{$cart_data['id_product']|escape:'htmlall':'UTF-8'}</td>
                                                     <td>{$cart_data['name']|escape:'htmlall':'UTF-8'}</td>
-                                                    {* <td>{$cart_data['hotel']['hotel_name']|escape:'htmlall':'UTF-8'}</td> *}
-                                                    <td>{$cart_data['cart_quantity']|escape:'htmlall':'UTF-8'}</td>
-                                                    <td>{convertPrice price=$cart_data['total']}</td>
-                                                    <td><button class="btn btn-default service_product_delete" data-id-product="{$cart_data['id_product']|escape:'htmlall':'UTF-8'}" data-id-cart="{$id_cart|escape:'htmlall':'UTF-8'}"><i class='icon-trash'></i></button></td>
+                                                    <td>{$cart_data['hotel_name']|escape:'htmlall':'UTF-8'}</td>
+                                                    <td>{$cart_data['quantity']|escape:'htmlall':'UTF-8'}</td>
+                                                    <td>{convertPrice price=$cart_data['total_price_tax_incl']}</td>
+                                                    <td><button class="btn btn-default service_product_delete" data-id-hotel="{$cart_data['id_hotel']|escape:'htmlall':'UTF-8'}" data-id-product="{$cart_data['id_product']|escape:'htmlall':'UTF-8'}" data-id-cart="{$id_cart|escape:'htmlall':'UTF-8'}"><i class='icon-trash'></i></button></td>
                                                 </tr>
                                             {/foreach}
                                         {/if}

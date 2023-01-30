@@ -55,7 +55,7 @@
                                     <div class="col-sm-6">
                                         <label class="control-label">{l s='Room Price'}</label>
                                             <p>
-                                                <span class="total_rooms_price_block">{convertPrice price=$rooms_price|floatval}</span>
+                                                <span class="total_price_block">{convertPrice price=$rooms_price|floatval}</span>
                                                 <span class="pull-right plus-sign">+</span>
                                             </p>
                                     </div>

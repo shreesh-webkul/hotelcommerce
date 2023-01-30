@@ -1791,7 +1791,7 @@ class OrderCore extends ObjectModel
     public function addOrderPaymentDetail(OrderPayment $payment, $amount = null, $order_invoice = null)
     {
         if (Validate::isLoadedObject($payment)) {
-            if (!is_null($amount)) {
+            if (is_null($amount)) {
                 $amount = $payment->amount;
             }
             $order_payment_detail = new OrderPaymentDetail();

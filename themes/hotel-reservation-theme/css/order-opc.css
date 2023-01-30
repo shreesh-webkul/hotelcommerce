@@ -229,17 +229,26 @@
 .order-detail-content .cart_product_summary_line .room_duration_block {
 	background-color: #fff;
 }
-.order-detail-content .room_price_detail_block {
+.order-detail-content .room_price_detail_block, .order-detail-content .product_price_detail_block {
 	font-size: 24px;
 	color: #333333;
 }
-.order-detail-content .room_price_detail_block .plus-sign {
+.order-detail-content .room_price_detail_block .plus-sign, .order-detail-content .product_price_detail_block .plus-sign {
 	color: #777;
 }
-.order-detail-content .room_total_price_detial {
+.product_price_detail_block .product_quantity_block, .product_price_detail_block .price_block {
+	display: inline-block;
+    padding: 10px 15px 0px 0px;
+    border-radius: 6px;
+}
+.order-detail-content .product_quantity_detial {
+	font-size: 14px;
+	color: #777777;
+}
+.order-detail-content .total_price_detial {
 	font-size: 14px;
 	color: #777777;}
-.room_price_detail_block .open_rooms_extra_services_panel {
+.room_price_detail_block .open_rooms_extra_services_panel, .product_price_detail_block .open_rooms_extra_services_panel  {
 	font-weight: 600;
 	color: #0000FF;}
 .order-detail-content .total_price_block {
@@ -248,7 +257,7 @@
     background-color: #f2f2f2f2;
     border-radius: 6px;
 }
-.order-detail-content .room_info_text {
+.order-detail-content .cart_section_title {
 	font-size: 12px;
 	color: #777777;
 	text-transform: uppercase;
@@ -269,13 +278,13 @@
 	font-size: 14px;
 	color: #777777;
 }
-.order-detail-content .room_remove_block {
+.order-detail-content .room_remove_block, .order-detail-content .product_remove_block {
 	font-size: 12px;
 	color: #555;
 	text-align: center;
 	margin-top: 20px
 }
-.order-detail-content .room_remove_block i {
+.order-detail-content .room_remove_block i, .order-detail-content .product_remove_block i {
 	font-size: 18px;
 }
 #order-opc #guest-info-block {
@@ -430,56 +439,56 @@
 	font-weight: normal!important;
 }
 @media (max-width: 767px) {
-	.order-detail-content .room_price_detail_block .plus-sign {
+	.order-detail-content .room_price_detail_block .plus-sign, .order-detail-content .product_price_detail_block .plus-sign {
 		display: none;
 	}
 	#order-opc .cart_voucher_detail_block .submit_discount_div {
 		margin-top: 10px;
 	}
-	#order-opc .room-type-img-block {
+	#order-opc .product-img-block {
 		display: none;
 	}
 	#order-opc .cart_product_line .room-type-features {
 		display: none;
 	}
-	.order-detail-content .room-xs-img {
+	.order-detail-content .product-xs-img {
 		display: inline-block;
 	}
-	.order-detail-content .room-xs-info {
+	.order-detail-content .product-xs-info {
 		display: inline-block;
 	}
-	.order-detail-content .room-xs-img {
+	.order-detail-content .product-xs-img {
 		width: 9%;
 		margin-right: 2%;
 	}
-	.order-detail-content .room-xs-img img {
+	.order-detail-content .product-xs-img img {
 		width: 60px;
 	}
-	.order-detail-content .room-xs-info {
+	.order-detail-content .product-xs-info {
 		width: 88%;
 		vertical-align: top;
 	}
 	.order-detail-content .hotel-location {
 		padding: 4px 0px 0px 0px;
 	}
-	.order-detail-content .room-xs-remove {
+	.order-detail-content .product-xs-remove {
 		display: block;
 		font-size: 16px!important;
 		padding: 0px 4px;
 	}
 }
 @media (max-width: 480px) {
-	.order-detail-content .room-xs-info {
+	.order-detail-content .product-xs-info {
 		display: inline-block;
 		width: 76%;
 		vertical-align: top;
 	}
-	.order-detail-content .room-xs-img {
+	.order-detail-content .product-xs-img {
 		display: inline-block;
 		width: 20%;
 		margin-right: 2%;
 	}
-	.order-detail-content .room-xs-img img {
+	.order-detail-content .product-xs-img img {
 		width: 60px;
 	}
 	.order-detail-content .hotel-location {
@@ -487,25 +496,25 @@
 	}
 }
 @media (min-width: 481px) and (max-width: 650px) {
-	.order-detail-content .room-xs-info {
+	.order-detail-content .product-xs-info {
 		display: inline-block;
 		width: 85%;
 		vertical-align: top;
 	}
-	.order-detail-content .room-xs-img {
+	.order-detail-content .product-xs-img {
 		display: inline-block;
 		width: 12%;
 		margin-right: 2%;
 	}
-	.order-detail-content .room-xs-img img {
+	.order-detail-content .product-xs-img img {
 		width: 60px;
 	}
 }
 @media (min-width: 768px) {
-	.order-detail-content .room-xs-img {
+	.order-detail-content .product-xs-img {
 		display: none;
 	}
-	.order-detail-content .room-xs-remove {
+	.order-detail-content .product-xs-remove {
 		display: none;
 	}
 }

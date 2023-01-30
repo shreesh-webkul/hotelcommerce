@@ -186,12 +186,12 @@
 	<div class="col-sm-8">
         <div class="panel">
 			<div class="panel-heading">
-				<i class="icon-info"></i> {l s='Booking Calender' mod='hotelreservationsystem'}
+				<i class="icon-info"></i> {if !isset($booking_product) || (isset($booking_product) && $booking_product == 1)}{l s='Booking Calender' mod='hotelreservationsystem'}{else}{l s='Service Products' mod='hotelreservationsystem'}{/if }
 				<button type="button" class="btn btn-primary" id="cart_btn" data-toggle="modal" data-target="#cartModal"><i class="icon-shopping-cart"></i> {l s='Cart' mod='hotelreservationsystem'} <span class="badge" id="cart_record">{$total_products_in_cart}</span></button>
 			</div>
 			{if !isset($booking_product) || (isset($booking_product) && $booking_product == 1)}
 				<div id='fullcalendar'></div>
-			{else if isset($booking_product) && $booking_product == 0}
+			{else}
 				<div class="panel-body">
 					{include file="./_partials/service-products.tpl"}
 				</div>

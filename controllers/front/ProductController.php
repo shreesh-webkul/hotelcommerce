@@ -737,7 +737,7 @@ class ProductControllerCore extends FrontController
         }
         $product_price_without_eco_tax = (float)$product_price_with_tax - $this->product->ecotax;
 
-        $ecotax_rate = (float)Tax::getProductEcotaxRate(Product::getIdAddressForTaxCalculation($this->product->id));
+        $ecotax_rate = (float)Tax::getProductEcotaxRate(Cart::getIdAddressForTaxCalculation($this->product->id));
         if (Product::$_taxCalculationMethod == PS_TAX_INC && (int)Configuration::get('PS_TAX')) {
             $ecotax_tax_amount = Tools::ps_round($this->product->ecotax * (1 + $ecotax_rate / 100), 2);
         } else {
@@ -768,7 +768,7 @@ class ProductControllerCore extends FrontController
             }
         }
 
-        $address = new Address(Product::getIdAddressForTaxCalculation($this->product->id));
+        $address = new Address(Cart::getIdAddressForTaxCalculation($this->product->id));
         $this->context->smarty->assign(
             array(
                 'quantity_discounts' => $this->formatQuantityDiscounts($quantity_discounts, null, (float)$tax, $ecotax_tax_amount),

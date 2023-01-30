@@ -344,10 +344,9 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             )) {
                 $smartyVars['cart_bdata'] = $cart_bdata;
             }
-            // $objHotelProductCartDetail->getHotelProducts($this->context->cart->id);
-            // if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id)) {
-            //     $smartyVars['cart_normal_data'] = $normalCartProduct;
-            // }
+            if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id)) {
+                $smartyVars['cart_normal_data'] = $normalCartProduct;
+            }
         }
         $rms_in_cart = $objHotelCartBookingData->getCountRoomsInCart($this->id_cart, $this->id_guest);
         $products_in_cart = array_sum(array_column($this->context->cart->getServiceProducts(), 'cart_quantity'));
@@ -554,12 +553,23 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         }
 
         if (empty($this->errors)) {
-            $objHotelProductCartDetail = new HotelProductCartDetail();
-            if ($objHotelProductCartDetail->updateProduct($product->id, $quantity, $opt, $id_hotel)) {
-                $response = array(
-                    'status' => true,
-                    'total_amount' => $this->context->cart->getOrderTotal()
-                );
+            if ($opt) {
+                $objHotelProductCartDetail = new HotelProductCartDetail();
+                if ($objHotelProductCartDetail->addHotelProductInCart($product->id, $quantity, $id_hotel)) {
+                    $response = array(
+                        'status' => true,
+                        'total_amount' => $this->context->cart->getOrderTotal()
+                    );
+                }
+            } else {
+                $objHotelProductCartDetail = new HotelProductCartDetail();
+                if ($objHotelProductCartDetail->removeProductFromCart($id_product, $id_hotel)) {
+                    $response = array(
+                        'status' => true,
+                        'total_amount' => $this->context->cart->getOrderTotal()
+                    );
+                }
+
             }
         } else {
             $response['errors'] = $this->errors;
@@ -772,6 +782,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'currency_blank' => $currency->blank,
             'ALLOTMENT_AUTO' => HotelBookingDetail::ALLOTMENT_AUTO,
             'ALLOTMENT_MANUAL' => HotelBookingDetail::ALLOTMENT_MANUAL,
+            'SERVICE_PRODUCT_WITH_ROOMTYPE' => Product::SERVICE_PRODUCT_WITH_ROOMTYPE,
+            'SERVICE_PRODUCT_WITHOUT_ROOMTYPE' => Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE,
             'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
             'max_child_in_room' => Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'),
             'occupancy_required_for_booking' => $occupancyRequiredForBooking,

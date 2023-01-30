@@ -48,22 +48,17 @@ class HotelProductCartDetail extends ObjectModel
         );
     }
 
-    public function updateProduct($idProduct, $quantity, $opt, $idHotel)
-    {
-        if ($opt == 'up') {
-            return $this->addHotelProductInCart($idProduct, $quantity, $idHotel);
-        } else {
-            // return $this->context->cart->deleteProduct($idProduct);
-        }
-    }
-
     public function addHotelProductInCart(
         $idProduct,
         $quantity,
-        $idHotel
+        $idHotel,
+        $idCart = null
     ) {
-        $context = context::getContext();
-        $idCart = $context->cart->id;
+
+        if (!$idCart) {
+            $context = context::getContext();
+            $idCart = $context->cart->id;
+        }
         if ($idHotelProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
             $objHotelProductCartDetail = new HotelProductCartDetail($idHotelProductCartDetail);
             $objHotelProductCartDetail->quantity += $quantity;
@@ -76,30 +71,90 @@ class HotelProductCartDetail extends ObjectModel
 
         }
         if ($objHotelProductCartDetail->save()) {
-            return $context->cart->updateQty($quantity, $idProduct);
+            $objCart = new Cart($idCart);
+            return $objCart->updateQty($quantity, $idProduct);
         }
         return false;
     }
 
-    public function removeStandardProductByIdHtlCartBooking($htlCartBookingId)
+    public function removeProductFromCart($idProduct, $idHotel, $idCart = null, $quantity = null)
     {
-        if ($stadardProductsData  = Db::getInstance()->executeS(
-            'SELECT * FROM `'._DB_PREFIX_.'htl_standard_product_cart_detail`
-            WHERE `htl_cart_booking_id` = '.(int)$htlCartBookingId
-        )) {
-            foreach ($stadardProductsData as $product) {
-                if (Validate::isLoadedObject(
-                    $objStandardProductCartDetail = new StandardProductCartDetail($product['id_standard_product_cart_detail'])
-                )) {
-                    if ($objStandardProductCartDetail->delete()) {
-                        $objCart = new Cart($product['id_cart']);
-                        $objCart->updateQty((int)($product['quantity']), $product['id_product'], null, false, 'down');
-                    }
+        if (!$idCart) {
+            $context = context::getContext();
+            $idCart = $context->cart->id;
+        }
+
+        $updateQunatity = false;
+        if ($idHotelProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
+            $objHotelProductCartDetail = new HotelProductCartDetail($idHotelProductCartDetail);
+            if ($quantity) {
+                $removedQuantity = $quantity;
+                $objHotelProductCartDetail->quantity -= $quantity;
+                if ($objHotelProductCartDetail->quantity) {
+                    $updateQunatity = $objHotelProductCartDetail->save();
+                } else {
+                    $updateQunatity = $objHotelProductCartDetail->delete();
                 }
+            } else {
+                $removedQuantity = $objHotelProductCartDetail->quantity;
+                $updateQunatity = $objHotelProductCartDetail->delete();
             }
         }
 
-        return true;
+        if ($updateQunatity) {
+            $objCart = new Cart($idCart);
+            return $objCart->updateQty((int)$removedQuantity, $idProduct, null, false, 'down');
+        }
+
+        return false;
+    }
+
+    public function getHotelProductUnitPrice(
+        $idCart,
+        $idProduct,
+        $idHotel = 0,
+        $useTax = null
+    ) {
+        $totalPrice = $totalQuantity = 0;
+
+        if ($useTax === null) {
+            $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
+        }
+        $sql = 'SELECT hpcd.`id_product`, hpcd.`quantity`, hpcd.`id_hotel`
+            FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd
+            WHERE hpcd.`id_cart`='.(int) $idCart.' AND hpcd.`id_product`='.(int) $idProduct;
+        if ($idHotel) {
+            $sql .= ' AND hpcd.`id_hotel`='.(int) $idHotel;
+        }
+        if ($standardProducts = Db::getInstance()->executeS($sql)) {
+            foreach ($standardProducts as $product) {
+                $objProduct = new Product($product['id_product']);
+                if (!$objProduct->booking_product) {
+                    $idHotelAddress = Cart::getIdAddressForTaxCalculation($idProduct, $product['id_hotel']);
+                    $totalQuantity += $product['quantity'] ? (int)$product['quantity'] : 1;
+                    $totalPrice += (ProductCore::getPriceStatic(
+                        $idProduct,
+                        $useTax,
+                        null,
+                        6,
+                        null,
+                        false,
+                        true,
+                        $product['quantity'],
+                        false,
+                        null,
+                        null,
+                        $idHotelAddress
+                    )* $product['quantity']);
+                }
+            }
+
+        }
+        if ($totalPrice && $totalQuantity) {
+            return $totalPrice/(int)$totalQuantity;
+        } else {
+            return false;
+        }
     }
 
     public function getHotelProducts(
@@ -108,18 +163,29 @@ class HotelProductCartDetail extends ObjectModel
         $idHotel = 0,
         $getTotalPrice = 0,
         $useTax = null,
-        $id_address = null
+        $idLang = null,
+        $full = false
     ) {
-        if ($useTax === null)
+        if ($useTax === null) {
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
+        }
+
+        if (!$idLang) {
+            $language = Context::getContext()->language;
+        } else {
+            $language = new Language($idLang);
+        }
 
         $sql = 'SELECT hpcd.`id_product`, hpcd.`quantity`, hpcd.`id_hotel`';
-        // if (!$getTotalPrice) {
-        //     $sql .= ', cbd.`id_guest`, cbd.`id_customer`,
-        //         cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
-        // }
-        $sql .= ' FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd
-            WHERE hpcd.`id_cart`='.(int) $idCart;
+        if (!$getTotalPrice) {
+            $sql .= ', hbil.`hotel_name` ';
+        }
+        $sql .= ' FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd';
+        if (!$getTotalPrice) {
+            $sql .= ' INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` hbil ON (hbil.`id` = hpcd.`id_hotel` AND hbil.`id_lang` = '. $language->id.')
+            INNER JOIN `'._DB_PREFIX_.'address` a ON (a.`id_hotel` = hpcd.`id_hotel`)';
+        }
+            $sql .= ' WHERE hpcd.`id_cart`='.(int) $idCart;
 
         if ($idProduct) {
             $sql .= ' AND hpcd.`id_product`='.(int) $idProduct;
@@ -131,192 +197,103 @@ class HotelProductCartDetail extends ObjectModel
         if ($getTotalPrice) {
             $totalPrice = 0;
         }
-        // $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-        // $objHotelRoomType = new HotelRoomType();
-        // $selectedStandardProducts = array();
-        ddd(Db::getInstance()->executeS($sql));
+
+        $selectedProducts = array();
         if ($standardProducts = Db::getInstance()->executeS($sql)) {
             foreach ($standardProducts as $product) {
-                if ($getTotalPrice) {
-                    $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
-                    $totalPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                        (int)$product['id_product'],
-                        (int)$product['room_type_id_product'],
-                        $qty,
-                        $useTax,
-                        false,
-                        $id_address
-                    );
-
-                } else {
-                    $roomTypeInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($product['room_type_id_product']);
-                    $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
-                    if (isset($selectedStandardProducts[$product['htl_cart_booking_id']])) {
-                        if ($product['id_product']) {
-                            if ($idProduct) {
-                                $selectedStandardProducts[$product['htl_cart_booking_id']]['quantity'] += $product['quantity'];
-
-                            } else {
-                                $selectedStandardProducts[$product['htl_cart_booking_id']]['selected_products_info'][$product['id_product']] = array(
-                                    'id_product' => $product['id_product'],
-                                    'quantity' => $product['quantity'],
-                                );
-                            }
-                        }
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
+                $objProduct = new Product($product['id_product'], false, $language->id);
+                if (!$objProduct->booking_product) {
+                    if ($getTotalPrice) {
+                        $idHotelAddress = Cart::getIdAddressForTaxCalculation($objProduct->id, $product['id_hotel']);
+                        $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
+                        $totalPrice += Product::getPriceStatic(
+                            $objProduct->id,
                             $useTax,
+                            null,
+                            6,
+                            null,
                             false,
-                            $id_address
-                        );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
-                            false,
-                            false,
-                            $id_address
-                        );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
                             true,
+                            $qty,
                             false,
-                            $id_address
+                            null,
+                            null,
+                            $idHotelAddress
                         );
                     } else {
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['htl_cart_booking_id'] = $product['htl_cart_booking_id'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_cart'] = $product['id_cart'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['room_type_id_product'] = $product['room_type_id_product'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_guest'] = $product['id_guest'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_customer'] = $product['id_customer'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_hotel'] = $product['id_hotel'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_room'] = $product['id_room'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['date_from'] = $product['date_from'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['date_to'] = $product['date_to'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['is_refunded'] = $product['is_refunded'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['adults'] = $product['adults'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['children'] = $product['children'];
-                        if ($idProduct) {
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['id_product'] = $product['id_product'];
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['quantity'] = $product['quantity'];
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                                (int)$product['id_product'],
-                                (int)$product['room_type_id_product'],
-                                1,
-                                false,
-                                false,
-                                $id_address
-                            );
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                                (int)$product['id_product'],
-                                (int)$product['room_type_id_product'],
-                                1,
-                                true,
-                                false,
-                                $id_address
+                        $context = Context::getContext();
+                        $idHotelAddress = Cart::getIdAddressForTaxCalculation($objProduct->id, $product['id_hotel']);
+                        $priceTaxIncl = Product::getPriceStatic(
+                            $objProduct->id,
+                            true,
+                            null,
+                            6,
+                            null,
+                            false,
+                            true,
+                            $product['quantity'],
+                            false,
+                            null,
+                            null,
+                            $idHotelAddress
+                        );
+                        $priceTaxExcl = Product::getPriceStatic(
+                            $objProduct->id,
+                            false,
+                            null,
+                            6,
+                            null,
+                            false,
+                            true,
+                            $product['quantity'],
+                            false,
+                            null,
+                            null,
+                            $idHotelAddress
+                        );
+                        $coverImageArr = $objProduct->getCover($product['id_product']);
+                        if (!empty($coverImageArr)) {
+                            $coverImg = $context->link->getImageLink(
+                                $objProduct->link_rewrite,
+                                $objProduct->id.'-'.$coverImageArr['id_image'],
+                                'small_default'
                             );
                         } else {
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['selected_products_info'] = ($product['id_product']) ? array(
-                                $product['id_product'] => array(
-                                    'id_product' => $product['id_product'],
-                                    'quantity' => $product['quantity'],
-                                    'unit_price_tax_excl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                                        (int)$product['id_product'],
-                                        (int)$product['room_type_id_product'],
-                                        1,
-                                        false,
-                                        false,
-                                        $id_address
-                                    ),
-                                    'unit_price_tax_incl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                                        (int)$product['id_product'],
-                                        (int)$product['room_type_id_product'],
-                                        1,
-                                        true,
-                                        false,
-                                        $id_address
-                                    ),
-                                )
-                            ): array();
+                            $coverImg = $context->link->getImageLink(
+                                $objProduct->link_rewrite,
+                                $language->iso_code.'-default',
+                                'small_default'
+                            );
                         }
 
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
-                            $useTax,
-                            false,
-                            $id_address
+                        $selectedProducts[$product['id_hotel'].'-'.$product['id_product']] = array(
+                            'id_hotel' => $product['id_hotel'],
+                            'hotel_name' => $product['hotel_name'],
+                            'id_product' =>$objProduct->id,
+                            'name' => $objProduct->name,
+                            'unit_price_tax_incl' => $priceTaxIncl,
+                            'unit_price_tax_excl' => $priceTaxExcl,
+                            'quantity' => $product['quantity'],
+                            'total_price_tax_incl' => $priceTaxIncl * (int)$product['quantity'],
+                            'total_price_tax_excl' => $priceTaxExcl * (int)$product['quantity'],
+                            'cover_img' => $coverImg
                         );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
-                            false,
-                            false,
-                            $id_address
-                        );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
-                            (int)$product['id_product'],
-                            (int)$product['room_type_id_product'],
-                            $qty,
-                            true,
-                            false,
-                            $id_address
-                        );
+                        if ($full) {
+                            $objHotelBranchInformation = new HotelBranchInformation();
+                            $hotelInfo = $objHotelBranchInformation->hotelBranchesInfo($language->id, 2, 1, $product['id_hotel']);
+                            $hotelInfo['location'] = $hotelInfo['hotel_name'].', '.$hotelInfo['city'].
+                                ($hotelInfo['state_name']?', '.$hotelInfo['state_name']:'').', '.
+                                $hotelInfo['country_name'].', '.$hotelInfo['postcode'];
+                            $selectedProducts[$product['id_hotel'].'-'.$product['id_product']]['hotel_info'] = $hotelInfo;
+                        }
                     }
                 }
             }
 
         }
-
         if ($getTotalPrice) {
             return $totalPrice;
         }
-        return $selectedStandardProducts;
-    }
-
-    public function updateCartStandardProduct(
-        $htl_cart_booking_id,
-        $id_product,
-        $quantity,
-        $id_cart,
-        $operator
-    ) {
-        $id_standard_product_cart_detail = $this->alreadyExists($id_product, $htl_cart_booking_id);
-
-        if ($operator == 'up') {
-            if ($id_standard_product_cart_detail) {
-                $objStandardProductCartDetail = new StandardProductCartDetail($id_standard_product_cart_detail);
-            } else {
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                $objStandardProductCartDetail->id_product = $id_product;
-                $objStandardProductCartDetail->htl_cart_booking_id = $htl_cart_booking_id;
-                $objStandardProductCartDetail->id_cart = $id_cart;
-            }
-            $updateQty = $quantity - $objStandardProductCartDetail->quantity;
-            $way = $updateQty > 0 ? 'up' : 'down';
-            $objStandardProductCartDetail->quantity = $quantity;
-            if ($objStandardProductCartDetail->save()) {
-                $objCart = new Cart($id_cart);
-                return $objCart->updateQty((int)abs($updateQty), $id_product, null, false, $way);
-            }
-        } else {
-            if ($id_standard_product_cart_detail) {
-                $objStandardProductCartDetail = new StandardProductCartDetail($id_standard_product_cart_detail);
-                $updateQty = $objStandardProductCartDetail->quantity;
-                if ($objStandardProductCartDetail->delete()) {
-                    $objCart = new Cart($id_cart);
-                    return $objCart->updateQty((int)abs($updateQty), $id_product, null, false, 'down');
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
+        return $selectedProducts;
     }
 }

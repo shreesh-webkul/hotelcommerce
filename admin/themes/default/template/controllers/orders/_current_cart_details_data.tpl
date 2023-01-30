@@ -172,14 +172,14 @@
 					<tbody>
 						{foreach $cart_normal_data as $product}
 							<tr>
-								<td><img src="{$product.cover_img|escape:'html':'UTF-8'}" class="img-responsive" /></td>
-								<td><p>{$product.name|escape:'html':'UTF-8'}</p></td>
-								{* <td colspan="2">{$product.hotel.hotel_name}</td> *}
-								<td colspan="2">{displayPrice price=$product.price}</td>
-								<td>{$product.cart_quantity|escape:'htmlall':'UTF-8'}</td>
-								<td>{displayPrice price=$product.total}</td>
+								<td><img src="{$product['cover_img']|escape:'html':'UTF-8'}" class="img-responsive" /></td>
+								<td><p>{$product['name']|escape:'html':'UTF-8'}</p></td>
+								<td colspan="2">{$product['hotel_name']}</td>
+								<td colspan="2">{displayPrice price=$product['unit_price_tax_incl']}</td>
+								<td>{$product['quantity']|escape:'htmlall':'UTF-8'}</td>
+								<td>{displayPrice price=$product['total_price_tax_incl']}</td>
 								<td>
-									<button class="delete_service_product btn btn-danger" data-id_product={$product.id_product|escape:'html':'UTF-8'} data-id_cart = {$cart->id|escape:'html':'UTF-8'}>
+									<button class="delete_service_product btn btn-danger" data-id-hotel="{$product['id_hotel']|escape:'htmlall':'UTF-8'}" data-id_product={$product['id_product']|escape:'html':'UTF-8'} data-id_cart = {$cart->id|escape:'html':'UTF-8'}>
 										<i class="icon-trash"></i>&nbsp;{l s='Delete'}
 									</button>
 								</td>

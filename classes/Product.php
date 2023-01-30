@@ -510,7 +510,7 @@ class ProductCore extends ObjectModel
             $this->manufacturer_name = Manufacturer::getNameById((int)$this->id_manufacturer);
             $this->supplier_name = Supplier::getNameById((int)$this->id_supplier);
             $address = null;
-            $id_address = Product::getIdAddressForTaxCalculation($this->id);
+            $id_address = Cart::getIdAddressForTaxCalculation($this->id);
             $this->tax_rate = $this->getTaxesRate(new Address($id_address));
 
             $this->new = $this->isNew();
@@ -3023,9 +3023,9 @@ class ProductCore extends ObjectModel
             $address_infos = Address::getCountryAndState($id_address);
         } else {
             // if ($id_roomtype) {
-            //     $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_roomtype));
+            //     $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($id_roomtype));
             // } else {
-                $address_infos = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_product));
+                $address_infos = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($id_product));
             // }
         }
 
@@ -3337,17 +3337,6 @@ class ProductCore extends ObjectModel
         return self::$_prices[$cache_id];
     }
 
-    public static function getIdAddressForTaxCalculation($id_product, $id_hotel = false)
-    {
-        if (self::isBookingProduct($id_product)) {
-            return HotelRoomType::getHotelIdAddressByIdProduct($id_product);
-        } else if ($id_hotel) {
-            $addressInfo = HotelBranchInformation::getAddress($id_hotel);
-            return $$addressInfo['id_address'];
-        }
-        return false;
-    }
-
     public static function convertAndFormatPrice($price, $currency = false, Context $context = null)
     {
         if (!$context) {
@@ -3374,7 +3363,7 @@ class ProductCore extends ObjectModel
         $quantity = $cart_quantity ? $cart_quantity : $quantity;
 
         $id_currency = (int)$context->currency->id;
-        $ids = Address::getCountryAndState(Product::getIdAddressForTaxCalculation($id_product));
+        $ids = Address::getCountryAndState(Cart::getIdAddressForTaxCalculation($id_product));
         $id_country = $ids['id_country'] ? (int)$ids['id_country'] : (int)Configuration::get('PS_COUNTRY_DEFAULT');
         return (bool)SpecificPrice::getSpecificPrice((int)$id_product, $context->shop->id, $id_currency, $id_country, $id_group, $quantity, null, 0, 0, $quantity);
     }
@@ -5270,7 +5259,7 @@ class ProductCore extends ObjectModel
     public function getTaxesRate(Address $address = null)
     {
         if (!$address || !$address->id_country) {
-            $address = Address::initialize(Product::getIdAddressForTaxCalculation($this->id));
+            $address = Address::initialize(Cart::getIdAddressForTaxCalculation($this->id));
         }
 
         $tax_manager = TaxManagerFactory::getManager($address, $this->id_tax_rules_group);

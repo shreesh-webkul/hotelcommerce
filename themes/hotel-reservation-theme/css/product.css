@@ -1386,7 +1386,7 @@ Quick View Styles
 .price_desc_block {
   font-size: 18px;
 }
-.price_desc_block .total_rooms_price_block {
+.price_desc_block .total_price_block {
   color: #333;
 }
 .price_desc_block .extra_demands_price_block {

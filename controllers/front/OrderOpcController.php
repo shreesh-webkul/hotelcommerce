@@ -556,8 +556,8 @@ class OrderOpcControllerCore extends ParentOrderController
                 if ($cartBookingInfo = HotelCartBookingData::getHotelCartBookingData()) {
                     $this->context->smarty->assign('cart_htl_data', $cartBookingInfo);
                 }
-
-                if ($normalCartProduct = $this->context->cart->getServiceProducts($cartProducts)) {
+                $objHotelProductCartDetail = new HotelProductCartDetail();
+                if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id, 0, 0, 0, null, null, true)) {
                     $this->context->smarty->assign('cart_normal_data', $normalCartProduct);
                 }
 

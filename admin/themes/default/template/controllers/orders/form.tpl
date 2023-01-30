@@ -193,6 +193,7 @@
 						action: "deleteProductProcess",
 						id_product: $(this).data('id_product'),
 						id_cart: $(this).data('id_cart'),
+						id_hotel: $(this).data('id_hotel'),
 					},
 					dataType:"json",
 					success : function(data)
@@ -648,7 +649,6 @@
 
 	function updateRoomOccupancy(params, cart_row)
 	{
-		debugger;
 		$.ajax({
 			type:"POST",
 			url: "{$link->getAdminLink('AdminCarts')|addslashes}",

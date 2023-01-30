@@ -263,7 +263,9 @@ $(document).ready(function() {
                             });
                             $('#id_room_type').append(html);
                         } else {
-                            showErrorMessage(noRoomTypeAvlTxt);
+                            if ($('#booking_product').val() == 1) {
+                                showErrorMessage(noRoomTypeAvlTxt);
+                            }
                             $('#id_room_type').append(html);
                         }
                     }
@@ -794,6 +796,7 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result.status) {
+                    $(current_btn).closest('.product-info-container').find('.product_quantity').val('1');
                     refreshCartData();
                     showSuccessMessage(product_added_cart_txt)
                 } else if (result.errors) {
@@ -810,6 +813,9 @@ $(document).ready(function() {
         var current_btn = $(this);
         current_btn.attr('disabled', 'disabled');
         var id_product = $(this).attr('data-id-product');
+        var id_cart = $(this).attr('data-id-cart');
+        var id_hotel = $(this).attr('data-id-hotel');
+
 
         $.ajax({
             url: rooms_booking_url,
@@ -819,6 +825,8 @@ $(document).ready(function() {
                 ajax: true,
                 action: 'updateProductInCart',
                 id_product: id_product,
+                id_hotel: id_hotel,
+                id_cart: id_cart,
                 opt: 0,
             },
             success: function(result) {

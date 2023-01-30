@@ -218,6 +218,7 @@ class AdminOrdersControllerCore extends AdminController
                 $this->context->currency = new Currency((int)$cart->id_currency);
                 $cart_detail_data = array();
                 $cart_detail_data_obj = new HotelCartBookingData();
+                $objHotelProductCartDetail = new HotelProductCartDetail();
                 if ($cart_detail_data = $cart_detail_data_obj->getCartFormatedBookinInfoByIdCart((int) $id_cart)) {
                     $objRoomType = new HotelRoomType();
                     foreach ($cart_detail_data as $key => $cart_data) {
@@ -226,7 +227,7 @@ class AdminOrdersControllerCore extends AdminController
                     }
                     $this->context->smarty->assign('cart_detail_data', $cart_detail_data);
                 }
-                if ($normalCartProduct = $this->context->cart->getServiceProducts()) {
+                if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id)) {
                     $this->context->smarty->assign('cart_normal_data', $normalCartProduct);
                 }
 

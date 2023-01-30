@@ -74,7 +74,7 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
 
-        $id_address =  $id_address ? $id_address : Product::getIdAddressForTaxCalculation($idProductRoomType);
+        $id_address =  $id_address ? $id_address : Cart::getIdAddressForTaxCalculation($idProductRoomType);
 
         $price = ProductCore::getPriceStatic(
             (int)$idProduct,
