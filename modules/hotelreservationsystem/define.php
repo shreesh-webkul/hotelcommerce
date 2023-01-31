@@ -47,11 +47,11 @@ require_once 'classes/HotelRoomDisableDates.php';
 require_once 'classes/HotelBranchRefundRules.php';
 
 // linked products
-require_once 'classes/HotelRoomTypeStandardProduct.php';
-require_once 'classes/HotelRoomTypeStandardProductPrice.php';
-require_once 'classes/StandardProductCartDetail.php';
-require_once 'classes/StandardProductOrderDetail.php';
-require_once 'classes/HotelProductCartDetail.php';
+require_once 'classes/RoomTypeServiceProduct.php';
+require_once 'classes/RoomTypeServiceProductPrice.php';
+require_once 'classes/RoomTypeServiceProductCartDetail.php';
+require_once 'classes/RoomTypeServiceProductOrderDetail.php';
+require_once 'classes/HotelServiceProductCartDetail.php';
 
 
 require_once 'classes/HotelSettingsLink.php';

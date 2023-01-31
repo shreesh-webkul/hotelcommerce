@@ -380,13 +380,7 @@ var ajaxCart = {
 
         var roomDemands = getRoomsExtraDemands();
         req.append('roomDemands', JSON.stringify(roomDemands) );
-        // }
-        req.append('standardProducts', JSON.stringify(getRoomsStandardProducts()) );
-
-        // $('#additional_products input').each(function(){
-        //     req.append('standard_products['+ $(this).data('id_product')+']', $(this).val());
-        // });
-        // get the selected extra demands by customer
+        req.append('serviceProducts', JSON.stringify(getRoomsServiceProducts()) );
 
         //send the ajax request to the server
         $.ajax({
@@ -401,7 +395,6 @@ var ajaxCart = {
             data: req,
             contentType: false,
             processData: false,
-            // data: 'controller=cart&add=1&dateFrom=' + dateFrom + '&dateTo=' + dateTo + '&ajax=true'+(occupancy_required_for_booking ? '&occupancy=' + JSON.stringify(occupancy) : '&qty=' + occupancy) + '&id_product=' + idProduct + '&roomDemands=' + JSON.stringify(roomDemands) + '&token=' + static_token + ((parseInt(idCombination) && idCombination != null) ? '&ipa=' + parseInt(idCombination) : '' + '&id_customization=' + ((typeof customizationId !== 'undefined') ? customizationId : 0)),
             success: function(jsonData, textStatus, jqXHR) {
                 /*by webkul checking and setting availability of rooms*/
                 /*for product page add to cart quantity management*/
@@ -1246,7 +1239,7 @@ function resetRoomtypeServices() {
     $('.room_demands_container').find('input:checkbox.id_room_type_demand').prop('checked', false);
     $('#additional_products').empty();
     $('#additional_products div')
-    $('.remove_roomtype_product').text(select_txt).removeClass('btn-danger remove_roomtype_product').addClass('btn-success add_product_to_roomtype');
+    $('.remove_roomtype_product').text(select_txt).removeClass('btn-danger remove_roomtype_product').addClass('btn-success add_roomtype_product');
     BookingForm.refresh();
 }
 
@@ -1276,18 +1269,18 @@ function getRoomsExtraDemands()
     return roomDemands;
 }
 
-function getRoomsStandardProducts()
+function getRoomsServiceProducts()
 {
-    var standardProducts = [];
+    var serviceProducts = [];
 
-    $('#additional_products input.standard_product').each(function () {
-        standardProducts.push({
+    $('#additional_products input.service_product').each(function () {
+        serviceProducts.push({
             'id_product': $(this).data('id_product'),
             'quantity':$(this).val(),
         });
     });
 
-    return standardProducts;
+    return serviceProducts;
 }
 
 function getBookingOccupancyDetails(bookingform)

@@ -556,8 +556,8 @@ class OrderOpcControllerCore extends ParentOrderController
                 if ($cartBookingInfo = HotelCartBookingData::getHotelCartBookingData()) {
                     $this->context->smarty->assign('cart_htl_data', $cartBookingInfo);
                 }
-                $objHotelProductCartDetail = new HotelProductCartDetail();
-                if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id, 0, 0, 0, null, null, true)) {
+                $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+                if ($normalCartProduct = $objHotelServiceProductCartDetail->getHotelProducts($this->context->cart->id, 0, 0, 0, null, null, true)) {
                     $this->context->smarty->assign('cart_normal_data', $normalCartProduct);
                 }
 
@@ -984,8 +984,8 @@ class OrderOpcControllerCore extends ParentOrderController
 
                     }
                 }
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                if ($selectedRoomStandardProduct = $objStandardProductCartDetail->getStandardProductsInCart(
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                if ($selectedRoomServiceProduct = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $this->context->cart->id,
                     0,
                     0,
@@ -993,16 +993,16 @@ class OrderOpcControllerCore extends ParentOrderController
                     $dateFrom,
                     $dateTo
                 )) {
-                    $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                    $roomTypeStandardProducts = $objHotelRoomTypeStandardProduct->getStandardProductsData($idProduct, 1, 0, true);
-                    foreach ($selectedRoomStandardProduct as $key => $selectedProducts) {
+                    $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                    $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct, 1, 0, true, 1);
+                    foreach ($selectedRoomServiceProduct as $key => $selectedProducts) {
                         foreach ($selectedProducts['selected_products_info'] as $product) {
-                            $selectedRoomStandardProduct[$key]['selected_products'][] = $product['id_product'];
+                            $selectedRoomServiceProduct[$key]['selected_products'][] = $product['id_product'];
                         }
                     }
                     $this->context->smarty->assign(array(
-                        'roomTypeStandardProducts' => $roomTypeStandardProducts,
-                        'selectedRoomStandardProduct' => $selectedRoomStandardProduct
+                        'roomTypeServiceProducts' => $roomTypeServiceProducts,
+                        'selectedRoomServiceProduct' => $selectedRoomServiceProduct
                     ));
                 }
 

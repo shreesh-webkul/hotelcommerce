@@ -155,7 +155,7 @@
 													<span>
 														{displayPrice price=($rm_v['amount'])}
 													</span>
-													{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['standard_products']) && $data_v['standard_products'])}
+													{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['service_products']) && $data_v['service_products'])}
 														<span class="plus-sign pull-right">
 															+
 														</span>
@@ -166,7 +166,7 @@
 												</p>
 											</div>
 										</div>
-										{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['standard_products']) && $data_v['standard_products'])}
+										{if (isset($data_v['extra_demands']) && $data_v['extra_demands']) || (isset($data_v['service_products']) && $data_v['service_products'])}
 											<div class="col-sm-6">
 												<div class="demand_price_block">
 													<p class="demand_total_price">

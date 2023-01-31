@@ -1096,7 +1096,7 @@ $(document).ready(function() {
     }
 
     // normal product
-    $(document).on('click', '.add_product_to_roomtype', function(e){
+    $(document).on('click', '.add_roomtype_product', function(e){
         e.preventDefault();
         addProductToRoomType(this);
     });
@@ -1106,11 +1106,15 @@ $(document).ready(function() {
         removeRoomtypeProduct(this);
     });
 
-    $(document).on('click', '.standard_product_qty_up', function(e) {
+    $(document).on('click', '.service_product_qty_up', function(e) {
         e.preventDefault();
-        qtyfield = $(this).closest('.qty_container').find('input.standard_product_qty');
+        qtyfield = $(this).closest('.qty_container').find('input.service_product_qty');
         var currentVal = parseInt(qtyfield.val());
-        qtyfield.val(currentVal + 1).trigger('focusout');
+        $(this).closest('.qty_container').find('.qty_count span').text(currentVal + 1);
+        qtyfield.val(currentVal + 1);
+        if ($('input#service_product_'+ $(qtyfield).data('id-product')).length) {
+            addProductToRoomType($(qtyfield).closest('.service-product-element').find('button.btn-service-product'));
+        }
     });
     var activeSlider;
     // slider for standard product
@@ -1121,7 +1125,7 @@ $(document).ready(function() {
         }, 250);
     });
 
-    $('#standard_products_cont a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('#service_products_cont a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         // var target = $(e.target).attr("href") // activated tab
         initStandardProductSlider()
     });
@@ -1131,8 +1135,8 @@ $(document).ready(function() {
         if (activeSlider) {
             activeSlider.destroySlider();
         }
-        if ($('#standard_products_cont .standard-products-slider:visible').length) {
-            slider = $('#standard_products_cont .standard-products-slider:visible');
+        if ($('#service_products_cont .service-products-slider:visible').length) {
+            slider = $('#service_products_cont .service-products-slider:visible');
             var productAtATime = 3;
             contentWidth = $(slider).innerWidth();
             console.log(contentWidth);
@@ -1171,30 +1175,25 @@ $(document).ready(function() {
     }
 
     // The button to decrement the product value
-    $(document).on('click', '.standard_product_qty_down', function(e) {
+    $(document).on('click', '.service_product_qty_down', function(e) {
         e.preventDefault();
-        qtyfield = $(this).closest('.qty_container').find('input.standard_product_qty');
+        qtyfield = $(this).closest('.qty_container').find('input.service_product_qty');
         var currentVal = parseInt(qtyfield.val());
         if (!isNaN(currentVal) && currentVal > 1) {
-            qtyfield.val(currentVal - 1).trigger('focusout');
+            $(this).closest('.qty_container').find('.qty_count span').text(currentVal - 1);
+            qtyfield.val(currentVal - 1);
         } else {
-            qtyfield.val(1).trigger('focusout');
+            $(this).closest('.qty_container').find('.qty_count span').text(1);
+            qtyfield.val(1);
         }
-    });
-
-    $(document).on('focusout', '.standard_product_qty', function(e) {
-        var qty_wntd = $(this).val();
-        if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
-            $(this).val(1);
-        }
-        if ($('input#standard_product_'+ $(this).data('id-product')).length) {
-            addProductToRoomType($(this).closest('.standard-product-element').find('button.btn-standard-product'));
+        if ($('input#service_product_'+ $(qtyfield).data('id-product')).length) {
+            addProductToRoomType($(qtyfield).closest('.service-product-element').find('button.btn-service-product'));
         }
     });
 
     var ajax_check_var = '';
 
-    $('#standard_products_cont .get-standard-products').on('click', function(e) {
+    $('#service_products_cont .get-service-products').on('click', function(e) {
         var triggerElement = $(this);
         var p = $(this).data('page');
         var id_category = $(this).data('id_category');
@@ -1211,7 +1210,7 @@ $(document).ready(function() {
                 id_category: id_category,
                 p: p,
                 id_product: $('#product_page_product_id').val(),
-                action: 'getStandardProducts',
+                action: 'getServiceProducts',
                 ajax: true,
                 token: static_token
             },
@@ -1220,19 +1219,19 @@ $(document).ready(function() {
             },
             success: function(result) {
                 if (result.status) {
-                    if (result.standard_products) {
+                    if (result.service_products) {
                         if (id_category) {
-                            $('#category_'+id_category+' .product-list').append(result.standard_products);
+                            $('#category_'+id_category+' .product-list').append(result.service_products);
                             triggerElement.data('page', parseInt(triggerElement.data('page')) + 1);
                             totalResults = triggerElement.data('num_total');
-                            if (totalResults <= $('#category_'+id_category+' .product-list .standard-product-element').length) {
+                            if (totalResults <= $('#category_'+id_category+' .product-list .service-product-element').length) {
                                 triggerElement.hide();
                             }
                         } else {
-                            $('#standard_products_cont .product-list').append(result.standard_products);
+                            $('#service_products_cont .product-list').append(result.service_products);
                             triggerElement.data('page', parseInt(triggerElement.data('page')) + 1);
                             totalResults = triggerElement.data('num_total');
-                            if (totalResults <= $('#standard_products_cont .product-list .standard-product-element').length) {
+                            if (totalResults <= $('#service_products_cont .product-list .service-product-element').length) {
                                 triggerElement.hide();
                             }
                         }
@@ -1247,7 +1246,7 @@ $(document).ready(function() {
             },
             error: function(jqXHR, textStatus, errorThrown)
             {
-                if (textStatus != 'error' || errorThrown != '')
+                if ((textStatus != 'error' || errorThrown != '') && textStatus != 'abort')
                     showErrorMessage(textStatus + ': ' + errorThrown);
             },
             complete: function() {
@@ -1263,12 +1262,12 @@ $(document).ready(function() {
     }
     function addProductToRoomType(that) {
         var id_product = $(that).data('id-product');
-        var qty = $('input#standard_product_qty_'+id_product).val();
+        var qty = $('input#service_product_qty_'+id_product).val();
         if (typeof(qty) == 'undefined') {
             qty = 1;
         }
-
-        $.ajax({
+        abortRunningAjax();
+        ajax_check_var = $.ajax({
             type: 'POST',
             headers: {
                 "cache-control": "no-cache"
@@ -1281,26 +1280,26 @@ $(document).ready(function() {
                 date_to: $('#room_check_out').val(),
                 qty: qty,
                 id_product: $('#product_page_product_id').val(),
-                standard_product: id_product,
-                action: 'checkStandardProductWithRoomType',
+                service_product: id_product,
+                action: 'checkServiceProductWithRoomType',
                 ajax: true,
                 token: static_token
             },
             success: function(result) {
                 if (result.status) {
-                    if ($('input#standard_product_'+ id_product).length) {
-                        $('input#standard_product_'+ id_product).val(qty);
+                    if ($('input#service_product_'+ id_product).length) {
+                        $('input#service_product_'+ id_product).val(qty);
                     } else {
                         $('<input type="hidden">').attr({
-                            id: 'standard_product_'+ id_product,
-                            name: 'standard_product['+ id_product +'][]',
-                            class: 'standard_product',
+                            id: 'service_product_'+ id_product,
+                            name: 'service_product['+ id_product +'][]',
+                            class: 'service_product',
                             'data-id_product': id_product,
                             value: qty
                         }).appendTo('#additional_products');
                     }
-                    $(that).data('id_standard_product_cart_detail', result.id_standard_product_cart_detail);
-                    $(that).text(remove_txt).addClass('btn-danger remove_roomtype_product').removeClass('btn-success add_product_to_roomtype');
+                    $(that).data('id_room_type_service_product_cart_detail', result.id_room_type_service_product_cart_detail);
+                    $(that).text(remove_txt).addClass('btn-danger remove_roomtype_product').removeClass('btn-success add_roomtype_product');
                     BookingForm.refresh();
                 } else {
                     if (result.error) {
@@ -1310,7 +1309,7 @@ $(document).ready(function() {
             },
             error: function(jqXHR, textStatus, errorThrown)
             {
-                if (textStatus != 'error' || errorThrown != '')
+                if ((textStatus != 'error' || errorThrown != '') && textStatus != 'abort')
                     showErrorMessage(textStatus + ': ' + errorThrown);
             }
         });
@@ -1319,10 +1318,10 @@ $(document).ready(function() {
     function removeRoomtypeProduct(that)
     {
         var id_product = $(that).data('id-product');
-        console.log($(document).find('input#standard_product_'+ id_product));
-        $(document).find('input#standard_product_'+ id_product).remove();
-        $(that).data('id_standard_product_cart_detail', '');
-        $(that).text(select_txt).removeClass('btn-danger remove_roomtype_product').addClass('btn-success add_product_to_roomtype');
+        console.log($(document).find('input#service_product_'+ id_product));
+        $(document).find('input#service_product_'+ id_product).remove();
+        $(that).data('id_room_type_service_product_cart_detail', '');
+        $(that).text(select_txt).removeClass('btn-danger remove_roomtype_product').addClass('btn-success add_roomtype_product');
         BookingForm.refresh();
     }
 });
@@ -1356,6 +1355,15 @@ var BookingForm = {
     init: function() {
         this.currentRequest = null;
         BookingForm.initDatepicker(max_order_date, preparation_time, $('#room_check_in').val(), $('#room_check_out').val());
+        // initialize tootltip for extra service
+        if ($('.price_desc_block .services-info').length) {
+            console.log($('.price_desc_block .services-info-content').html());
+            $('.price_desc_block .services-info img').popover({
+                content: $('.price_desc_block .services-info-content').html(),
+                html: true,
+                trigger: 'hover'
+            });
+        }
     },
     initDatepicker: function(max_order_date, preparation_time, dateFrom, dateTo) {
         let start_date = new Date();
@@ -1416,7 +1424,7 @@ var BookingForm = {
             date_to: $('#room_check_out').val(),
             // quantity: quantity,
             room_type_demands: JSON.stringify(getRoomsExtraDemands()),
-            room_standard_products: JSON.stringify(getRoomsStandardProducts()),
+            room_service_products: JSON.stringify(getRoomsServiceProducts()),
         };
         if (occupancy = getBookingOccupancy()) {
             data.occupancy = occupancy;

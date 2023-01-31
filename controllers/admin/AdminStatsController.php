@@ -389,6 +389,8 @@ class AdminStatsControllerCore extends AdminStatsTabController
 				GROUP BY pr.`id_product`
 			) t ON t.`id_product` = pr.`id_product`
 		) t	ON t.`id_product` = capr.`id_product`
+        RIGHT JOIN `'._DB_PREFIX_.'category` c2
+        ON c2.`id_category` = '.(int)Configuration::get('PS_PRODUCTS_CATEGORY').' AND ca.`nleft` >= c2.`nleft` AND ca.`nright` <= c2.`nright`
 		WHERE ca.`level_depth` > 1
 		GROUP BY ca.`id_category`
 		ORDER BY SUM(t.`totalPriceSold`) DESC');
@@ -638,13 +640,21 @@ class AdminStatsControllerCore extends AdminStatsTabController
                 break;
 
             case 'disabled_room_types':
-                $value = round(100 * AdminStatsController::getDisabledRoomTypes() / AdminStatsController::getTotalRoomTypes(), 2).'%';
+                if (AdminStatsController::getTotalRoomTypes()) {
+                    $value = round(100 * AdminStatsController::getDisabledRoomTypes() / AdminStatsController::getTotalRoomTypes(), 2).'%';
+                } else {
+                    $value = '0%';
+                }
                 ConfigurationKPI::updateValue('DISABLED_ROOM_TYPES', $value);
                 ConfigurationKPI::updateValue('DISABLED_ROOM_TYPES_EXPIRE', strtotime('+2 hour'));
                 break;
 
             case 'disabled_products':
-                $value = round(100 * AdminStatsController::getDisabledProducts() / AdminStatsController::getTotalProducts(), 2).'%';
+                if (AdminStatsController::getTotalProducts()) {
+                    $value = round(100 * AdminStatsController::getDisabledProducts() / AdminStatsController::getTotalProducts(), 2).'%';
+                } else {
+                    $value = '0%';
+                }
                 break;
 
             case '8020_sales_catalog':

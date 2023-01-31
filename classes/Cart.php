@@ -786,9 +786,9 @@ class CartCore extends ObjectModel
                 }
             } else if  (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $row['service_product_type']) {
 
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                $totalPriceByProductTaxIncl = $objStandardProductCartDetail->getStandardProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, true);
-                $totalPriceByProductTaxExcl = $objStandardProductCartDetail->getStandardProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, false);
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                $totalPriceByProductTaxIncl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, true);
+                $totalPriceByProductTaxExcl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, false);
 
                 switch (Configuration::get('PS_ROUND_TYPE')) {
                     case Order::ROUND_TOTAL:
@@ -807,9 +807,9 @@ class CartCore extends ObjectModel
                         break;
                 }
             } else {
-                $objHotelProductCartDetail = new HotelProductCartDetail();
-                $unitPriceByProductTaxIncl = $objHotelProductCartDetail->getHotelProductUnitPrice($this->id, (int)$row['id_product'], 0, true);
-                $unitPriceByProductTaxExcl = $objHotelProductCartDetail->getHotelProductUnitPrice($this->id, (int)$row['id_product'], 0, false);
+                $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+                $unitPriceByProductTaxIncl = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, (int)$row['id_product'], 0, true);
+                $unitPriceByProductTaxExcl = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, (int)$row['id_product'], 0, false);
 
                 switch (Configuration::get('PS_ROUND_TYPE'))
                 {
@@ -1754,11 +1754,11 @@ class CartCore extends ObjectModel
             }
 
             if (!$product['booking_product'] && Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE == $product['service_product_type']) {
-                $objHotelProductCartDetail = new HotelProductCartDetail();
-                $price = $objHotelProductCartDetail->getHotelProductUnitPrice($this->id, (int)$product['id_product'], 0, $with_taxes);
+                $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+                $price = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, (int)$product['id_product'], 0, $with_taxes);
             } else if (!$product['booking_product'] && Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product['service_product_type']) {
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                $totalPriceByProduct = $objStandardProductCartDetail->getStandardProductsInCart(
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                $totalPriceByProduct = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $this->id,
                     (int)$product['id_product'],
                     isset($product['id_hotel']) ? $product['id_hotel'] : 0,
@@ -2295,8 +2295,8 @@ class CartCore extends ObjectModel
         $serviceProducts = array();
         $objRoomType = new HotelRoomType();
         $objHtlCartBookingData = new HotelCartBookingData();
-        $objStandardProductCartDetail = new StandardProductCartDetail();
-        $objHotelProductCartDetail = new HotelProductCartDetail();
+        $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+        $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
         foreach ($final_package_list as $id_address => $packages) {
             foreach ($packages as $id_package => $package) {
                 foreach ($package['product_list'] as $product) {
@@ -2327,9 +2327,9 @@ class CartCore extends ObjectModel
                         }
                     } else {
                         if (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product['service_product_type']) {
-                            if ($selectedStandardProducts = $objStandardProductCartDetail->getStandardProductsInCart($this->id, $product['id_product'])) {
+                            if ($selectedServiceProducts = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, $product['id_product'])) {
                                 $array = array();
-                                foreach($selectedStandardProducts as $selectedProduct) {
+                                foreach($selectedServiceProducts as $selectedProduct) {
                                     if (isset($array[$selectedProduct['id_hotel']])) {
                                         $array[$selectedProduct['id_hotel']]['quantity'] += $selectedProduct['quantity'];
                                     } else {
@@ -2365,13 +2365,13 @@ class CartCore extends ObjectModel
                                 }
                             }
                         } else {
-                            if ($selectedStandardProducts = $objHotelProductCartDetail->getHotelProducts($this->id, $product['id_product'])) {
-                                foreach($selectedStandardProducts as $hotelProduct) {
+                            if ($selectedServiceProducts = $objHotelServiceProductCartDetail->getHotelProducts($this->id, $product['id_product'])) {
+                                foreach($selectedServiceProducts as $hotelProduct) {
                                     // ppp($hotelProduct);
                                     $serviceProduct = $product;
                                     $serviceProduct['cart_quantity'] = $hotelProduct['quantity'];
-                                    $unitPrice = $objHotelProductCartDetail->getHotelProductUnitPrice($this->id, $product['id_product'], $hotelProduct['id_hotel'], false);
-                                    $unitPriceWt = $objHotelProductCartDetail->getHotelProductUnitPrice($this->id, $product['id_product'], $hotelProduct['id_hotel'], true);
+                                    $unitPrice = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, $product['id_product'], $hotelProduct['id_hotel'], false);
+                                    $unitPriceWt = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, $product['id_product'], $hotelProduct['id_hotel'], true);
                                     $serviceProduct['total'] = $unitPrice * $hotelProduct['quantity'];
                                     $serviceProduct['total_wt'] = $unitPriceWt * $hotelProduct['quantity'];
                                     $serviceProduct['price_wt'] = $unitPriceWt;

@@ -1743,12 +1743,12 @@
 			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
 				$(this).val(1);
 			}
-			{* updateStandardProducts($(this)); *}
+			{* updateServiceProducts($(this)); *}
 		});
 
-		function updateStandardProducts(element)
+		function updateServiceProducts(element)
 		{
-			var id_standard_product_order_detail = $(element).data('id_standard_product_order_detail');
+			var id_room_type_service_product_order_detail = $(element).data('id_room_type_service_product_order_detail');
 			var qty = $(element).val();
 			if ($.isNumeric(qty)) {
 				$.ajax({
@@ -1760,7 +1760,7 @@
 					dataType: 'JSON',
 					cache: false,
 					data: {
-						id_standard_product_order_detail: id_standard_product_order_detail,
+						id_room_type_service_product_order_detail: id_room_type_service_product_order_detail,
 						qty: qty,
 						action: 'updateRoomAdditionalServices',
 						ajax: true
@@ -1888,9 +1888,9 @@
 		$(document).on('click', '.del_room_additional_service', function(e){
 			e.preventDefault();
 			if (confirm(txt_confirm)) {
-				var idStandardProductOrderDetail = $(this).data('id_standard_product_order_detail');
+				var idServiceProductOrderDetail = $(this).data('id_room_type_service_product_order_detail');
 				$currentItem = $(this);
-				if (idStandardProductOrderDetail) {
+				if (idServiceProductOrderDetail) {
 					$.ajax({
 						type: 'POST',
 						headers: {
@@ -1900,7 +1900,7 @@
 						dataType: 'JSON',
 						cache: false,
 						data: {
-							id_standard_product_order_detail: idStandardProductOrderDetail,
+							id_room_type_service_product_order_detail: idServiceProductOrderDetail,
 							action: 'DeleteRoomAdditionalService',
 							ajax: true
 						},

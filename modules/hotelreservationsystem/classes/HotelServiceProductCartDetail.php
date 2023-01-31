@@ -18,17 +18,17 @@
 *  @license   https://store.webkul.com/license.html
 */
 
-class HotelProductCartDetail extends ObjectModel
+class HotelServiceProductCartDetail extends ObjectModel
 {
-    public $id_hotel_product_cart_detail;
+    public $id_hotel_service_product_cart_detail;
     public $id_cart;
     public $id_product;
     public $id_hotel;
     public $quantity;
 
     public static $definition = array(
-        'table' => 'htl_hotel_product_cart_detail',
-        'primary' => 'id_hotel_product_cart_detail',
+        'table' => 'htl_hotel_service_product_cart_detail',
+        'primary' => 'id_hotel_service_product_cart_detail',
         'fields' => array(
             'id_cart' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
@@ -43,7 +43,7 @@ class HotelProductCartDetail extends ObjectModel
         $idCart
     ) {
         return Db::getInstance()->getValue(
-            'SELECT `id_hotel_product_cart_detail` FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail`
+            'SELECT `id_hotel_service_product_cart_detail` FROM `'._DB_PREFIX_.'htl_hotel_service_product_cart_detail`
             WHERE `id_cart` = '.(int)$idCart.' AND `id_product` = '.(int)$idProduct.' AND `id_hotel` = '.(int)$idHotel
         );
     }
@@ -59,18 +59,18 @@ class HotelProductCartDetail extends ObjectModel
             $context = context::getContext();
             $idCart = $context->cart->id;
         }
-        if ($idHotelProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
-            $objHotelProductCartDetail = new HotelProductCartDetail($idHotelProductCartDetail);
-            $objHotelProductCartDetail->quantity += $quantity;
+        if ($idHotelServiceProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
+            $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail($idHotelServiceProductCartDetail);
+            $objHotelServiceProductCartDetail->quantity += $quantity;
         } else {
-            $objHotelProductCartDetail = new HotelProductCartDetail();
-            $objHotelProductCartDetail->id_product = $idProduct;
-            $objHotelProductCartDetail->quantity = $quantity;
-            $objHotelProductCartDetail->id_hotel = $idHotel;
-            $objHotelProductCartDetail->id_cart = $idCart;
+            $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+            $objHotelServiceProductCartDetail->id_product = $idProduct;
+            $objHotelServiceProductCartDetail->quantity = $quantity;
+            $objHotelServiceProductCartDetail->id_hotel = $idHotel;
+            $objHotelServiceProductCartDetail->id_cart = $idCart;
 
         }
-        if ($objHotelProductCartDetail->save()) {
+        if ($objHotelServiceProductCartDetail->save()) {
             $objCart = new Cart($idCart);
             return $objCart->updateQty($quantity, $idProduct);
         }
@@ -85,19 +85,19 @@ class HotelProductCartDetail extends ObjectModel
         }
 
         $updateQunatity = false;
-        if ($idHotelProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
-            $objHotelProductCartDetail = new HotelProductCartDetail($idHotelProductCartDetail);
+        if ($idHotelServiceProductCartDetail = $this->alreadyExists($idProduct, $idHotel, $idCart)) {
+            $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail($idHotelServiceProductCartDetail);
             if ($quantity) {
                 $removedQuantity = $quantity;
-                $objHotelProductCartDetail->quantity -= $quantity;
-                if ($objHotelProductCartDetail->quantity) {
-                    $updateQunatity = $objHotelProductCartDetail->save();
+                $objHotelServiceProductCartDetail->quantity -= $quantity;
+                if ($objHotelServiceProductCartDetail->quantity) {
+                    $updateQunatity = $objHotelServiceProductCartDetail->save();
                 } else {
-                    $updateQunatity = $objHotelProductCartDetail->delete();
+                    $updateQunatity = $objHotelServiceProductCartDetail->delete();
                 }
             } else {
-                $removedQuantity = $objHotelProductCartDetail->quantity;
-                $updateQunatity = $objHotelProductCartDetail->delete();
+                $removedQuantity = $objHotelServiceProductCartDetail->quantity;
+                $updateQunatity = $objHotelServiceProductCartDetail->delete();
             }
         }
 
@@ -120,14 +120,14 @@ class HotelProductCartDetail extends ObjectModel
         if ($useTax === null) {
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
         }
-        $sql = 'SELECT hpcd.`id_product`, hpcd.`quantity`, hpcd.`id_hotel`
-            FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd
-            WHERE hpcd.`id_cart`='.(int) $idCart.' AND hpcd.`id_product`='.(int) $idProduct;
+        $sql = 'SELECT spcd.`id_product`, spcd.`quantity`, spcd.`id_hotel`
+            FROM `'._DB_PREFIX_.'htl_hotel_service_product_cart_detail` spcd
+            WHERE spcd.`id_cart`='.(int) $idCart.' AND spcd.`id_product`='.(int) $idProduct;
         if ($idHotel) {
-            $sql .= ' AND hpcd.`id_hotel`='.(int) $idHotel;
+            $sql .= ' AND spcd.`id_hotel`='.(int) $idHotel;
         }
-        if ($standardProducts = Db::getInstance()->executeS($sql)) {
-            foreach ($standardProducts as $product) {
+        if ($serviceProducts = Db::getInstance()->executeS($sql)) {
+            foreach ($serviceProducts as $product) {
                 $objProduct = new Product($product['id_product']);
                 if (!$objProduct->booking_product) {
                     $idHotelAddress = Cart::getIdAddressForTaxCalculation($idProduct, $product['id_hotel']);
@@ -176,22 +176,22 @@ class HotelProductCartDetail extends ObjectModel
             $language = new Language($idLang);
         }
 
-        $sql = 'SELECT hpcd.`id_product`, hpcd.`quantity`, hpcd.`id_hotel`';
+        $sql = 'SELECT spcd.`id_product`, spcd.`quantity`, spcd.`id_hotel`';
         if (!$getTotalPrice) {
             $sql .= ', hbil.`hotel_name` ';
         }
-        $sql .= ' FROM `'._DB_PREFIX_.'htl_hotel_product_cart_detail` hpcd';
+        $sql .= ' FROM `'._DB_PREFIX_.'htl_hotel_service_product_cart_detail` spcd';
         if (!$getTotalPrice) {
-            $sql .= ' INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` hbil ON (hbil.`id` = hpcd.`id_hotel` AND hbil.`id_lang` = '. $language->id.')
-            INNER JOIN `'._DB_PREFIX_.'address` a ON (a.`id_hotel` = hpcd.`id_hotel`)';
+            $sql .= ' INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` hbil ON (hbil.`id` = spcd.`id_hotel` AND hbil.`id_lang` = '. $language->id.')
+            INNER JOIN `'._DB_PREFIX_.'address` a ON (a.`id_hotel` = spcd.`id_hotel`)';
         }
-            $sql .= ' WHERE hpcd.`id_cart`='.(int) $idCart;
+            $sql .= ' WHERE spcd.`id_cart`='.(int) $idCart;
 
         if ($idProduct) {
-            $sql .= ' AND hpcd.`id_product`='.(int) $idProduct;
+            $sql .= ' AND spcd.`id_product`='.(int) $idProduct;
         }
         if ($idHotel) {
-            $sql .= ' AND hpcd.`id_hotel`='.(int) $idHotel;
+            $sql .= ' AND spcd.`id_hotel`='.(int) $idHotel;
         }
 
         if ($getTotalPrice) {
@@ -199,8 +199,8 @@ class HotelProductCartDetail extends ObjectModel
         }
 
         $selectedProducts = array();
-        if ($standardProducts = Db::getInstance()->executeS($sql)) {
-            foreach ($standardProducts as $product) {
+        if ($serviceProducts = Db::getInstance()->executeS($sql)) {
+            foreach ($serviceProducts as $product) {
                 $objProduct = new Product($product['id_product'], false, $language->id);
                 if (!$objProduct->booking_product) {
                     if ($getTotalPrice) {

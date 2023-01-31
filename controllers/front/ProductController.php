@@ -295,7 +295,7 @@ class ProductControllerCore extends FrontController
             }
 
             $useTax = HotelBookingDetail::useTax();
-            // Check if product is a booking product or a standard product
+            // Check if product is a booking product or a service product
             // Virtual product is booking product
             if ($this->product->booking_product) {
                 #####################################################################
@@ -413,13 +413,13 @@ class ProductControllerCore extends FrontController
                             'hotel_has_images' => (bool) HotelImage::getCover($hotel_id),
                             'ftr_img_src' => _PS_IMG_.'rf/',
                             'order_date_restrict' => $order_date_restrict,
-                            'PS_STANDARD_PRODUCT_DISPLAY_TYPE' => Configuration::get('PS_STANDARD_PRODUCT_DISPLAY_TYPE'),
-                            'PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER' => Configuration::get('PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER'),
+                            'PS_SERVICE_PRODUCT_DISPLAY_TYPE' => Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE'),
+                            'PS_SERVICE_PRODUCT_CATEGORY_FILTER' => Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER'),
                         )
                     );
 
                     $this->assignBookingFormVars($this->product->id, $date_from, $date_to);
-                    $this->assignStandardProductVars();
+                    $this->assignServiceProductVars();
 
                     // product price after imposing feature prices...
                     if ($useTax) {
@@ -442,8 +442,7 @@ class ProductControllerCore extends FrontController
                         }
                     }
                 } else {
-                    // Non virtual product is standard product / Normal products
-                    // when using normal product we will not need any new paramaters, will update interface by checking is_virtual
+                    // when using service product we will not need any new paramaters, will update interface by checking is_virtual
                 }
 
                 if (Tools::getValue('error')) {
@@ -507,48 +506,49 @@ class ProductControllerCore extends FrontController
         $this->setTemplate(_PS_THEME_DIR_.'product.tpl');
     }
 
-    public function assignStandardProductVars()
+    public function assignServiceProductVars()
     {
-        // get standard products for room type
+        // get service products for room type
         $p = 1;
         $n = 0;
-        $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-        if (Configuration::get('PS_STANDARD_PRODUCT_DISPLAY_TYPE') == 'list') {
-            $n = HotelRoomTypeStandardProduct::WK_NUM_RESULTS;
+        $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+        if (Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE') == 'list') {
+            $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
         }
         $smartyVars = array();
-        if (Configuration::get('PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER')) {
-            $standardProductsByCategory = $objHotelRoomTypeStandardProduct->getStandardProductsGroupByCategory(
+        if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER')) {
+            $serviceProductsByCategory = $objRoomTypeServiceProduct->getServiceProductsGroupByCategory(
                 $this->product->id,
                 $p,
                 $n,
                 true
             );
-            $standardProductsCategories = $this->product->getAvailableStandardProductsCategories($this->context->language->id);
-            if ($standardProductsByCategory) {
-                $smartyVars['standard_products_exists'] = 1;
+            $serviceProductsCategories = $this->product->getAvailableServiceProductsCategories($this->context->language->id);
+            if ($serviceProductsByCategory) {
+                $smartyVars['service_products_exists'] = 1;
             }
-            $smartyVars['standard_products_by_category'] = $standardProductsByCategory;
-            $smartyVars['standard_products_categories'] = $standardProductsCategories;
+            $smartyVars['service_products_by_category'] = $serviceProductsByCategory;
+            $smartyVars['service_products_categories'] = $serviceProductsCategories;
         } else {
-            $roomTypeStandardProducts = $objHotelRoomTypeStandardProduct->getStandardProductsData(
+            $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData(
                 $this->product->id,
                 $p,
                 $n,
                 true
             );
-            $numTotalStandardProducts = $this->product->getProductStandardProducts(
+            $numTotalServiceProducts = $this->product->getProductServiceProducts(
                 $this->context->language->id,
                 $p,
                 $n,
                 true,
+                2,
                 true
             );
-            if ($roomTypeStandardProducts) {
-                $smartyVars['standard_products_exists'] = 1;
+            if ($roomTypeServiceProducts) {
+                $smartyVars['service_products_exists'] = 1;
             }
-            $smartyVars['standard_products'] = $roomTypeStandardProducts;
-            $smartyVars['num_total_standard_products'] = $numTotalStandardProducts;
+            $smartyVars['service_products'] = $roomTypeServiceProducts;
+            $smartyVars['num_total_service_products'] = $numTotalServiceProducts;
         }
         $this->context->smarty->assign($smartyVars);
 
@@ -561,7 +561,7 @@ class ProductControllerCore extends FrontController
         $dateTo,
         $occupancy = array(),
         $jsonDemands = '',
-        $roomStandardProducts = null
+        $roomServiceProducts = null
     ) {
         $objProduct = new Product($idProduct, true, $this->context->language->id, $this->context->shop->id);
         if (!Validate::isLoadedObject($objProduct)) {
@@ -669,21 +669,59 @@ class ProductControllerCore extends FrontController
             );
 
             $demandsPrice *= $quantity;
+
+            // send demand info to booking form
+            foreach($cartDemands as &$demand) {
+                if (Validate::isLoadedObject(
+                    $objRoomTypeGlobalDemand = new HotelRoomTypeGlobalDemand($demand['id_global_demand'], $this->context->language->id)
+                )) {
+                    $demand['name'] = $objRoomTypeGlobalDemand->name;
+                    if ($demand['id_option']) {
+                        if (Validate::isLoadedObject($objDemandAdvanceOption = new HotelRoomTypeGlobalDemandAdvanceOption($demand['id_option'], $this->context->language->id))) {
+                            if ($objDemandAdvanceOption->id_global_demand != $objRoomTypeGlobalDemand->id) {
+                                unset($demand);
+                                continue;
+                            }
+                            $demand['advance_option'] = array(
+                                'id_option' => $objDemandAdvanceOption->id,
+                                'name' => $objDemandAdvanceOption->name
+                            );
+                        } else {
+                            unset($demand);
+                            continue;
+                        }
+                    }
+
+                    $advanceOption = $objDemandAdvanceOption->getGlobalDemandAdvanceOptions($demand['id_global_demand'], $this->context->language->id);
+                    $demand['price'] = HotelRoomTypeDemand::getPriceStatic(
+                        $idProduct,
+                        $objRoomTypeGlobalDemand->id,
+                        $demand['id_option'],
+                        $useTax
+                    );
+                }
+            }
+            $smartyVars['selected_demands'] = $cartDemands;
         }
 
-        if ($roomStandardProducts) {
-            $standardProductsPrice = 0;
-            if ($roomStandardProducts = json_decode($roomStandardProducts, true)) {
-                $smartyVars['selected_standard_product'] = $roomStandardProducts;
-                $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-                foreach ($roomStandardProducts as $product) {
-                    $standardProductsPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice($product['id_product'], $idProduct, $product['quantity'], $useTax);
+        if ($roomServiceProducts) {
+            $serviceProductsPrice = 0;
+            if ($roomServiceProducts = json_decode($roomServiceProducts, true)) {
+                $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
+                foreach ($roomServiceProducts as &$product) {
+                    $objProduct = new ProductCore($product['id_product'], false, $this->context->language->id);
+                    $product['name'] = $objProduct->name;
+                    $product['allow_multiple_quantity'] = $objProduct->allow_multiple_quantity;
+                    $productPrice = $objRoomTypeServiceProductPrice->getProductPrice($product['id_product'], $idProduct, $product['quantity'], $useTax);
+                    $product['price'] = $productPrice;
+                    $serviceProductsPrice += $productPrice;
                 }
+                $smartyVars['selected_service_product'] = $roomServiceProducts;
                 // multiply price by number of room required
-                $standardProductsPrice *= $quantity;
+                $serviceProductsPrice *= $quantity;
             }
-            $demandsPrice += $standardProductsPrice;
-            $totalPrice += $standardProductsPrice;
+            $demandsPrice += $serviceProductsPrice;
+            $totalPrice += $serviceProductsPrice;
         }
         // calculate total price
         $totalPrice = $totalRoomPrice + $demandsPrice;
@@ -1186,18 +1224,18 @@ class ProductControllerCore extends FrontController
         $dateTo = Tools::getValue('date_to');
         $occupancy = Tools::getValue('occupancy');
         $roomTypeDemands = Tools::getValue('room_type_demands');
-        $roomStandardProducts = Tools::getValue('room_standard_products');
+        $roomServiceProducts = Tools::getValue('room_service_products');
 
         $dateFrom = date('Y-m-d', strtotime($dateFrom));
         $dateTo = date('Y-m-d', strtotime($dateTo));
-        $this->assignStandardProductVars();
+        $this->assignServiceProductVars();
         if ($this->assignBookingFormVars(
             $idProduct,
             $dateFrom,
             $dateTo,
             $occupancy,
             $roomTypeDemands,
-            $roomStandardProducts
+            $roomServiceProducts
         )) {
             $html = $this->context->smarty->fetch('_partials/booking-form.tpl');
             $response['status'] = true;
@@ -1243,7 +1281,7 @@ class ProductControllerCore extends FrontController
         die(json_encode($response));
     }
 
-    public function displayAjaxGetStandardProducts()
+    public function displayAjaxGetServiceProducts()
     {
         $response = array(
             'status' => false
@@ -1256,28 +1294,29 @@ class ProductControllerCore extends FrontController
         if ($this->isTokenValid()) {
             if ($p && $id_product) {
                 if (Validate::isLoadedObject($objProduct = new Product($id_product))) {
-                    $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                    if (Configuration::get('PS_STANDARD_PRODUCT_DISPLAY_TYPE') == 'list') {
-                        $n = HotelRoomTypeStandardProduct::WK_NUM_RESULTS;
-                        if (Configuration::get('PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER') && !$id_category) {
+                    $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                    if (Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE') == 'list') {
+                        $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
+                        if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER') && !$id_category) {
                             $response['error'] = Tools::displayError('Invaild Request, please try again');
                         }
                         if (empty($response['error'])) {
                             $response['status'] = true;
-                            if ($roomTypeStandardProducts = $objHotelRoomTypeStandardProduct->getStandardProductsData(
+                            if ($roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData(
                                 $objProduct->id,
                                 $p,
                                 $n,
                                 true,
+                                2,
                                 $id_category
                             )) {
-                                $this->context->smarty->assign('standard_products', $roomTypeStandardProducts);
-                                if (Configuration::get('PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER')) {
+                                $this->context->smarty->assign('service_products', $roomTypeServiceProducts);
+                                if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER')) {
                                     $this->context->smarty->assign('group', $id_category);
                                 } else {
                                     $this->context->smarty->assign('group', 'all');
                                 }
-                                $response['standard_products'] = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/standard-products-list.tpl');
+                                $response['service_products'] = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/service-products-list.tpl');
                             }
                         }
                     } else {
@@ -1297,7 +1336,7 @@ class ProductControllerCore extends FrontController
         $this->ajaxDie(json_encode($response));
     }
 
-    public function displayAjaxCheckStandardProductWithRoomType()
+    public function displayAjaxCheckServiceProductWithRoomType()
     {
         $response = array(
             'status' => false
@@ -1305,15 +1344,15 @@ class ProductControllerCore extends FrontController
 
         if ($this->isTokenValid()) {
             $idProduct = Tools::getValue('id_product');
-            $idStandardProduct = Tools::getValue('standard_product');
+            $idServiceProduct = Tools::getValue('service_product');
             if (Validate::isLoadedObject($objProduct = new Product($idProduct))) {
                 if (!Product::isBookingProduct($idProduct)) {
                     $response['error'] = Tools::displayError('Room Type info not Found');
                     $this->ajaxDie(json_encode($response));
                 }
 
-                $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($idProduct, $idStandardProduct)) {
+                $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                if (!$objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($idProduct, $idServiceProduct)) {
                     $response['error'] = Tools::displayError('Selected product is not available with current room type');
                 } else {
                     $response['status'] = true;

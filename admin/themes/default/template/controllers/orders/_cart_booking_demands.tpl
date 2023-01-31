@@ -28,8 +28,8 @@
 					{if isset($selectedRoomDemands) && $selectedRoomDemands}
 						<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Facilities'}</a></li>
 					{/if}
-					{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
+					{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
+						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_service_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
 					{/if}
 				</ul>
 			</div>
@@ -96,14 +96,14 @@
 							</div>
 						</div>
 					{/if}
-					{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-						<div id="room_type_standard_product_desc" class="tab-pane{if !isset($selectedRoomDemands) || !$selectedRoomDemands} active{/if}">
+					{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
+						<div id="room_type_service_product_desc" class="tab-pane{if !isset($selectedRoomDemands) || !$selectedRoomDemands} active{/if}">
 							<div class="rooms_extra_demands_head">
 								<p class="rooms_extra_demands_text">{l s='Add below products to the rooms for better hotel experience'}</p>
 							</div>
 							<div id="room_type_services_desc">
 								{assign var=roomCount value=1}
-								{foreach $selectedRoomStandardProduct as $cartRoom}
+								{foreach $selectedRoomServiceProduct as $cartRoom}
 									<div class="row room_demands_container">
 										<div class="col-sm-12 demand_header">
 											<span>
@@ -116,19 +116,19 @@
 											</span>
 										</div>
 										<div class="col-sm-12 room_demand_detail">
-											{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-												{foreach $roomTypeStandardProducts as $product}
+											{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
+												{foreach $roomTypeServiceProducts as $product}
 													<div class="row room_demand_block">
 															<div class="col-xs-6">
 																<div class="row">
 																	<div class="col-xs-2">
-																		<input data-id_cart_booking="{$cartRoom['htl_cart_booking_id']}" value="{$product['id_product']|escape:'html':'UTF-8'}" type="checkbox" class="change_room_type_standard_product" {if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}checked{/if}/>
+																		<input data-id_cart_booking="{$cartRoom['htl_cart_booking_id']}" value="{$product['id_product']|escape:'html':'UTF-8'}" type="checkbox" class="change_room_type_service_product" {if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}checked{/if}/>
 																	</div>
 																	<div class="col-xs-10 demand_adv_option_block">
 																		<p>{$product['name']|escape:'html':'UTF-8'}</p>
 																		{if $product.allow_multiple_quantity}
 																			<div class="qty_container">
-																				<input type="text" class="form-control qty" id="qty_{$product.id_product}" name="standard_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
+																				<input type="text" class="form-control qty" id="qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
 																				<div class="qty_controls">
 																					<a href="#" class="qty_up"><span><i class="icon-plus"></i></span></a>
 																					<a href="#" class="qty_down"><span><i class="icon-minus"></i></span></a>

@@ -18,7 +18,7 @@
 *  @license   https://store.webkul.com/license.html
 */
 
-class HotelRoomTypeStandardProductPrice extends ObjectModel
+class RoomTypeServiceProductPrice extends ObjectModel
 {
     /** @var int id_product */
     public $id_product;
@@ -31,16 +31,16 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
     /** @var int id_hotel or id_room_type */
     public $id_element;
 
-    /** @var int define element type hotel or room type (refer HotelRoomTypeStandardProduct clas for constants) */
+    /** @var int define element type hotel or room type (refer RoomTypeServiceProduct clas for constants) */
     public $element_type;
 
-    // public $id_room_type_standard_product;
+    // public $id_room_type_service_product;
 
     public static $definition = array(
-        'table' => 'htl_room_type_standard_product_price',
-        'primary' => 'id_room_type_standard_product_price',
+        'table' => 'htl_room_type_service_product_price',
+        'primary' => 'id_room_type_service_product_price',
         'fields' => array(
-            // 'id_room_type_standard_product' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            // 'id_room_type_service_product' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'id_product' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'price' =>          array('type' => self::TYPE_FLOAT),
             'id_tax_rules_group' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
@@ -52,7 +52,7 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
     public static function getProductRoomTypeLinkPriceAndTax($idProduct, $idElement, $elementType)
     {
         return Db::getInstance()->getRow(
-            'SELECT `price`, `id_tax_rules_group` FROM `'._DB_PREFIX_.'htl_room_type_standard_product_price`
+            'SELECT `price`, `id_tax_rules_group` FROM `'._DB_PREFIX_.'htl_room_type_service_product_price`
             WHERE `id_product`='.(int)$idProduct.
             ' AND `id_element`='.(int)$idElement.
             ' AND `element_type`='.(int)$elementType
@@ -62,7 +62,7 @@ class HotelRoomTypeStandardProductPrice extends ObjectModel
     public function getProductRoomTypeLinkPriceInfo($idProduct, $idElement, $elementType)
     {
         return Db::getInstance()->getRow(
-            'SELECT * FROM `'._DB_PREFIX_.'htl_room_type_standard_product_price`
+            'SELECT * FROM `'._DB_PREFIX_.'htl_room_type_service_product_price`
             WHERE `id_product`='.(int)$idProduct.
             ' AND `id_element`='.(int)$idElement.
             ' AND `element_type`='.(int)$elementType

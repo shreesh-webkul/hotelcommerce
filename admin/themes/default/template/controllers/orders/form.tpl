@@ -1577,8 +1577,8 @@
 			});
 		});
 
-		$(document).on('click', '.change_room_type_standard_product', function() {
-			updateStandardProducts(this);
+		$(document).on('click', '.change_room_type_service_product', function() {
+			updateServiceProducts(this);
 		});
 
 		$(document).on('click', '#rooms_type_extra_demands .qty_up', function(e) {
@@ -1604,12 +1604,12 @@
 			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
 				$(this).val(1);
 			}
-			if ($(this).closest('.room_demand_block').find('.change_room_type_standard_product').is(':checked')) {
-				updateStandardProducts($(this).closest('.room_demand_block').find('.change_room_type_standard_product'));
+			if ($(this).closest('.room_demand_block').find('.change_room_type_service_product').is(':checked')) {
+				updateServiceProducts($(this).closest('.room_demand_block').find('.change_room_type_service_product'));
 			}
 		});
 
-		function updateStandardProducts(element)
+		function updateServiceProducts(element)
 		{
 			var operator = $(element).is(':checked') ? 'up' : 'down';
 			var id_product = $(element).val();
@@ -1631,7 +1631,7 @@
 					id_product: id_product,
 					id_cart_booking: id_cart_booking,
 					qty: qty,
-					action: 'updateStandardProduct',
+					action: 'updateServiceProduct',
 					ajax: true
 				},
 				success: function(jsonData) {

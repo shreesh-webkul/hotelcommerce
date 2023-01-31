@@ -18,7 +18,7 @@
 *  @license   https://store.webkul.com/license.html
 */
 
-class StandardProductCartDetail extends ObjectModel
+class RoomTypeServiceProductCartDetail extends ObjectModel
 {
     public $id_product;
     public $quantity;
@@ -26,8 +26,8 @@ class StandardProductCartDetail extends ObjectModel
     public $htl_cart_booking_id;
 
     public static $definition = array(
-        'table' => 'htl_standard_product_cart_detail',
-        'primary' => 'id_standard_product_cart_detail',
+        'table' => 'htl_room_type_service_product_cart_detail',
+        'primary' => 'id_room_type_service_product_cart_detail',
         'fields' => array(
             'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'quantity' => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
@@ -41,12 +41,12 @@ class StandardProductCartDetail extends ObjectModel
         $idHtlCartData
     ) {
         return Db::getInstance()->getValue(
-            'SELECT `id_standard_product_cart_detail` FROM `'._DB_PREFIX_.'htl_standard_product_cart_detail`
+            'SELECT `id_room_type_service_product_cart_detail` FROM `'._DB_PREFIX_.'htl_room_type_service_product_cart_detail`
             WHERE `id_product` = '.(int)$idProduct.' AND `htl_cart_booking_id` = '.(int)$idHtlCartData
         );
     }
 
-    public function addStandardProductInCart(
+    public function addServiceProductInCart(
         $idProduct,
         $quantity,
         $idCart,
@@ -55,29 +55,29 @@ class StandardProductCartDetail extends ObjectModel
         if ($this->alreadyExists($idProduct, $idHtlCartData)) {
             return false;
         } else {
-            $objStandardProductCartDetail = new StandardProductCartDetail();
-            $objStandardProductCartDetail->id_product = $idProduct;
-            $objStandardProductCartDetail->quantity = $quantity;
-            $objStandardProductCartDetail->id_cart = $idCart;
-            $objStandardProductCartDetail->htl_cart_booking_id = $idHtlCartData;
-            if ($objStandardProductCartDetail->save()) {
+            $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+            $objRoomTypeServiceProductCartDetail->id_product = $idProduct;
+            $objRoomTypeServiceProductCartDetail->quantity = $quantity;
+            $objRoomTypeServiceProductCartDetail->id_cart = $idCart;
+            $objRoomTypeServiceProductCartDetail->htl_cart_booking_id = $idHtlCartData;
+            if ($objRoomTypeServiceProductCartDetail->save()) {
                 $objCart = new Cart($idCart);
                 $objCart->updateQty((int)($quantity), $idProduct);
             }
         }
     }
 
-    public function removeStandardProductByIdHtlCartBooking($htlCartBookingId)
+    public function removeServiceProductByIdHtlCartBooking($htlCartBookingId)
     {
         if ($stadardProductsData  = Db::getInstance()->executeS(
-            'SELECT * FROM `'._DB_PREFIX_.'htl_standard_product_cart_detail`
+            'SELECT * FROM `'._DB_PREFIX_.'htl_room_type_service_product_cart_detail`
             WHERE `htl_cart_booking_id` = '.(int)$htlCartBookingId
         )) {
             foreach ($stadardProductsData as $product) {
                 if (Validate::isLoadedObject(
-                    $objStandardProductCartDetail = new StandardProductCartDetail($product['id_standard_product_cart_detail'])
+                    $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail($product['id_room_type_service_product_cart_detail'])
                 )) {
-                    if ($objStandardProductCartDetail->delete()) {
+                    if ($objRoomTypeServiceProductCartDetail->delete()) {
                         $objCart = new Cart($product['id_cart']);
                         $objCart->updateQty((int)($product['quantity']), $product['id_product'], null, false, 'down');
                     }
@@ -88,7 +88,7 @@ class StandardProductCartDetail extends ObjectModel
         return true;
     }
 
-    public function getStandardProductsInCart(
+    public function getServiceProductsInCart(
         $idCart,
         $idProduct = 0,
         $idHotel = 0,
@@ -103,20 +103,20 @@ class StandardProductCartDetail extends ObjectModel
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
 
-        $sql = 'SELECT scd.`id_product`, scd.`quantity`, cbd.`id_cart`, cbd.`id` as `htl_cart_booking_id` ,
+        $sql = 'SELECT rscd.`id_product`, rscd.`quantity`, cbd.`id_cart`, cbd.`id` as `htl_cart_booking_id` ,
             cbd.`id_product` as `room_type_id_product`, cbd.`adults`, cbd.`children`';
         if (!$getTotalPrice) {
             $sql .= ', cbd.`id_guest`, cbd.`id_customer`,
                 cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_cart_booking_data` cbd
-            LEFT JOIN `'._DB_PREFIX_.'htl_standard_product_cart_detail` scd ON(scd.`htl_cart_booking_id` = cbd.`id`)
+            LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_cart_detail` rscd ON(rscd.`htl_cart_booking_id` = cbd.`id`)
             WHERE 1';
         if ($idCart) {
             $sql .= ' AND cbd.`id_cart`='.(int) $idCart;
         }
         if ($idProduct) {
-            $sql .= ' AND scd.`id_product`='.(int) $idProduct;
+            $sql .= ' AND rscd.`id_product`='.(int) $idProduct;
         }
         if ($idHotel) {
             $sql .= ' AND cbd.`id_hotel`='.(int) $idHotel;
@@ -135,15 +135,15 @@ class StandardProductCartDetail extends ObjectModel
         if ($getTotalPrice) {
             $totalPrice = 0;
         }
-        $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
+        $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
         $objHotelRoomType = new HotelRoomType();
-        $selectedStandardProducts = array();
+        $selectedServiceProducts = array();
 
-        if ($standardProducts = Db::getInstance()->executeS($sql)) {
-            foreach ($standardProducts as $product) {
+        if ($serviceProducts = Db::getInstance()->executeS($sql)) {
+            foreach ($serviceProducts as $product) {
                 if ($getTotalPrice) {
                     $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
-                    $totalPrice += $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                    $totalPrice += $objRoomTypeServiceProductPrice->getProductPrice(
                         (int)$product['id_product'],
                         (int)$product['room_type_id_product'],
                         $qty,
@@ -155,19 +155,19 @@ class StandardProductCartDetail extends ObjectModel
                 } else {
                     $roomTypeInfo = $objHotelRoomType->getRoomTypeInfoByIdProduct($product['room_type_id_product']);
                     $qty = $product['quantity'] ? (int)$product['quantity'] : 1;
-                    if (isset($selectedStandardProducts[$product['htl_cart_booking_id']])) {
+                    if (isset($selectedServiceProducts[$product['htl_cart_booking_id']])) {
                         if ($product['id_product']) {
                             if ($idProduct) {
-                                $selectedStandardProducts[$product['htl_cart_booking_id']]['quantity'] += $product['quantity'];
+                                $selectedServiceProducts[$product['htl_cart_booking_id']]['quantity'] += $product['quantity'];
 
                             } else {
-                                $selectedStandardProducts[$product['htl_cart_booking_id']]['selected_products_info'][$product['id_product']] = array(
+                                $selectedServiceProducts[$product['htl_cart_booking_id']]['selected_products_info'][$product['id_product']] = array(
                                     'id_product' => $product['id_product'],
                                     'quantity' => $product['quantity'],
                                 );
                             }
                         }
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price'] += $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -175,7 +175,7 @@ class StandardProductCartDetail extends ObjectModel
                             false,
                             $id_address
                         );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] += $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -183,7 +183,7 @@ class StandardProductCartDetail extends ObjectModel
                             false,
                             $id_address
                         );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] += $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] += $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -192,22 +192,22 @@ class StandardProductCartDetail extends ObjectModel
                             $id_address
                         );
                     } else {
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['htl_cart_booking_id'] = $product['htl_cart_booking_id'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_cart'] = $product['id_cart'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['room_type_id_product'] = $product['room_type_id_product'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_guest'] = $product['id_guest'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_customer'] = $product['id_customer'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_hotel'] = $product['id_hotel'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['id_room'] = $product['id_room'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['date_from'] = $product['date_from'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['date_to'] = $product['date_to'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['is_refunded'] = $product['is_refunded'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['adults'] = $product['adults'];
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['children'] = $product['children'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['htl_cart_booking_id'] = $product['htl_cart_booking_id'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['id_cart'] = $product['id_cart'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['room_type_id_product'] = $product['room_type_id_product'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['id_guest'] = $product['id_guest'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['id_customer'] = $product['id_customer'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['id_hotel'] = $product['id_hotel'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['id_room'] = $product['id_room'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['date_from'] = $product['date_from'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['date_to'] = $product['date_to'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['is_refunded'] = $product['is_refunded'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['adults'] = $product['adults'];
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['children'] = $product['children'];
                         if ($idProduct) {
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['id_product'] = $product['id_product'];
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['quantity'] = $product['quantity'];
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['id_product'] = $product['id_product'];
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['quantity'] = $product['quantity'];
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['unit_price_tax_excl'] = $objRoomTypeServiceProductPrice->getProductPrice(
                                 (int)$product['id_product'],
                                 (int)$product['room_type_id_product'],
                                 1,
@@ -215,7 +215,7 @@ class StandardProductCartDetail extends ObjectModel
                                 false,
                                 $id_address
                             );
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['unit_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['unit_price_tax_incl'] = $objRoomTypeServiceProductPrice->getProductPrice(
                                 (int)$product['id_product'],
                                 (int)$product['room_type_id_product'],
                                 1,
@@ -224,11 +224,11 @@ class StandardProductCartDetail extends ObjectModel
                                 $id_address
                             );
                         } else {
-                            $selectedStandardProducts[$product['htl_cart_booking_id']]['selected_products_info'] = ($product['id_product']) ? array(
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['selected_products_info'] = ($product['id_product']) ? array(
                                 $product['id_product'] => array(
                                     'id_product' => $product['id_product'],
                                     'quantity' => $product['quantity'],
-                                    'unit_price_tax_excl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                                    'unit_price_tax_excl' => $objRoomTypeServiceProductPrice->getProductPrice(
                                         (int)$product['id_product'],
                                         (int)$product['room_type_id_product'],
                                         1,
@@ -236,7 +236,7 @@ class StandardProductCartDetail extends ObjectModel
                                         false,
                                         $id_address
                                     ),
-                                    'unit_price_tax_incl' => $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                                    'unit_price_tax_incl' => $objRoomTypeServiceProductPrice->getProductPrice(
                                         (int)$product['id_product'],
                                         (int)$product['room_type_id_product'],
                                         1,
@@ -248,7 +248,7 @@ class StandardProductCartDetail extends ObjectModel
                             ): array();
                         }
 
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price'] = $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -256,7 +256,7 @@ class StandardProductCartDetail extends ObjectModel
                             false,
                             $id_address
                         );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price_tax_excl'] = $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -264,7 +264,7 @@ class StandardProductCartDetail extends ObjectModel
                             false,
                             $id_address
                         );
-                        $selectedStandardProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] = $objHotelRoomTypeStandardProductPrice->getProductPrice(
+                        $selectedServiceProducts[$product['htl_cart_booking_id']]['total_price_tax_incl'] = $objRoomTypeServiceProductPrice->getProductPrice(
                             (int)$product['id_product'],
                             (int)$product['room_type_id_product'],
                             $qty,
@@ -281,39 +281,39 @@ class StandardProductCartDetail extends ObjectModel
         if ($getTotalPrice) {
             return $totalPrice;
         }
-        return $selectedStandardProducts;
+        return $selectedServiceProducts;
     }
 
-    public function updateCartStandardProduct(
+    public function updateCartServiceProduct(
         $htl_cart_booking_id,
         $id_product,
         $quantity,
         $id_cart,
         $operator
     ) {
-        $id_standard_product_cart_detail = $this->alreadyExists($id_product, $htl_cart_booking_id);
+        $id_room_type_service_product_cart_detail = $this->alreadyExists($id_product, $htl_cart_booking_id);
 
         if ($operator == 'up') {
-            if ($id_standard_product_cart_detail) {
-                $objStandardProductCartDetail = new StandardProductCartDetail($id_standard_product_cart_detail);
+            if ($id_room_type_service_product_cart_detail) {
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail($id_room_type_service_product_cart_detail);
             } else {
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                $objStandardProductCartDetail->id_product = $id_product;
-                $objStandardProductCartDetail->htl_cart_booking_id = $htl_cart_booking_id;
-                $objStandardProductCartDetail->id_cart = $id_cart;
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                $objRoomTypeServiceProductCartDetail->id_product = $id_product;
+                $objRoomTypeServiceProductCartDetail->htl_cart_booking_id = $htl_cart_booking_id;
+                $objRoomTypeServiceProductCartDetail->id_cart = $id_cart;
             }
-            $updateQty = $quantity - $objStandardProductCartDetail->quantity;
+            $updateQty = $quantity - $objRoomTypeServiceProductCartDetail->quantity;
             $way = $updateQty > 0 ? 'up' : 'down';
-            $objStandardProductCartDetail->quantity = $quantity;
-            if ($objStandardProductCartDetail->save()) {
+            $objRoomTypeServiceProductCartDetail->quantity = $quantity;
+            if ($objRoomTypeServiceProductCartDetail->save()) {
                 $objCart = new Cart($id_cart);
                 return $objCart->updateQty((int)abs($updateQty), $id_product, null, false, $way);
             }
         } else {
-            if ($id_standard_product_cart_detail) {
-                $objStandardProductCartDetail = new StandardProductCartDetail($id_standard_product_cart_detail);
-                $updateQty = $objStandardProductCartDetail->quantity;
-                if ($objStandardProductCartDetail->delete()) {
+            if ($id_room_type_service_product_cart_detail) {
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail($id_room_type_service_product_cart_detail);
+                $updateQty = $objRoomTypeServiceProductCartDetail->quantity;
+                if ($objRoomTypeServiceProductCartDetail->delete()) {
                     $objCart = new Cart($id_cart);
                     return $objCart->updateQty((int)abs($updateQty), $id_product, null, false, 'down');
                 }

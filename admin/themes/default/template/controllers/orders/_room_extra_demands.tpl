@@ -6,8 +6,8 @@
 		{if (isset($extraDemands) && $extraDemands) || (isset($roomTypeDemands) && $roomTypeDemands)}
 			<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Facilities'}</a></li>
 		{/if}
-		{if (isset($additionalServices) && $additionalServices) || (isset($roomTypeStandardProducts) && $roomTypeStandardProducts)}
-			<li role="presentation" {if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)}class="active"{/if}><a href="#room_type_standard_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
+		{if (isset($additionalServices) && $additionalServices) || (isset($roomTypeServiceProducts) && $roomTypeServiceProducts)}
+			<li role="presentation" {if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)}class="active"{/if}><a href="#room_type_service_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
 		{/if}
 	</ul>
 </div>
@@ -101,8 +101,8 @@
 				{/if}
 			</div>
 		{/if}
-		{if (isset($additionalServices) && $additionalServices) || (isset($roomTypeStandardProducts) && $roomTypeStandardProducts)}
-			<div id="room_type_standard_product_desc" class="tab-pane{if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)} active{/if}">
+		{if (isset($additionalServices) && $additionalServices) || (isset($roomTypeServiceProducts) && $roomTypeServiceProducts)}
+			<div id="room_type_service_product_desc" class="tab-pane{if !(isset($extraDemands) && $extraDemands) && !(isset($roomTypeDemands) && $roomTypeDemands)} active{/if}">
 				{if isset($orderEdit) && $orderEdit}
 
 					<p class="col-sm-12 facility_nav_btn">
@@ -121,7 +121,7 @@
 												<div>{$service['name']|escape:'html':'UTF-8'}</div>
 													{if $service['allow_multiple_quantity']}
 														<div class="qty_container">
-															<input type="text" class="form-control qty" data-id_standard_product_order_detail="{$service['id_standard_product_order_detail']}" data-id_product="{$service['id_product']|escape:'html':'UTF-8'}" value="{$service['quantity']|escape:'html':'UTF-8'}">
+															<input type="text" class="form-control qty" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" data-id_product="{$service['id_product']|escape:'html':'UTF-8'}" value="{$service['quantity']|escape:'html':'UTF-8'}">
 															<div class="qty_controls">
 																<a href="#" class="qty_up"><span><i class="icon-plus"></i></span></a>
 																<a href="#" class="qty_down"><span><i class="icon-minus"></i></span></a>
@@ -130,7 +130,7 @@
 													{/if}
 											</td>
 											<td>{displayPrice price=$demand['total_price_tax_incl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
-											<td><a class="btn btn-danger pull-right del_room_additional_service" data-id_standard_product_order_detail="{$service['id_standard_product_order_detail']}" href="#"><i class="icon-trash"></i></a></td>
+											<td><a class="btn btn-danger pull-right del_room_additional_service" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" href="#"><i class="icon-trash"></i></a></td>
 										</tr>
 									{/foreach}
 								{else}
@@ -146,8 +146,8 @@
 
 					<form id="add_room_services_form" class="col-sm-12 room_services_container">
 						<div class="room_demand_detail">
-							{if isset($roomTypeStandardProducts) && $roomTypeStandardProducts}
-								{foreach $roomTypeStandardProducts as $product}
+							{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
+								{foreach $roomTypeServiceProducts as $product}
 									<div class="row room_demand_block">
 										<div class="col-xs-6">
 											<div class="row">

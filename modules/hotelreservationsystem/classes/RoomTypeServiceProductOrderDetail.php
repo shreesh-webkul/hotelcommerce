@@ -19,7 +19,7 @@
 */
 
 
-class StandardProductOrderDetail extends ObjectModel
+class RoomTypeServiceProductOrderDetail extends ObjectModel
 {
     public $id_product;
     public $id_order;
@@ -36,8 +36,8 @@ class StandardProductOrderDetail extends ObjectModel
     public $date_upd;
 
     public static $definition = array(
-        'table' => 'htl_standard_product_order_detail',
-        'primary' => 'id_standard_product_order_detail',
+        'table' => 'htl_room_type_service_product_order_detail',
+        'primary' => 'id_room_type_service_product_order_detail',
         'fields' => array(
             'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'id_order' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
@@ -55,7 +55,7 @@ class StandardProductOrderDetail extends ObjectModel
         )
     );
 
-    public function getRoomTypeStandardProducts(
+    public function getroomTypeServiceProducts(
         $idOrder,
         $idProduct = 0,
         $idHotel = 0,
@@ -71,20 +71,20 @@ class StandardProductOrderDetail extends ObjectModel
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
         }
 
-        $sql = 'SELECT sod.*';
+        $sql = 'SELECT rsod.*';
         if (!$getTotalPrice) {
             $sql .= ', hbd.`id_product` as `room_type_id_product`, od.`product_allow_multiple_quantity`, hbd.`id_room`, hbd.`adults`, hbd.`children`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
-            LEFT JOIN `'._DB_PREFIX_.'htl_standard_product_order_detail` sod ON(sod.`id_htl_booking_detail` = hbd.`id`)';
+            LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` rsod ON(rsod.`id_htl_booking_detail` = hbd.`id`)';
 
         if (!$getTotalPrice) {
-            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = sod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
+            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
         }
-        $sql .= ' WHERE sod.`id_order` = '.(int)$idOrder;
+        $sql .= ' WHERE rsod.`id_order` = '.(int)$idOrder;
 
         if ($idProduct) {
-            $sql .= ' AND sod.`id_product`='.(int) $idProduct;
+            $sql .= ' AND rsod.`id_product`='.(int) $idProduct;
         }
         if ($idHotel) {
             $sql .= ' AND hbd.`id_hotel`='.(int) $idHotel;
@@ -127,7 +127,7 @@ class StandardProductOrderDetail extends ObjectModel
                         $selectedAdditionalServices[$product['id_htl_booking_detail']]['total_price_tax_excl'] += $product['total_price_tax_excl'];
                         $selectedAdditionalServices[$product['id_htl_booking_detail']]['total_price_tax_incl'] += $product['total_price_tax_incl'];
                         $selectedAdditionalServices[$product['id_htl_booking_detail']]['additional_services'][] = array(
-                            'id_standard_product_order_detail' => $product['id_standard_product_order_detail'],
+                            'id_room_type_service_product_order_detail' => $product['id_room_type_service_product_order_detail'],
                             'id_order_detail' => $product['id_order_detail'],
                             'id_product' => $product['id_product'],
                             'name' => $product['name'],
@@ -152,7 +152,7 @@ class StandardProductOrderDetail extends ObjectModel
 
                         $selectedAdditionalServices[$product['id_htl_booking_detail']]['additional_services'] = array(
                             array(
-                                'id_standard_product_order_detail' => $product['id_standard_product_order_detail'],
+                                'id_room_type_service_product_order_detail' => $product['id_room_type_service_product_order_detail'],
                                 'id_order_detail' => $product['id_order_detail'],
                                 'id_product' => $product['id_product'],
                                 'name' => $product['name'],
@@ -189,17 +189,17 @@ class StandardProductOrderDetail extends ObjectModel
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
         }
 
-        $sql = 'SELECT sod.*';
+        $sql = 'SELECT rsod.*';
         if (!$getTotalPrice) {
             $sql .= ', hbd.`id_product` as `room_type_id_product`, od.`product_allow_multiple_quantity`, hbd.`id_room`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
-            LEFT JOIN `'._DB_PREFIX_.'htl_standard_product_order_detail` sod ON(sod.`id_htl_booking_detail` = hbd.`id`)';
+            LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` rsod ON(rsod.`id_htl_booking_detail` = hbd.`id`)';
 
         if (!$getTotalPrice) {
-            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = sod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
+            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
         }
-        $sql .= ' WHERE sod.`id_order` = '.(int)$idOrder.' AND hbd.`id_product`='.(int) $roomTypeIdProduct .' AND hbd.`date_from` = \''.pSQL($dateFrom).'\' AND hbd.`date_to` = \''.pSQL($dateTo).'\' AND hbd.`id_room`='.(int) $idRoom;
+        $sql .= ' WHERE rsod.`id_order` = '.(int)$idOrder.' AND hbd.`id_product`='.(int) $roomTypeIdProduct .' AND hbd.`date_from` = \''.pSQL($dateFrom).'\' AND hbd.`date_to` = \''.pSQL($dateTo).'\' AND hbd.`id_room`='.(int) $idRoom;
 
         if ($getTotalPrice) {
             $totalPrice = 0;
@@ -218,7 +218,7 @@ class StandardProductOrderDetail extends ObjectModel
                         $selectedAdditionalServices['total_price_tax_excl'] += $product['total_price_tax_excl'];
                         $selectedAdditionalServices['total_price_tax_incl'] += $product['total_price_tax_incl'];
                         $selectedAdditionalServices['additional_services'][] = array(
-                            'id_standard_product_order_detail' => $product['id_standard_product_order_detail'],
+                            'id_room_type_service_product_order_detail' => $product['id_room_type_service_product_order_detail'],
                             'id_order_detail' => $product['id_order_detail'],
                             'id_product' => $product['id_product'],
                             'name' => $product['name'],
@@ -237,7 +237,7 @@ class StandardProductOrderDetail extends ObjectModel
                         $selectedAdditionalServices['id_room'] = $product['id_room'];
                         $selectedAdditionalServices['additional_services'] = array(
                             array(
-                                'id_standard_product_order_detail' => $product['id_standard_product_order_detail'],
+                                'id_room_type_service_product_order_detail' => $product['id_room_type_service_product_order_detail'],
                                 'id_order_detail' => $product['id_order_detail'],
                                 'id_product' => $product['id_product'],
                                 'name' => $product['name'],
@@ -257,27 +257,16 @@ class StandardProductOrderDetail extends ObjectModel
         return $selectedAdditionalServices;
     }
 
-    // public function deleteRoomTypeServices(
-    //     $idOrder,
-    //     $roomTypeIdProduct,
-    //     $dateFrom,
-    //     $dateTo,
-    //     $idRoom
-    // ) {
-    //     $sql = 'SELECT * FROM `'._DB_PREFIX_.'htl_standard_product_order_detail` pod
-    //         INNER JOIN `'._DB_PREFIX_.'htl_booking_detail` hbd'
-    // }
-
     public function deleteRoomSevicesByIdHotelBookingDetail($idHotelBookingDetail)
     {
         $services = Db::getInstance()->executeS(
-            'SELECT `id_standard_product_order_detail` FROM `'._DB_PREFIX_.'htl_standard_product_order_detail` pod
+            'SELECT `id_room_type_service_product_order_detail` FROM `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` pod
             WHERE `id_htl_booking_detail` = '.(int)$idHotelBookingDetail
         );
         $res = true;
         foreach ($services as $service) {
-            $objStandardProductOrderDetail = new self($service['id_standard_product_order_detail']);
-            $res &= $objStandardProductOrderDetail->delete();
+            $objServiceProductOrderDetail = new self($service['id_room_type_service_product_order_detail']);
+            $res &= $objServiceProductOrderDetail->delete();
         }
 
         return $res;

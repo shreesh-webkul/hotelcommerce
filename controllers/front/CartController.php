@@ -84,8 +84,8 @@ class CartControllerCore extends FrontController
             } elseif (Tools::getIsset('duplicate')) {
                 $this->processDuplicateProduct();
                 CheckoutProcess::refreshCheckoutProcess();
-            } elseif (Tools::getIsset('updateStandardProduct')) {
-                $this->processUpdateStandardProduct();
+            } elseif (Tools::getIsset('updateServiceProduct')) {
+                $this->processUpdateServiceProduct();
                 CheckoutProcess::refreshCheckoutProcess();
             }
             // Make redirection
@@ -316,7 +316,7 @@ class CartControllerCore extends FrontController
                     $date_to = Tools::getValue('dateTo');
                     $date_from = date("Y-m-d", strtotime($date_from));
                     $date_to = date("Y-m-d", strtotime($date_to));
-                    $standardProducts = json_decode(Tools::getValue('standardProducts'),true);
+                    $serviceProducts = json_decode(Tools::getValue('serviceProducts'),true);
 
                     // valdiate occupancy if providede
                     if ($operator == 'up') {
@@ -397,11 +397,11 @@ class CartControllerCore extends FrontController
                                             die(json_encode(array('status' => 'unavailable_quantity', 'avail_rooms' => $total_available_rooms)));
                                             } else {
                                                 // validate normal products if available
-                                                if ($standardProducts) {
-                                                    $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                                                    foreach ($standardProducts as $key => $standartProduct) {
-                                                        if (!$objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($this->id_product, $standartProduct['id_product'])) {
-                                                            unset($standardProducts[$key]);
+                                                if ($serviceProducts) {
+                                                    $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                                                    foreach ($serviceProducts as $key => $standartProduct) {
+                                                        if (!$objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($this->id_product, $standartProduct['id_product'])) {
+                                                            unset($serviceProducts[$key]);
                                                         }
                                                     }
                                                 }
@@ -515,7 +515,7 @@ class CartControllerCore extends FrontController
                         $date_from,
                         $date_to,
                         $roomDemand,
-                        $standardProducts,
+                        $serviceProducts,
                         $id_cart,
                         $id_guest
                     );
@@ -596,18 +596,18 @@ class CartControllerCore extends FrontController
         }
     }
 
-    protected function processUpdateStandardProduct()
+    protected function processUpdateServiceProduct()
     {
         $operator = Tools::getValue('operator', 'up');
-        $idStandardProduct = Tools::getValue('id_product');
+        $idServiceProduct = Tools::getValue('id_product');
         $idCartBooking = Tools::getValue('id_cart_booking');
         $qty = Tools::getValue('qty');
 
         if (Validate::isLoadedObject($objHotelCartBookingData = new HotelCartBookingData($idCartBooking))) {
 
             if ($operator == 'up') {
-                $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                if ($objHotelRoomTypeStandardProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idStandardProduct)) {
+                $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                if ($objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idServiceProduct)) {
                     // validate quanitity
                     $objProduct = new Product($objHotelCartBookingData->id_product);
                     if ($objProduct->allow_multiple_quantity) {
@@ -623,10 +623,10 @@ class CartControllerCore extends FrontController
             }
 
             if (empty($this->errors)) {
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                if ($objStandardProductCartDetail->updateCartStandardProduct(
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                if ($objRoomTypeServiceProductCartDetail->updateCartServiceProduct(
                     $idCartBooking,
-                    $idStandardProduct,
+                    $idServiceProduct,
                     $qty,
                     $this->context->cart->id,
                     $operator

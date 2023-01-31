@@ -999,22 +999,6 @@ product_tabs['Shipping'] = new function(){
 product_tabs['Informations'] = new function(){
 	var self = this;
 	this.bindAvailableForOrder = function (){
-		$("#available_for_order").click(function()
-		{
-			if ($(this).is(':checked') || ($('input[name=\'multishop_check[show_price]\']').length && !$('input[name=\'multishop_check[show_price]\']').prop('checked')))
-			{
-				$('#show_price').attr('checked', true).attr('disabled', true).closest('.checkbox').hide();
-					// $('#auto_add_to_cart').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
-					// $('#auto_add_to_cart_info').show('slow');
-			}
-			else
-			{
-				$('#show_price').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
-				// $('#auto_add_to_cart').attr('checked', false).attr('disabled', true).closest('.checkbox').hide();
-				// $('#auto_add_to_cart_info').hide('slow');
-			}
-		});
-
 		if ($('#active_on').prop('checked'))
 		{
 			showRedirectProductOptions(false);
@@ -1029,23 +1013,36 @@ product_tabs['Informations'] = new function(){
 
 		$('input[name="show_at_front"]').on('change', function(){
 			if (parseInt($(this).val())) {
-				$("#product_positions").show('slow');
+				$("#available_for_order_container").show('fast');
+				if ($('input[name=available_for_order]:checked').val() == 0) {
+					$('#show_price_container').show('fast');
+				}
 			} else {
-				$("#product_positions").hide('slow');
+				$("#available_for_order_container").hide('fast');
+				$('#show_price_container').hide('fast');
+
 			}
 		});
-
+		$('input[name=available_for_order]').on('change', function(e) {
+			if ($(this).val() == 1) {
+				$('#show_price_container').hide('fast');
+				$('#show_price_off').prop("checked", true).change();
+			} else {
+				$('#show_price_container').show('fast');
+				$('#show_price_off').prop("checked", true).change();
+			}
+		});
 		$('#service_product_type').on('change',function(){
 			if (parseInt($(this).val()) == with_room_type) {
-				$('#associated_hotel_rooms_tree').show('slow');
-				$('#show_at_front_container').show('slow');
-				$('#product_options').show('slow');
-				$('#independent_product_info').hide('slow');
+				$('#associated_hotel_rooms_tree').show('fast');
+				$('#show_at_front_container').show('fast');
+				$('#product_options').show('fast');
+				$('#independent_product_info').hide('fast');
 			} else {
-				$('#associated_hotel_rooms_tree').hide('slow');
-				$('#show_at_front_container').hide('slow');
-				$('#product_options').hide('slow');
-				$('#independent_product_info').show('slow');
+				$('#associated_hotel_rooms_tree').hide('fast');
+				$('#show_at_front_container').hide('fast');
+				$('#product_options').hide('fast');
+				$('#independent_product_info').show('fast');
 			}
 		});
 

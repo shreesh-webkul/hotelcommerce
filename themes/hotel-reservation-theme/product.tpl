@@ -170,16 +170,9 @@
 					{/if}
 				</div>
 
-				<div id="standard_products_cont">
-					{* {if isset($standard_products_by_category) && $standard_products_by_category && $PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER}
-						{assign var='standard_products_exists' value=1}
-					{else if isset($standard_products) && $standard_products}
-						{assign var='standard_products_exists' value=1}
-					{else}
-						{assign var='standard_products_exists' value=0}
-					{/if} *}
-					{if isset($standard_products_exists) && $standard_products_exists}
-						{include file="{$tpl_dir}_partials/standard-products.tpl"}
+				<div id="service_products_cont">
+					{if isset($service_products_exists) && $service_products_exists}
+						{include file="{$tpl_dir}_partials/service-products.tpl"}
 					{/if}
 				</div>
 

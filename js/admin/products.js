@@ -425,7 +425,7 @@ product_tabs['Associations'] = new function(){
 	};
 }
 
-product_tabs['StandardProduct'] = new function(){
+product_tabs['ServiceProduct'] = new function(){
 	this.onReady = function(){
 
 		// Display datatables in lead request page
@@ -459,8 +459,8 @@ product_tabs['StandardProduct'] = new function(){
 		$(this).find('.btn-save').on('click', function(e){
 			e.preventDefault();
 			selectedElement = this;
-			var price = $(this).closest('tr').find('.standard-product-price').val();
-			var id_tax_rules_group = $(this).closest('tr').find('.standard_product_id_tax_rules_group').val();
+			var price = $(this).closest('tr').find('.service-product-price').val();
+			var id_tax_rules_group = $(this).closest('tr').find('.service_product_id_tax_rules_group').val();
 			if (!price) {
 				showErrorMessage();
 				return;
@@ -469,19 +469,19 @@ product_tabs['StandardProduct'] = new function(){
 				url: $(this).data('roomtype_url'),
 				data: {
 					id_product: id_product,
-					standard_product_id : $(this).data('id_product'),
-					id_room_type_standard_product_price : $(this).data('id_room_type_standard_product_price'),
+					service_product_id : $(this).data('id_product'),
+					id_room_type_service_product_price : $(this).data('id_room_type_service_product_price'),
 					price: price,
 					id_tax_rules_group: id_tax_rules_group,
-					action: 'updatedstandardProductPrice',
+					action: 'updatedServiceProductPrice',
 					ajax: true
 				},
 				dataType: 'json',
 				success: function(data) {
 					if (data.status == 'ok')
 					{
-						$(selectedElement).closest('tr').find('.standard-product-price-text').text(data.price);
-						$(selectedElement).closest('tr').find('.standard_product_tax_text').text(data.tax_rules_group_name);
+						$(selectedElement).closest('tr').find('.service-product-price-text').text(data.price);
+						$(selectedElement).closest('tr').find('.service_product_tax_text').text(data.tax_rules_group_name);
 
 						togglelinkedProductEditForm(selectedElement, false);
 						showSuccessMessage(data.message);

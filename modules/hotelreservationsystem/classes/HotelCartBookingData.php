@@ -380,14 +380,14 @@ class HotelCartBookingData extends ObjectModel
                 } else {
                     $controllerType = 'front';
                 }
-                $objStandardProductCartDetail = new StandardProductCartDetail();
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
                 foreach ($cartBookingInfo as $bookingRow) {
                     $idPsCart = $bookingRow['id_cart'];
                     $idPsProduct = $bookingRow['id_product'];
                     $objCart = new Cart($idPsCart);
                     $updQty = $objBookingDetail->getNumberOfDays($bookingRow['date_from'], $bookingRow['date_to']);
-                    // remove standaard product for this room
-                    $objStandardProductCartDetail->removeStandardProductByIdHtlCartBooking($bookingRow['id']);
+                    // remove service product for this room
+                    $objRoomTypeServiceProductCartDetail->removeServiceProductByIdHtlCartBooking($bookingRow['id']);
                     // if room type is deleting from admin then reduce product cart quantity by updating directly table
                     if ($controllerType == 'admin' || $controllerType == 'moduleadmin') {
                         if ($cartQty = Cart::getProductQtyInCart($idPsCart, $idPsProduct)) {
@@ -442,13 +442,13 @@ class HotelCartBookingData extends ObjectModel
         $date_from,
         $date_to,
         $roomDemand,
-        $standardProducts,
+        $serviceProducts,
         $roomsAvailableList,
         $id_cart
     ) {
         $chkQty = 0;
         $num_days = HotelHelper::getNumberOfDays($date_from, $date_to);
-        $objStandardProductCartDetail = new StandardProductCartDetail();
+        $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
         if (Configuration::get('PS_FRONT_ROOM_UNIT_SELECTION_TYPE') == HotelBookingDetail::PS_FRONT_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY) {
             $roomsRequired = count($occupancy);
         } else {
@@ -484,9 +484,9 @@ class HotelCartBookingData extends ObjectModel
                         $obj_htl_cart_booking_data->child_ages = json_encode(array());
                     }
                     if ($obj_htl_cart_booking_data->save()) {
-                        if (count($standardProducts)) {
-                            foreach($standardProducts as $product) {
-                                $objStandardProductCartDetail->addStandardProductInCart(
+                        if (count($serviceProducts)) {
+                            foreach($serviceProducts as $product) {
+                                $objRoomTypeServiceProductCartDetail->addServiceProductInCart(
                                     $product['id_product'],
                                     $product['quantity'],
                                     $id_cart,
@@ -514,7 +514,7 @@ class HotelCartBookingData extends ObjectModel
         $date_from = false,
         $date_to = false,
         $roomDemand = array(),
-        $standardProducts = array(),
+        $serviceProducts = array(),
         $id_cart = false,
         $id_guest = false
     ) {
@@ -570,7 +570,7 @@ class HotelCartBookingData extends ObjectModel
                                 $date_from,
                                 $date_to,
                                 $roomDemand,
-                                $standardProducts,
+                                $serviceProducts,
                                 $roomsAvailableList,
                                 $id_cart
                             );
@@ -850,8 +850,8 @@ class HotelCartBookingData extends ObjectModel
         $cart_detail_data = $this->getCartCurrentDataByCartId((int) $id_cart);
         if ($cart_detail_data) {
             $objRoomDemands = new HotelRoomTypeDemand();
-            $objStandardProductCartDetail = new StandardProductCartDetail();
-            $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
+            $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+            $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
 
             foreach ($cart_detail_data as $key => $value) {
                 $product_image_id = Product::getCover($value['id_product']);
@@ -924,8 +924,8 @@ class HotelCartBookingData extends ObjectModel
                     false
                 );
 
-                $cart_detail_data[$key]['additional_service'] = $objHotelRoomTypeStandardProduct->getStandardProductsData($value['id_product']);
-                $cart_detail_data[$key]['selected_additional_service'] = $objStandardProductCartDetail->getStandardProductsInCart(
+                $cart_detail_data[$key]['additional_service'] = $objRoomTypeServiceProduct->getServiceProductsData($value['id_product']);
+                $cart_detail_data[$key]['selected_additional_service'] = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $id_cart,
                     0,
                     0,
@@ -934,7 +934,7 @@ class HotelCartBookingData extends ObjectModel
                     $value['date_to'],
                     $value['id']
                 );
-                $cart_detail_data[$key]['additional_service_price'] = $objStandardProductCartDetail->getStandardProductsInCart(
+                $cart_detail_data[$key]['additional_service_price'] = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $id_cart,
                     0,
                     0,
@@ -1140,8 +1140,8 @@ class HotelCartBookingData extends ObjectModel
             $objHtlFeatures = new HotelFeatures();
             $objCartBookingData = new HotelCartBookingData();
             $objRoomDemands = new HotelRoomTypeDemand();
-            $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-            $objStandardProductCartDetail = new StandardProductCartDetail();
+            $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+            $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
 
             foreach ($cartRoomTypes as $prodKey => $product) {
                 if (Validate::isLoadedObject(
@@ -1189,7 +1189,7 @@ class HotelCartBookingData extends ObjectModel
                         if ($detailed) {
                             // extra demands
                             $cartHotelData[$prodKey]['extra_demands'] = $objRoomDemands->getRoomTypeDemands($product['id_product']);
-                            $cartHotelData[$prodKey]['standard_products'] = $objHotelRoomTypeStandardProduct->getStandardProductsData($product['id_product'], 1, 0, true);
+                            $cartHotelData[$prodKey]['service_products'] = $objRoomTypeServiceProduct->getServiceProductsData($product['id_product'], 1, 0, true);
                             // add hotel info of the room
                             if ($hotelInfo = $objHotelBranch->hotelBranchesInfo(
                                 false,
@@ -1248,7 +1248,7 @@ class HotelCartBookingData extends ObjectModel
                                     $data_v['date_to'],
                                     1
                                 );
-                                $standardProductPrice = $objStandardProductCartDetail->getStandardProductsInCart(
+                                $serviceProductPrice = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                                     $context->cart->id,
                                     0,
                                     $data_v['id_hotel'],
@@ -1258,7 +1258,7 @@ class HotelCartBookingData extends ObjectModel
                                     $data_v['id'],
                                     true
                                 );
-                                $totalAdditionalServicePrice = $demandPrice + $standardProductPrice;
+                                $totalAdditionalServicePrice = $demandPrice + $serviceProductPrice;
 
                                 if (isset($cartHotelData[$prodKey]['date_diff'][$dateJoin])) {
                                     $numDays = $objBookingDetail->getNumberOfDays($data_v['date_from'], $data_v['date_to']);

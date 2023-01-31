@@ -924,10 +924,10 @@ abstract class PaymentModuleCore extends Module
                         }
                     }
                     if (!empty($normalProducts)) {
-                        $objStandardProductCartDetail = new StandardProductCartDetail();
+                        $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
                         foreach($normalProducts as $product) {
                             $idProduct = $product['id_product'];
-                            if ($cartAdditialServices = $objStandardProductCartDetail->getStandardProductsInCart(
+                            if ($cartAdditialServices = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                                 $this->context->cart->id,
                                 $product['id_product'],
                                 isset($product['id_hotel']) ? $product['id_hotel'] : 0,
@@ -946,19 +946,19 @@ abstract class PaymentModuleCore extends Module
                                         $additionalService['date_to'],
                                         $additionalService['id_room']
                                     );
-                                    $objStandardProductOrderDetail = new StandardProductOrderDetail();
-                                    $objStandardProductOrderDetail->id_product = $idProduct;
-                                    $objStandardProductOrderDetail->id_order = $order->id;
-                                    $objStandardProductOrderDetail->id_order_detail = $idOrderDetail;
-                                    $objStandardProductOrderDetail->id_cart = $this->context->cart->id;
-                                    $objStandardProductOrderDetail->id_htl_booking_detail = $roomBookingDetail['id'];
-                                    $objStandardProductOrderDetail->unit_price_tax_excl = $additionalService['unit_price_tax_excl'];
-                                    $objStandardProductOrderDetail->unit_price_tax_incl = $additionalService['unit_price_tax_incl'];
-                                    $objStandardProductOrderDetail->total_price_tax_excl = $additionalService['total_price_tax_excl'];
-                                    $objStandardProductOrderDetail->total_price_tax_incl = $additionalService['total_price_tax_incl'];
-                                    $objStandardProductOrderDetail->name = $product['name'];
-                                    $objStandardProductOrderDetail->quantity = $additionalService['quantity'];
-                                    $objStandardProductOrderDetail->save();
+                                    $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
+                                    $objRoomTypeServiceProductOrderDetail->id_product = $idProduct;
+                                    $objRoomTypeServiceProductOrderDetail->id_order = $order->id;
+                                    $objRoomTypeServiceProductOrderDetail->id_order_detail = $idOrderDetail;
+                                    $objRoomTypeServiceProductOrderDetail->id_cart = $this->context->cart->id;
+                                    $objRoomTypeServiceProductOrderDetail->id_htl_booking_detail = $roomBookingDetail['id'];
+                                    $objRoomTypeServiceProductOrderDetail->unit_price_tax_excl = $additionalService['unit_price_tax_excl'];
+                                    $objRoomTypeServiceProductOrderDetail->unit_price_tax_incl = $additionalService['unit_price_tax_incl'];
+                                    $objRoomTypeServiceProductOrderDetail->total_price_tax_excl = $additionalService['total_price_tax_excl'];
+                                    $objRoomTypeServiceProductOrderDetail->total_price_tax_incl = $additionalService['total_price_tax_incl'];
+                                    $objRoomTypeServiceProductOrderDetail->name = $product['name'];
+                                    $objRoomTypeServiceProductOrderDetail->quantity = $additionalService['quantity'];
+                                    $objRoomTypeServiceProductOrderDetail->save();
                                 }
                             }
                         }
@@ -1489,7 +1489,7 @@ abstract class PaymentModuleCore extends Module
             $obj_htl_bk_dtl = new HotelBookingDetail();
             $obj_rm_type = new HotelRoomType();
             $objBookingDemand = new HotelBookingDemands();
-            $objStandardProductOrderDetail = new StandardProductOrderDetail();
+            $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
             $result['total_extra_demands_te'] = 0;
             $result['total_extra_demands_ti'] = 0;
             $result['total_additional_services_te'] =0;
@@ -1614,7 +1614,7 @@ abstract class PaymentModuleCore extends Module
                                     1
                                 );
 
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                     $order->id,
                                     0,
                                     0,
@@ -1622,7 +1622,7 @@ abstract class PaymentModuleCore extends Module
                                     $data_v['date_from'],
                                     $data_v['date_to']
                                 );
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                     $order->id,
                                     0,
                                     0,
@@ -1633,7 +1633,7 @@ abstract class PaymentModuleCore extends Module
                                     1,
                                     1
                                 );
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                     $order->id,
                                     0,
                                     0,

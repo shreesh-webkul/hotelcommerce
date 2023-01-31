@@ -1,3 +1,22 @@
+{**
+* 2010-2023 Webkul.
+*
+* NOTICE OF LICENSE
+*
+* All right is reserved,
+* Please go through LICENSE.txt file inside our module
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade this module to newer
+* versions in the future. If you wish to customize this module for your
+* needs please refer to CustomizationPolicy.txt file inside our module for more information.
+*
+* @author Webkul IN
+* @copyright 2010-2023 Webkul IN
+* @license LICENSE.txt
+*}
+
 <section>
 	{if (isset($extraDemands) && $extraDemands) || (isset($additionalServices) && $additionalServices)}
 		<ul class="nav nav-tabs">
@@ -5,7 +24,7 @@
 				<li class="active"><a href="#room_type_demands_desc" data-toggle="tab">{l s='Facilities'}</a></li>
 			{/if}
 			{if isset($additionalServices) && $additionalServices}
-				<li{if !isset($extraDemands) || !$extraDemands} class="active"{/if}><a href="#room_type_standard_product_desc" data-toggle="tab">{l s='Products'}</a></li>
+				<li{if !isset($extraDemands) || !$extraDemands} class="active"{/if}><a href="#room_type_service_product_desc" data-toggle="tab">{l s='Services'}</a></li>
 			{/if}
 		</ul>
 		<div class="tab-content">
@@ -46,9 +65,9 @@
 			{/if}
 
 			{if isset($additionalServices) && $additionalServices}
-				<div id="room_type_standard_product_desc" class="tab-pane{if !isset($extraDemands) || !$extraDemands} active{/if}">
+				<div id="room_type_service_product_desc" class="tab-pane{if !isset($extraDemands) || !$extraDemands} active{/if}">
 					<div class="rooms_extra_demands_head">
-						<p class="rooms_extra_demands_text">{l s='Below are the products chosen by you in this booking'}</p>
+						<p class="rooms_extra_demands_text">{l s='Below are the services chosen by you in this booking'}</p>
 					</div>
 					{assign var=roomCount value=1}
 					{foreach $additionalServices as $key => $roomAdditionalService}

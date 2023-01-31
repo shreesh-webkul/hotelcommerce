@@ -198,7 +198,7 @@ class AdminNormalProductsControllerCore extends AdminController
             $this->_select .= ' , cp.`position`, ';
         }
 
-        // show the list of the product according to the booking or standard products
+        // show the list of the product according to the booking or service products
         $this->_where .= ' AND a.`booking_product` = 0';
 
         $this->_use_found_rows = false;
@@ -2690,33 +2690,13 @@ class AdminNormalProductsControllerCore extends AdminController
 
         /* The data generation is located in AdminStatsControllerCore */
 
-        // if (Configuration::get('PS_STOCK_MANAGEMENT')) {
-        //     $helper = new HelperKpi();
-        //     $helper->id = 'box-products-stock';
-        //     $helper->icon = 'icon-archive';
-        //     $helper->color = 'color1';
-        //     $helper->title = $this->l('Out of stock items', null, null, false);
-        //     if (ConfigurationKPI::get('PERCENT_PRODUCT_OUT_OF_STOCK') !== false) {
-        //         $helper->value = ConfigurationKPI::get('PERCENT_PRODUCT_OUT_OF_STOCK');
-        //     }
-        //     $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=percent_product_out_of_stock';
-        //     $helper->tooltip = $this->l('X% of your room types for sale are out of stock.', null, null, false);
-        //     $helper->refresh = (bool)(ConfigurationKPI::get('PERCENT_PRODUCT_OUT_OF_STOCK_EXPIRE') < $time);
-        //     $helper->href = Context::getContext()->link->getAdminLink('AdminNormalProducts').'&productFilter_sav!quantity=0&productFilter_active=1&submitFilterproduct=1';
-        //     $kpis[] = $helper->generate();
-        // }
-
         $helper = new HelperKpi();
         $helper->id = 'box-avg-gross-margin';
         $helper->icon = 'icon-tags';
         $helper->color = 'color2';
         $helper->title = $this->l('Average Gross Margin %', null, null, false);
-        if (ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN') !== false) {
-            $helper->value = ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN');
-        }
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=product_avg_gross_margin';
         $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types / products. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
-        $helper->refresh = (bool)(ConfigurationKPI::get('PRODUCT_AVG_GROSS_MARGIN_EXPIRE') < $time);
         $kpis[] = $helper->generate();
 
         $helper = new HelperKpi();
@@ -2725,12 +2705,8 @@ class AdminNormalProductsControllerCore extends AdminController
         $helper->color = 'color3';
         $helper->title = $this->l('Purchased references', null, null, false);
         $helper->subtitle = $this->l('30 days', null, null, false);
-        if (ConfigurationKPI::get('8020_SALES_CATALOG') !== false) {
-            $helper->value = ConfigurationKPI::get('8020_SALES_CATALOG');
-        }
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=8020_sales_catalog';
         $helper->tooltip = $this->l('X% of your references have been purchased for the past 30 days', null, null, false);
-        $helper->refresh = (bool)(ConfigurationKPI::get('8020_SALES_CATALOG_EXPIRE') < $time);
         if (Module::isInstalled('statsbestproducts')) {
             $helper->href = Context::getContext()->link->getAdminLink('AdminStats').'&module=statsbestproducts&datepickerFrom='.date('Y-m-d', strtotime('-30 days')).'&datepickerTo='.date('Y-m-d');
         }
@@ -2740,15 +2716,9 @@ class AdminNormalProductsControllerCore extends AdminController
         $helper->id = 'box-disabled-products';
         $helper->icon = 'icon-off';
         $helper->color = 'color4';
-        $helper->href = $this->context->link->getAdminLink('AdminNormalProducts');
         $helper->title = $this->l('Disabled Products', null, null, false);
-        if (ConfigurationKPI::get('DISABLED_PRODUCTS') !== false) {
-            $helper->value = ConfigurationKPI::get('DISABLED_PRODUCTS');
-        }
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=disabled_products';
-        $helper->refresh = (bool)(ConfigurationKPI::get('DISABLED_PRODUCTS_EXPIRE') < $time);
-        $helper->tooltip = $this->l('X% of your room types are disabled and not visible to your customers', null, null, false);
-        $helper->href = Context::getContext()->link->getAdminLink('AdminNormalProducts').'&productFilter_active=0&submitFilterproduct=1';
+        $helper->tooltip = $this->l('X% of your products are disabled and not visible to your customers', null, null, false);
         $kpis[] = $helper->generate();
 
         $helper = new HelperKpiRow();
@@ -2759,7 +2729,6 @@ class AdminNormalProductsControllerCore extends AdminController
     public function renderList()
     {
         $this->addRowAction('edit');
-        $this->addRowAction('preview');
         $this->addRowAction('duplicate');
         $this->addRowAction('delete');
         return parent::renderList();
@@ -2845,8 +2814,8 @@ class AdminNormalProductsControllerCore extends AdminController
     protected function _displayDraftWarning($active)
     {
         $content = '<div class="warn draft" style="'.($active ? 'display:none' : '').'">
-				<span>'.$this->l('Your room type will be saved as a draft.').'</span>
-				<a href="#" class="btn btn-default pull-right" onclick="submitAddProductAndPreview()" ><i class="icon-external-link-sign"></i> '.$this->l('Save and preview').'</a>
+				<span>'.$this->l('Your product will be saved as a draft.').'</span>
+				<a href="#" class="btn btn-default pull-right" onclick="submitAddProductAndPreview()" ><i class="icon-external-link-sign"></i> '.$this->l('Save').'</a>
 				<input type="hidden" name="fakeSubmitAddProductAndPreview" id="fakeSubmitAddProductAndPreview" />
 	 		</div>';
         $this->tpl_form_vars['draft_warning'] = $content;
@@ -3288,25 +3257,16 @@ class AdminNormalProductsControllerCore extends AdminController
     public function updateLinkedHotelsAndRooms($product)
     {
         if (Validate::isLoadedObject($product)) {
-            $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-            $objHotelRoomTypeStandardProduct->deleteRoomProductLink($product->id);
+            $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+            $objRoomTypeServiceProduct->deleteRoomProductLink($product->id);
 
             if (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product->service_product_type) {
-                // add product link for hotel
-                // if ($selectedHotels = Tools::getValue('hotelBox')) {
-                //     $objHotelRoomTypeStandardProduct->addRoomProductLink(
-                //         $product->id,
-                //         $selectedHotels,
-                //         HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL
-                //     );
-                // }
-
                 // add product link for room types
                 if ($selectedRoomTypes = Tools::getValue('roomTypeBox')) {
-                    $objHotelRoomTypeStandardProduct->addRoomProductLink(
+                    $objRoomTypeServiceProduct->addRoomProductLink(
                         $product->id,
                         $selectedRoomTypes,
-                        HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE
+                        RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
                     );
                 }
             }
@@ -4194,8 +4154,8 @@ class AdminNormalProductsControllerCore extends AdminController
             $check_product_association_ajax = true;
         }
 
-        $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-        $selectedElements = $objHotelRoomTypeStandardProduct->getAssociatedHotelsAndRoomType($product->id);
+        $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+        $selectedElements = $objRoomTypeServiceProduct->getAssociatedHotelsAndRoomType($product->id);
         $tree = new HelperTreeHotels('associated-hotels-tree', 'Associated hotels');
         $tree->setTemplate('tree_associated_hotels.tpl')
             ->setHeaderTemplate('tree_associated_header.tpl')
@@ -5254,7 +5214,7 @@ class AdminNormalProductsControllerCore extends AdminController
             'Consider changing the default category.' => $this->l('Consider changing the default category.'),
             'ID' => $this->l('ID'),
             'Name' => $this->l('Name'),
-            'Mark all checkbox(es) of categories in which room type is to appear' => $this->l('Mark the checkbox of each categories in which this room type will appear.')
+            'Mark all checkbox(es) of categories in which product is to appear' => $this->l('Mark the checkbox of each categories in which this product will appear.')
         );
         return $trad[$key];
     }
@@ -5262,8 +5222,8 @@ class AdminNormalProductsControllerCore extends AdminController
     protected function _displayUnavailableProductWarning()
     {
         $content = '<div class="alert">
-            <span>'.$this->l('Your room type will be saved as a draft.').'</span>
-                <a href="#" class="btn btn-default pull-right" onclick="submitAddProductAndPreview()" ><i class="icon-external-link-sign"></i> '.$this->l('Save and preview').'</a>
+            <span>'.$this->l('Your product will be saved as a draft.').'</span>
+                <a href="#" class="btn btn-default pull-right" onclick="submitAddProductAndPreview()" ><i class="icon-external-link-sign"></i> '.$this->l('Save').'</a>
                 <input type="hidden" name="fakeSubmitAddProductAndPreview" id="fakeSubmitAddProductAndPreview" />
             </div>';
         $this->tpl_form_vars['warning_unavailable_product'] = $content;

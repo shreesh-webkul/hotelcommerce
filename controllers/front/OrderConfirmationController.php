@@ -132,7 +132,7 @@ class OrderConfirmationControllerCore extends FrontController
                 $orderTotalInfo['total_order_amount'] = 0;
                 $hotelCartBookingData = new HotelCartBookingData();
                 $objBookingDemand = new HotelBookingDemands();
-                $objStandardProductOrderDetail = new StandardProductOrderDetail();
+                $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
                 foreach ($cartOrders as $cartOrder) {
                     $idOrder = $cartOrder['id_order'];
                     $objCartOrder = new Order($idOrder);
@@ -275,7 +275,7 @@ class OrderConfirmationControllerCore extends FrontController
                                     $cart_htl_data[$type_key]['hotel_name'] = $data_v['hotel_name'];
 
                                     // add additional services products in hotel detail.
-                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $idOrder,
                                         0,
                                         0,
@@ -286,7 +286,7 @@ class OrderConfirmationControllerCore extends FrontController
                                     if (empty($cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'])) {
                                         $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] = 0;
                                     }
-                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] += $extraDemandPriceTI = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] += $extraDemandPriceTI = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $idOrder,
                                         0,
                                         0,
@@ -300,7 +300,7 @@ class OrderConfirmationControllerCore extends FrontController
                                     if (empty($cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'])) {
                                         $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'] = 0;
                                     }
-                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'] += $extraDemandPriceTE = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_te'] += $extraDemandPriceTE = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $idOrder,
                                         0,
                                         0,

@@ -356,7 +356,7 @@
 														{/if}
 													</span>
 													<span class="voucher_apply_state pull-right">
-														<img src="{$THEME_DIR}img/icon/form-ok-circle.svg" /> {l s='Applied'}
+														<img src="{$img_dir}img/icon/form-ok-circle.svg" /> {l s='Applied'}
 													</span>
 												</div>
 											{/foreach}

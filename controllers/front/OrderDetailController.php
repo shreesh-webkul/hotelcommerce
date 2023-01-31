@@ -196,8 +196,8 @@ class OrderDetailControllerCore extends FrontController
                             )
                         );
                     }
-                    $objStandardProductOrderDetail = new StandardProductOrderDetail();
-                    if ($additionalServices = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                    $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
+                    if ($additionalServices = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                         $idOrder,
                         0,
                         0,
@@ -306,7 +306,7 @@ class OrderDetailControllerCore extends FrontController
                     $objBookingDetail = new HotelBookingDetail();
                     $objRoomType = new HotelRoomType();
                     $objBookingDemand = new HotelBookingDemands();
-                    $objStandardProductOrderDetail = new StandardProductOrderDetail();
+                    $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
                     $nonRequestedRooms = 1;
                     $anyBackOrder = 0;
                     $processedProducts = array();
@@ -440,7 +440,7 @@ class OrderDetailControllerCore extends FrontController
 
                                     $cartHotelData[$type_key]['hotel_name'] = $data_v['hotel_name'];
                                     // add additional services products in hotel detail.
-                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $id_order,
                                         0,
                                         0,
@@ -452,7 +452,7 @@ class OrderDetailControllerCore extends FrontController
                                     if (empty($cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_ti'])) {
                                         $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] = 0;
                                     }
-                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] += $additionalServicesPriceTI = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] += $additionalServicesPriceTI = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $id_order,
                                         0,
                                         0,
@@ -466,7 +466,7 @@ class OrderDetailControllerCore extends FrontController
                                     if (empty($cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_te'])) {
                                         $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_te'] = 0;
                                     }
-                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_te'] += $additionalServicesPriceTE = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                                    $cartHotelData[$type_key]['date_diff'][$date_join]['additional_services_price_te'] += $additionalServicesPriceTE = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                                         $id_order,
                                         0,
                                         0,

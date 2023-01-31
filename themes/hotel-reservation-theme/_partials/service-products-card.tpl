@@ -1,0 +1,58 @@
+{**
+* 2010-2023 Webkul.
+*
+* NOTICE OF LICENSE
+*
+* All right is reserved,
+* Please go through LICENSE.txt file inside our module
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade this module to newer
+* versions in the future. If you wish to customize this module for your
+* needs please refer to CustomizationPolicy.txt file inside our module for more information.
+*
+* @author Webkul IN
+* @copyright 2010-2023 Webkul IN
+* @license LICENSE.txt
+*}
+
+{if isset($product) && $product}
+    <div class="service-product-element">
+        <a href="{$link->getImageLink($product.link_rewrite, $product.id_image, 'large_default')|escape:'html':'UTF-8'}" data-fancybox-group="service-products-{$group}" class="fancybox" title="{if !empty($product.legend)}{$product.legend|escape:'html':'UTF-8'}{else}{$product.name|escape:'html':'UTF-8'}{/if}">
+            <img class="img-responsive service-product-img" src="{$link->getImageLink($product.link_rewrite, $product.id_image, 'large_default')|escape:'html':'UTF-8'}" alt="{if !empty($product.legend)}{$product.legend|escape:'html':'UTF-8'}{else}{$product.name|escape:'html':'UTF-8'}{/if}" title="{if !empty($product.legend)}{$product.legend|escape:'html':'UTF-8'}{else}{$product.name|escape:'html':'UTF-8'}{/if}">
+        </a>
+        <div class="clearfix">
+            <p class="service-product-name">{$product['name']}</p>
+            {if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
+                <p class="service-product-price">
+                    {if !$priceDisplay}{convertPrice price=$product.price_tax_incl}{else}{convertPrice price=$product.price_tax_exc}{/if}
+                </p>
+            {/if}
+        </div>
+        {if $product['description_short']}
+            <div class="service-product-short-desc">
+                {$product['description_short']}
+            </div>
+        {/if}
+        <div class="service-product-actions">
+            {if $product.allow_multiple_quantity && $product.available_for_order}
+                <div class="qty_container">
+                    <input type="hidden" class="service_product_qty" id="service_product_qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" value="{if isset($product.quantity_added) && $product.quantity_added}{$product.quantity_added|escape:'html':'UTF-8'}{else}1{/if}">
+                    <div class="qty_count pull-left">
+                        <span>{if isset($product.quantity_added) && $product.quantity_added}{$product.quantity_added|escape:'html':'UTF-8'}{else}1{/if}</span>
+                    </div>
+                    <div class="qty_direction pull-left">
+                        <a href="#" class="btn btn-default quantity_up service_product_qty_up"><span><i class="icon-plus"></i></span></a>
+                        <a href="#" class="btn btn-default quantity_down service_product_qty_down"><span><i class="icon-minus"></i></span></a>
+                    </div>
+                </div>
+            {/if}
+            {if $product.available_for_order && !$PS_CATALOG_MODE && !$order_date_restrict && !((isset($restricted_country_mode) && $restricted_country_mode))}
+                <div>
+                    <button class="btn btn-block btn-service-product{if isset($product.selected) && $product.selected} btn-danger remove_roomtype_product{else} btn-success add_roomtype_product{/if}" data-id-product="{$product.id_product}">{if isset($product.selected) && $product.selected}{l s='Remove'}{else}{l s='Select'}{/if}</button>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}

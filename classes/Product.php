@@ -1284,7 +1284,7 @@ class ProductCore extends ObjectModel
     }
 
 
-    public function getProductStandardProducts($id_lang, $p, $n, $front = false, $get_total = false, $active = true, $sub_category = false, Context $context = null)
+    public function getProductServiceProducts($id_lang, $p, $n, $front = false, $available_for_order = 2, $get_total = false, $active = true, $sub_category = false, Context $context = null)
     {
         if (!$context) {
             $context = Context::getContext();
@@ -1303,18 +1303,17 @@ class ProductCore extends ObjectModel
             $sql = 'SELECT COUNT(DISTINCT(p.`id_product`)) AS total
 					FROM `'._DB_PREFIX_.'product` p
 					'.Shop::addSqlAssociation('product', 'p').'
-                    INNER JOIN `'._DB_PREFIX_.'htl_room_type_standard_product` rsp ON (rsp.`id_product` = p.`id_product`)
+                    INNER JOIN `'._DB_PREFIX_.'htl_room_type_service_product` rsp ON (rsp.`id_product` = p.`id_product`)
 					WHERE
                     ('.
-                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
-                        // 'OR'.
-                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                        '(`element_type` = '.RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
                     )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                 .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
                 .($front ? ' AND product_shop.`show_at_front` = 1':'')
                 .($front ? ' AND p.`is_invisible` = 0':'')
+                .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                 .($active ? ' AND product_shop.`active` = 1' : '');
             return (int)Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($sql);
         }
@@ -1336,7 +1335,7 @@ class ProductCore extends ObjectModel
                     INTERVAL '.(int)$nb_days_new_product.' DAY)) > 0 AS new, product_shop.price AS orderprice
 				FROM `'._DB_PREFIX_.'product` p
 				'.Shop::addSqlAssociation('product', 'p').'
-                INNER JOIN `'._DB_PREFIX_.'htl_room_type_standard_product` rsp ON (rsp.`id_product` = p.`id_product`)'
+                INNER JOIN `'._DB_PREFIX_.'htl_room_type_service_product` rsp ON (rsp.`id_product` = p.`id_product`)'
                 .Product::sqlStock('p', 0).'
 				LEFT JOIN `'._DB_PREFIX_.'category_lang` cl
 					ON (product_shop.`id_category_default` = cl.`id_category`
@@ -1351,15 +1350,14 @@ class ProductCore extends ObjectModel
 					AND il.`id_lang` = '.(int)$id_lang.')
 				WHERE
                     ('.
-                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
-                        // 'OR'.
-                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                        '(`element_type` = '.RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
                     )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                     .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
                     .($front ? ' AND product_shop.`show_at_front` = 1':'')
                     .($front ? ' AND p.`is_invisible` = 0':'')
+                    .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                     .($active ? ' AND product_shop.`active` = 1' : '');
                     // .($displayPosition ? ' AND pdp.`id_position` = '.(int) $displayPosition : '');
 
@@ -1374,7 +1372,7 @@ class ProductCore extends ObjectModel
         return $result;
     }
 
-    public function getAvailableStandardProductsCategories($id_lang, $front = false, $active = true, Context $context = null)
+    public function getAvailableServiceProductsCategories($id_lang, $front = false, $active = true, Context $context = null)
     {
         if (!$context) {
             $context = Context::getContext();
@@ -1392,16 +1390,14 @@ class ProductCore extends ObjectModel
         $sql = 'SELECT cl.*, COUNT(DISTINCT(p.`id_product`)) as num_products
 				FROM `'._DB_PREFIX_.'product` p
 				'.Shop::addSqlAssociation('product', 'p').'
-                INNER JOIN `'._DB_PREFIX_.'htl_room_type_standard_product` rsp ON (rsp.`id_product` = p.`id_product`)'
+                INNER JOIN `'._DB_PREFIX_.'htl_room_type_service_product` rsp ON (rsp.`id_product` = p.`id_product`)'
                 .Product::sqlStock('p', 0).'
 				INNER JOIN `'._DB_PREFIX_.'category_lang` cl
 					ON (product_shop.`id_category_default` = cl.`id_category`
 					AND cl.`id_lang` = '.(int)$id_lang.Shop::addSqlRestrictionOnLang('cl').')
 				WHERE
                     ('.
-                        // '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$roomInfo['id_hotel'].')'.
-                        // 'OR'.
-                        '(`element_type` = '.HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
+                        '(`element_type` = '.RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$this->id.')
                     )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
@@ -3192,10 +3188,10 @@ class ProductCore extends ObjectModel
 
         // get price per room type
         if ($id_roomtype) {
-            $priceForRoomInfo = HotelRoomTypeStandardProductPrice::getProductRoomTypeLinkPriceAndTax(
+            $priceForRoomInfo = RoomTypeServiceProductPrice::getProductRoomTypeLinkPriceAndTax(
                 $id_product,
                 $id_roomtype,
-                HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE
+                RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
             );
         }
 

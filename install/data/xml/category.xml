@@ -10,4 +10,20 @@
     <category id="Locations" id_parent="Home" active="1"/>
     <category id="Products" id_parent="Home" active="1"/>
   </entities>
+  <category id="Locations" id_shop="1">
+    <name>Locations</name>
+    <description/>
+    <link_rewrite>locations</link_rewrite>
+    <meta_title/>
+    <meta_keywords/>
+    <meta_description/>
+  </category>
+  <category id="Products" id_shop="1">
+    <name>Products</name>
+    <description/>
+    <link_rewrite>products</link_rewrite>
+    <meta_title/>
+    <meta_keywords/>
+    <meta_description/>
+  </category>
 </entity_category>

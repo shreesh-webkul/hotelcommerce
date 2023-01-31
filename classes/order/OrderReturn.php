@@ -197,7 +197,7 @@ class OrderReturnCore extends ObjectModel
             }
 
             $objBookingDemands = new HotelBookingDemands();
-            $objStandardProductOrderDetail = new StandardProductOrderDetail();
+            $objRoomTypeServiceProductOrderDetail = new RoomTypeServiceProductOrderDetail();
             foreach ($returnDetails as &$bookingRow) {
                 $bookingRow['extra_demands_price_tax_incl'] = $objBookingDemands->getRoomTypeBookingExtraDemands(
                     $bookingRow['id_order'],
@@ -218,7 +218,7 @@ class OrderReturnCore extends ObjectModel
                     1,
                     0
                 );
-                $bookingRow['additional_services_tax_excl'] = $objStandardProductOrderDetail->getRoomTypeStandardProducts(
+                $bookingRow['additional_services_tax_excl'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $id_order,
                     0,
                     0,

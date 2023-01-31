@@ -351,38 +351,38 @@ class HotelReservationSystemDb
                 PRIMARY KEY (`id_room_type_demand`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
-            "CREATE TABLE `"._DB_PREFIX_."htl_room_type_standard_product` (
-                `id_room_type_standard_product` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE `"._DB_PREFIX_."htl_room_type_service_product` (
+                `id_room_type_service_product` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_product` int(11) UNSIGNED NOT NULL,
                 `id_element` int(11) unsigned NOT NULL,
                 `element_type` tinyint(11) unsigned NOT NULL,
-                PRIMARY KEY (`id_room_type_standard_product`),
+                PRIMARY KEY (`id_room_type_service_product`),
                 KEY `id_product` (`id_product`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
-            "CREATE TABLE `"._DB_PREFIX_."htl_room_type_standard_product_price` (
-                `id_room_type_standard_product_price` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE `"._DB_PREFIX_."htl_room_type_service_product_price` (
+                `id_room_type_service_product_price` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_product` int(11) UNSIGNED NOT NULL,
                 `price` decimal(20,6) NOT NULL DEFAULT '0.000000',
                 `id_tax_rules_group` int(11) unsigned NOT NULL,
                 `id_element` int(11) unsigned NOT NULL,
                 `element_type` tinyint(11) unsigned NOT NULL,
-                PRIMARY KEY (`id_room_type_standard_product_price`),
+                PRIMARY KEY (`id_room_type_service_product_price`),
                 KEY `id_product` (`id_product`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
-            "CREATE TABLE `"._DB_PREFIX_."htl_hotel_product_cart_detail` (
-                `id_hotel_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE `"._DB_PREFIX_."htl_hotel_service_product_cart_detail` (
+                `id_hotel_service_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_cart` int(11) unsigned NOT NULL,
                 `id_product` int(11) UNSIGNED NOT NULL,
                 `id_hotel` int(11) UNSIGNED NOT NULL,
                 `quantity` int(11) UNSIGNED NOT NULL,
-                PRIMARY KEY (`id_hotel_product_cart_detail`),
+                PRIMARY KEY (`id_hotel_service_product_cart_detail`),
                 KEY `id_product` (`id_product`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
-            "CREATE TABLE `"._DB_PREFIX_."htl_standard_product_cart_detail` (
-                `id_standard_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE `"._DB_PREFIX_."htl_room_type_service_product_cart_detail` (
+                `id_room_type_service_product_cart_detail` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_room_type` int(11) UNSIGNED NOT NULL,
                 `id_product` int(11) UNSIGNED NOT NULL,
                 `quantity` int(11) UNSIGNED NOT NULL,
@@ -391,12 +391,12 @@ class HotelReservationSystemDb
                 `id_guest` int(11) unsigned NOT NULL,
                 `id_cart` int(11) unsigned NOT NULL,
                 `htl_cart_booking_id` int(11) unsigned NOT NULL,
-                PRIMARY KEY (`id_standard_product_cart_detail`),
+                PRIMARY KEY (`id_room_type_service_product_cart_detail`),
                 KEY `id_product` (`id_product`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
-            "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_standard_product_order_detail` (
-                `id_standard_product_order_detail` int(11) NOT NULL AUTO_INCREMENT,
+            "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_room_type_service_product_order_detail` (
+                `id_room_type_service_product_order_detail` int(11) NOT NULL AUTO_INCREMENT,
                 `id_product` int(11) NOT NULL,
                 `id_order` int(11) NOT NULL,
                 `id_order_detail` int(11) NOT NULL,
@@ -410,7 +410,7 @@ class HotelReservationSystemDb
                 `quantity` INT(11) UNSIGNED NOT NULL,
                 `date_add` datetime NOT NULL,
                 `date_upd` datetime NOT NULL,
-                PRIMARY KEY (`id_standard_product_order_detail`)
+                PRIMARY KEY (`id_room_type_service_product_order_detail`)
             ) ENGINE="._MYSQL_ENGINE_." DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 
             "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."htl_room_disable_dates` (

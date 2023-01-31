@@ -100,7 +100,7 @@ class AdminProductsControllerCore extends AdminController
             'Prices' => $this->l('Prices'),
             'Seo' => $this->l('SEO'),
             'Images' => $this->l('Images'),
-            'StandardProduct' => $this->l('Standard Products'),
+            'ServiceProduct' => $this->l('Service Products'),
             'Associations' => $this->l('Associations'),
             'Features' => $this->l('Features'),
             'Configuration' => $this->l('Configuration'),
@@ -119,7 +119,7 @@ class AdminProductsControllerCore extends AdminController
                 'Features' => 5,
                 'Configuration' => 6,
                 'Occupancy' => 7,
-                'StandardProduct' => 9,
+                'ServiceProduct' => 9,
                 'LengthOfStay' => 10,
                 'AdditionalFacilities' => 11,
             ));
@@ -208,7 +208,7 @@ class AdminProductsControllerCore extends AdminController
             $this->_select .= ' , cp.`position`, ';
         }
 
-        // show the list of the product according to the booking or standard products
+        // show the list of the product according to the booking or service products
         $this->_where .= ' AND a.`booking_product` = 1';
 
         $this->_use_found_rows = false;
@@ -1108,14 +1108,14 @@ class AdminProductsControllerCore extends AdminController
         }
     }
 
-    public function ajaxProcessUpdatedstandardProductPrice()
+    public function ajaxProcessUpdatedServiceProductPrice()
     {
         $response = array();
         if ($this->tabAccess['edit'] === '1') {
             // process price update
             $idProduct = Tools::getValue('id_product');
-            $idStandardProduct = Tools::getValue('standard_product_id');
-            $idProductRoomtypePrice = Tools::getValue('id_room_type_standard_product_price');
+            $idServiceProduct = Tools::getValue('service_product_id');
+            $idProductRoomtypePrice = Tools::getValue('id_room_type_service_product_price');
             $price = Tools::getValue('price');
             $id_tax_rules_group = Tools::getValue('id_tax_rules_group');
 
@@ -1127,42 +1127,42 @@ class AdminProductsControllerCore extends AdminController
                     $error = $this->l('Room Type details not found. Save room type details before updating price.');
                 }
             }
-            if (!$idStandardProduct) {
-                $error = $this->l('Standard Product not found.');
+            if (!$idServiceProduct) {
+                $error = $this->l('Service Product not found.');
             }
 
             if (!$price) {
-                $error = $this->l('Standard product price must not be empty');
+                $error = $this->l('Service product price must not be empty');
             } elseif (!Validate::isPrice($price)) {
-                $error = $this->l('Standard product price is invalid');
+                $error = $this->l('Service product price is invalid');
             }
 
             if (!isset($error)) {
-                $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-                $priceExists = $objHotelRoomTypeStandardProductPrice->getProductRoomTypeLinkPriceInfo(
-                    $idStandardProduct,
+                $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
+                $priceExists = $objRoomTypeServiceProductPrice->getProductRoomTypeLinkPriceInfo(
+                    $idServiceProduct,
                     $idProduct,
-                    HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE
+                    RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
                 );
 
                 if ($priceExists) {
-                    $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice($priceExists['id_room_type_standard_product_price']);
+                    $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice($priceExists['id_room_type_service_product_price']);
                 } else {
-                    $objHotelRoomTypeStandardProductPrice = new HotelRoomTypeStandardProductPrice();
-                    $objHotelRoomTypeStandardProductPrice->id_product = $idStandardProduct;
-                    $objHotelRoomTypeStandardProductPrice->id_element = $idProduct;
-                    $objHotelRoomTypeStandardProductPrice->element_type = HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE;
+                    $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
+                    $objRoomTypeServiceProductPrice->id_product = $idServiceProduct;
+                    $objRoomTypeServiceProductPrice->id_element = $idProduct;
+                    $objRoomTypeServiceProductPrice->element_type = RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE;
                 }
 
-                $objHotelRoomTypeStandardProductPrice->price = $price;
-                $objHotelRoomTypeStandardProductPrice->id_tax_rules_group = $id_tax_rules_group;
+                $objRoomTypeServiceProductPrice->price = $price;
+                $objRoomTypeServiceProductPrice->id_tax_rules_group = $id_tax_rules_group;
 
-                if (!$objHotelRoomTypeStandardProductPrice->save()) {
+                if (!$objRoomTypeServiceProductPrice->save()) {
                     $error = $this->l('Unable to save price, please try again.');
                 } else {
                     $response['price'] = Tools::DisplayPrice($price);
                     $objTaxRuleGroup = new TaxRulesGroup(
-                        $objHotelRoomTypeStandardProductPrice->id_tax_rules_group,
+                        $objRoomTypeServiceProductPrice->id_tax_rules_group,
                         $this->context->language->id
                     );
                     $response['tax_rules_group_name'] = $objTaxRuleGroup->name;
@@ -1339,7 +1339,7 @@ class AdminProductsControllerCore extends AdminController
         }
 
         $this->addJS(array(
-            _PS_JS_DIR_.'admin/room_types.js',
+            _PS_JS_DIR_.'admin/products.js',
         ));
 
         if (in_array($this->display, array('add', 'edit'))
@@ -2444,7 +2444,7 @@ class AdminProductsControllerCore extends AdminController
             $this->page_header_toolbar_btn['new_product'] = array(
                     'href' => self::$currentIndex.'&addproduct&token='.$this->token,
                     // 'desc' => $this->l('Add new room type', null, null, false),
-                    'desc' => $this->l('Add new product', null, null, false),
+                    'desc' => $this->l('Add new room type', null, null, false),
                     'icon' => 'process-icon-new'
                 );
         }
@@ -2819,18 +2819,18 @@ class AdminProductsControllerCore extends AdminController
 
             $objRoomType = new HotelRoomType();
             if ($hotelRoomType = $objRoomType->getRoomTypeInfoByIdProduct($obj->id)) {
-                $objRoomTypeLink = new HotelRoomTypeStandardProduct();
-                $objRoomTypeLinkPrice = new HotelRoomTypeStandardProductPrice();
-                $standardProducts = $objRoomTypeLink->getIdProductsForHotelAndRoomType(
+                $objRoomTypeLink = new RoomTypeServiceProduct();
+                $objRoomTypeLinkPrice = new RoomTypeServiceProductPrice();
+                $serviceProducts = $objRoomTypeLink->getIdProductsForHotelAndRoomType(
                     $hotelRoomType['id_hotel'],
                     $obj->id
                 );
-                foreach ($standardProducts as &$standardProduct) {
+                foreach ($serviceProducts as &$standardProduct) {
                     $product = new Product($standardProduct['id_product'], false, $this->context->language->id);
                     $standardProductPriceInfo = $objRoomTypeLinkPrice->getProductRoomTypeLinkPriceInfo(
                         $product->id,
                         $obj->id,
-                        HotelRoomTypeStandardProduct::WK_ELEMENT_TYPE_ROOM_TYPE
+                        RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
                     );
                     $standardProduct['id_product'] = $product->id;
                     $standardProduct['name'] = $product->name;
@@ -2849,7 +2849,7 @@ class AdminProductsControllerCore extends AdminController
                             );
                             $standardProduct['tax_rules_group_name'] = $objTaxRuleGroup->name;
                         }
-                        $standardProduct['id_room_type_standard_product_price'] = $standardProductPriceInfo['id_room_type_standard_product_price'];
+                        $standardProduct['id_room_type_service_product_price'] = $standardProductPriceInfo['id_room_type_service_product_price'];
                     }
 
                     if ($product->id_tax_rules_group == 0) {
@@ -2865,13 +2865,13 @@ class AdminProductsControllerCore extends AdminController
 
                 $data->assign(array(
                     'product' => $obj,
-                    'standard_products' => $standardProducts,
+                    'service_products' => $serviceProducts,
                     'tax_rules_groups' => $tax_rules_groups,
                     'taxesRatesByGroup' => $tax_rates,
                 ));
             }
         } else {
-            $this->displayWarning($this->l('You must save this room type before managing Standard Products.'));
+            $this->displayWarning($this->l('You must save this room type before managing Service Products.'));
         }
 
         $this->tpl_form_vars['custom_form'] = $data->fetch();

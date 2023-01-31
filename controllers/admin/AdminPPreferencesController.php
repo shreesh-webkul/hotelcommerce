@@ -299,9 +299,9 @@ class AdminPPreferencesControllerCore extends AdminController
                         'type' => 'bool'
                     ),
 
-                    'PS_STANDARD_PRODUCT_DISPLAY_TYPE' => array(
-                        'title' => $this->l('Standard Products display type'),
-                        'hint' => $this->l('Display style for standard products on room type page.'),
+                    'PS_SERVICE_PRODUCT_DISPLAY_TYPE' => array(
+                        'title' => $this->l('Service Products display type'),
+                        'hint' => $this->l('Display style for service products on room type page.'),
                         'type' => 'select',
                         'list' => array(
                             array('id' => '1', 'name' => $this->l('List'), 'value' => 'list'),
@@ -310,8 +310,8 @@ class AdminPPreferencesControllerCore extends AdminController
                         'identifier' => 'value'
                     ),
 
-                    'PS_SHOW_STANDARD_PRODUCT_CATEGORY_FILTER' => array(
-                        'title' => $this->l('Show category filter for standard products'),
+                    'PS_SERVICE_PRODUCT_CATEGORY_FILTER' => array(
+                        'title' => $this->l('Show category filter for service products'),
                         'validation' => 'isBool',
                         'cast' => 'intval',
                         'required' => false,

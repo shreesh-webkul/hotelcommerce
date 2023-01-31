@@ -383,14 +383,14 @@ class AdminCategoriesControllerCore extends AdminController
         $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=disabled_categories';
         $kpis[] = $helper->generate();
 
-        $helper = new HelperKpi();
-        $helper->id = 'box-empty-categories';
-        $helper->icon = 'icon-bookmark-empty';
-        $helper->color = 'color2';
-        $helper->href = $this->context->link->getAdminLink('AdminTracking');
-        $helper->title = $this->l('Empty Categories', null, null, false);
-        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=empty_categories';
-        $kpis[] = $helper->generate();
+        // $helper = new HelperKpi();
+        // $helper->id = 'box-empty-categories';
+        // $helper->icon = 'icon-bookmark-empty';
+        // $helper->color = 'color2';
+        // $helper->href = $this->context->link->getAdminLink('AdminTracking');
+        // $helper->title = $this->l('Empty Categories', null, null, false);
+        // $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=empty_categories';
+        // $kpis[] = $helper->generate();
 
         $helper = new HelperKpi();
         $helper->id = 'box-top-category';

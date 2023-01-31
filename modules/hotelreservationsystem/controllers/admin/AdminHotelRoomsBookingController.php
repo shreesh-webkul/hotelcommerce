@@ -334,7 +334,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'id_guest' => $this->id_guest,
         );
         $objHotelCartBookingData = new HotelCartBookingData();
-        $objHotelProductCartDetail = new HotelProductCartDetail();
+        $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
 
         if ($cartProducts = $this->context->cart->getProducts()) {
             if ($cart_bdata = $objHotelCartBookingData->getCartBookingDetailsByIdCartIdGuest(
@@ -344,7 +344,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             )) {
                 $smartyVars['cart_bdata'] = $cart_bdata;
             }
-            if ($normalCartProduct = $objHotelProductCartDetail->getHotelProducts($this->context->cart->id)) {
+            if ($normalCartProduct = $objHotelServiceProductCartDetail->getHotelProducts($this->context->cart->id)) {
                 $smartyVars['cart_normal_data'] = $normalCartProduct;
             }
         }
@@ -554,16 +554,16 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
 
         if (empty($this->errors)) {
             if ($opt) {
-                $objHotelProductCartDetail = new HotelProductCartDetail();
-                if ($objHotelProductCartDetail->addHotelProductInCart($product->id, $quantity, $id_hotel)) {
+                $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+                if ($objHotelServiceProductCartDetail->addHotelProductInCart($product->id, $quantity, $id_hotel)) {
                     $response = array(
                         'status' => true,
                         'total_amount' => $this->context->cart->getOrderTotal()
                     );
                 }
             } else {
-                $objHotelProductCartDetail = new HotelProductCartDetail();
-                if ($objHotelProductCartDetail->removeProductFromCart($id_product, $id_hotel)) {
+                $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
+                if ($objHotelServiceProductCartDetail->removeProductFromCart($id_product, $id_hotel)) {
                     $response = array(
                         'status' => true,
                         'total_amount' => $this->context->cart->getOrderTotal()

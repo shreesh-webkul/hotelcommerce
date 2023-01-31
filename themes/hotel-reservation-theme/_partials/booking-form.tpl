@@ -49,7 +49,7 @@
                                     {/if}
                                 </div>
                             </div>
-                            {if (isset($has_room_type_demands) && $has_room_type_demands) || (isset($standard_products_exists) && $standard_products_exists)}
+                            {if (isset($has_room_type_demands) && $has_room_type_demands) || (isset($service_products_exists) && $service_products_exists)}
                                 <hr class="separator-hr-mg-10">
                                 <div class="row price_desc_block">
                                     <div class="col-sm-6">
@@ -60,10 +60,60 @@
                                             </p>
                                     </div>
                                     <div class="col-sm-6">
-                                        <label class="control-label">{l s='Extra Facilities'}</label>
+                                        <label class="control-label">{l s='Extra Services'}</label>
                                         <p class="extra_demands_price_block">
                                             {if isset($demands_price)}{convertPrice price=$demands_price}{else}{convertPrice price=0}{/if}
+                                            {if (isset($selected_demands) && $selected_demands) || (isset($selected_service_product) && $selected_service_product)}
+                                                <span class="services-info">
+                                                    <img data-toggle="popover" data-placement="bottom" src="{$img_dir}icon/icon-info.svg" />
+                                                </span>
+                                            {/if}
                                         </p>
+                                        {if (isset(selected_demands) && selected_demands) || (isset(selected_service_product) && selected_service_product)}
+                                            <div class="services-info-title" style="display: none;">
+                                                {l s='Services breakage (per room)'}
+                                            </div>
+                                            <div class="services-info-content" style="display: none;">
+                                                {if isset($selected_service_product) && $selected_service_product}
+                                                    <div class="extra_service_panel">
+                                                        <p class="panel_title">{l s='Selected services'}</p>
+                                                        <hr>
+                                                        {foreach $selected_service_product as $product}
+                                                            <div class="row product-row">
+                                                                <div class="col-xs-8">
+                                                                    <div>{$product['name']}</div>
+                                                                    {if $product['allow_multiple_quantity']}
+                                                                        <div>{l s='Quantity:'} {$product['quantity']}</div>
+                                                                    {/if}
+                                                                </div>
+                                                                <div class="col-xs-4">
+                                                                    <p>{displayPrice price=$product['price']}</p>
+                                                                </div>
+                                                            </div>
+                                                        {/foreach}
+                                                    </div>
+                                                {/if}
+                                                {if isset($selected_demands) && $selected_demands}
+                                                    <div class="extra_service_panel">
+                                                        <p class="panel_title">{l s='Selected facilities'}</p>
+                                                        <hr>
+                                                        {foreach $selected_demands as $product}
+                                                            <div class="row product-row">
+                                                                <div class="col-xs-8">
+                                                                    <div>{$product['name']}</div>
+                                                                    {if isset($product['advance_option']) && $product['advance_option']}
+                                                                        <div>{l s='Option:'} {$product['advance_option']['name']}</div>
+                                                                    {/if}
+                                                                </div>
+                                                                <div class="col-xs-4">
+                                                                    <p>{displayPrice price=$product['price']}</p>
+                                                                </div>
+                                                            </div>
+                                                        {/foreach}
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                        {/if}
                                     </div>
                                 </div>
                                 <hr class="separator-hr-mg-10 form-group">
@@ -87,9 +137,9 @@
                                     {if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || (isset($restricted_country_mode) && $restricted_country_mode) || $PS_CATALOG_MODE || $order_date_restrict}
                                     {else}
                                         <div id="additional_products" class="hidden">
-                                            {if isset($selected_standard_product) && $selected_standard_product}
-                                                {foreach $selected_standard_product as $product}
-                                                    <input type="hidded" id="standard_product_{$product['id_product']}" name="standard_product[{$product['id_product']}][]" class="standard_product" data-id_product="{$product['id_product']}" value="{$product['quantity']}">
+                                            {if isset($selected_service_product) && $selected_service_product}
+                                                {foreach $selected_service_product as $product}
+                                                    <input type="hidded" id="service_product_{$product['id_product']}" name="service_product[{$product['id_product']}][]" class="service_product" data-id_product="{$product['id_product']}" value="{$product['quantity']}">
                                                 {/foreach}
                                             {/if}
                                         </div>

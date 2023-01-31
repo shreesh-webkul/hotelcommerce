@@ -1074,8 +1074,8 @@ class AdminCartsControllerCore extends AdminController
                     $idRoom
                 );
 
-                $objStandardProductCartDetail = new StandardProductCartDetail();
-                if ($selectedRoomStandardProduct = $objStandardProductCartDetail->getStandardProductsInCart(
+                $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
+                if ($selectedRoomServiceProduct = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $idCart,
                     0,
                     0,
@@ -1084,18 +1084,18 @@ class AdminCartsControllerCore extends AdminController
                     $dateTo,
                     $htlCartBoookingata['id']
                 )) {
-                    $objHotelRoomTypeStandardProduct = new HotelRoomTypeStandardProduct();
-                    $roomTypeStandardProducts = $objHotelRoomTypeStandardProduct->getStandardProductsData($idProduct);
-                        foreach ($selectedRoomStandardProduct as $key => $selectedProducts) {
+                    $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                    $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct);
+                        foreach ($selectedRoomServiceProduct as $key => $selectedProducts) {
                             $objRoom = new HotelRoomInformation($selectedProducts['id_room']);
-                            $selectedRoomStandardProduct[$key]['room_num'] = $objRoom->room_num;
+                            $selectedRoomServiceProduct[$key]['room_num'] = $objRoom->room_num;
                             foreach ($selectedProducts['selected_products_info'] as $product) {
-                                $selectedRoomStandardProduct[$key]['selected_products'][] = $product['id_product'];
+                                $selectedRoomServiceProduct[$key]['selected_products'][] = $product['id_product'];
                             }
                         }
                     $this->context->smarty->assign(array(
-                        'roomTypeStandardProducts' => $roomTypeStandardProducts,
-                        'selectedRoomStandardProduct' => $selectedRoomStandardProduct
+                        'roomTypeServiceProducts' => $roomTypeServiceProducts,
+                        'selectedRoomServiceProduct' => $selectedRoomServiceProduct
                     ));
                 }
             }
