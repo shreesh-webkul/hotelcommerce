@@ -351,9 +351,8 @@
 						<th class="cart_product">{l s='Room Image'}</th>
 						<th class="cart_description">{l s='Room Description'}</th>
 						<th>{l s='Hotel Name'}</th>
-						<th>{l s='Room Capacity'}</th>
 						<th class="cart_unit">{l s='Unit Price'}</th>
-						<th>{l s='Rooms'}</th>
+						<th>{l s='Room Capacity'}</th>
 						<th>{l s='Check-in Date'}</th>
 						<th>{l s='Check-out Date'}</th>
 						<th class="cart_total">{l s='Total'}</th>

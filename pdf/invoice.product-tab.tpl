@@ -27,7 +27,7 @@
 	<table class="product" class="bordered-table" width="100%" cellpadding="4" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="{if $display_product_images}10{else}9{/if}" class="header">{l s='Rooms Details' pdf='true'}</th>
+				<th colspan="{if $display_product_images}9{else}8{/if}" class="header">{l s='Rooms Details' pdf='true'}</th>
 			</tr>
 			<tr>
 				{if $display_product_images}
@@ -35,7 +35,7 @@
 				{/if}
 				<th class="product header small">{l s='Room Description' pdf='true'}</th>
 				<th class="product header small">{l s='Hotel' pdf='true'}</th>
-					<th class="product header small">{l s='Tax Rate(s)' pdf='true'}</th>
+				<th class="product header small">{l s='Tax Rate(s)' pdf='true'}</th>
 				{* {if isset($layout.before_discount)}
 					<th class="product header small">{l s='Base price' pdf='true'} <br /> {l s='(Tax excl.)' pdf='true'}</th>
 				{/if} *}
@@ -67,11 +67,6 @@
 									{$data_v['hotel_name']}
 								</p>
 							</td>
-							{* <td>
-								<p class="text-left">
-									{$data_v['adults']} {l s='Adults'}, {$data_v['children']} {l s='Children'}
-								</p>
-							</td> *}
 							<td class="product center">
 								{$data_v['order_detail_tax_label']}
 							</td>

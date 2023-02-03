@@ -395,13 +395,6 @@ $(document).ready(function()
 	// 				autoScale : true,
 	// 				maxWidth : '100%',
 	// 				'hideOnContentClick': false,
-	// 				helpers: {
-	// 					overlay: {
-	// 						css: {
-	// 							'background': 'rgba(255, 255, 255, 0.95)'
-	// 						},
-	// 					},
-	// 				},
 	// 				afterClose: function() {
 	// 					// reload so that changes prices will reflect everywhere
 	// 					location.reload();

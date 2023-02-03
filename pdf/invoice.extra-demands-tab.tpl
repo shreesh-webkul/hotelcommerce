@@ -32,7 +32,7 @@
 			</tr>
 			<tr>
 				<th class="header-left small">{l s='Room Type' pdf='true'}</th>
-				<th class="header-left small">{l s='Extra demand name' pdf='true'}</th>
+				<th class="header-left small">{l s='Name' pdf='true'}</th>
 				<th class="header-left small">{l s='Tax rate(s)' pdf='true'}</th>
 				<th class="header-left small">{l s='Total' pdf='true'} <br /> {l s='(Tax excl.)' pdf='true'}</th>
 			</tr>
@@ -111,50 +111,16 @@
 	<table id="demands-table" class="bordered-table" width="100%" cellpadding="4" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="5" class="header">{l s='Additional service Details' pdf='true'}</th>
+				<th colspan="5" class="header">{l s='Service Details' pdf='true'}</th>
 			</tr>
 			<tr>
 				<th class="header-left small">{l s='Room Type' pdf='true'}</th>
-				<th class="header-left small">{l s='Additional service name' pdf='true'}</th>
+				<th class="header-left small">{l s='Name' pdf='true'}</th>
 				<th class="header small">{l s='Tax rate(s)' pdf='true'}</th>
 				<th class="header small">{l s='Qty' pdf='true'}</th>
 				<th class="header-left small">{l s='Total' pdf='true'} <br /> {l s='(Tax excl.)' pdf='true'}</th>
 			</tr>
 		</thead>
-		{* <tbody>
-			{if isset($cart_htl_data)}
-				{foreach from=$cart_htl_data key=data_k item=data_v}
-					{foreach from=$data_v['date_diff'] key=rm_k item=rm_v}
-						{if isset($rm_v['extra_demands']) && $rm_v['extra_demands']}
-							{assign var=roomCount value=1}
-							{foreach $rm_v['extra_demands'] as $roomDemand}
-								{foreach name=demandRow from=$roomDemand['extra_demands'] item=demand}
-									<tr class="header small">
-										{if $smarty.foreach.demandRow.first}
-											<td rowspan="{$roomDemand['extra_demands']|count}">
-												{$data_v['name']}<br>
-												{$rm_v['data_form']} {l s='to' pdf='true'} {$rm_v['data_to']}<br>
-												<strong>{l s='Room' pdf='true'} - {$roomCount}</strong>
-											</td>
-										{/if}
-										<td>
-											{$demand['name']}
-										</td>
-										<td>
-											{$demand['extra_demands_tax_label']}
-										</td>
-										<td>
-											{displayPrice currency=$order->id_currency price=$demand['total_price_tax_excl']}
-										</td>
-									</tr>
-								{/foreach}
-								{assign var=roomCount value=$roomCount+1}
-							{/foreach}
-						{/if}
-					{/foreach}
-				{/foreach}
-			{/if}
-		</tbody> *}
 		<tbody>
 				{* {foreach from=$cart_htl_data key=data_k item=data_v}
 					{foreach from=$data_v['date_diff'] key=rm_k item=rm_v} *}

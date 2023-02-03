@@ -36,7 +36,7 @@
 							<th><span class="fixed-width-lg title_box">{l s='Occupancy'}</span></th>
 						{/if}
 						<th><span class="title_box">{l s='Unit Price (tax excl)'}</span></th>
-							<th><span class="title_box">{l s='Additinal Facilities (tax excl)'}</span></th>
+							<th><span class="title_box">{l s='Extra Services (tax excl)'}</span></th>
 							<th><span class="title_box">{l s='Total Rooms Price (tax excl)'}</span></th>
 							<th><span class="title_box">{l s='Total Price (tax excl)'}</span></th>
 							<th></th>
@@ -148,8 +148,8 @@
 									</button>
 									{if (isset($data.extra_demands) && $data.extra_demands) || isset($data.additional_service) && $data.additional_service}
 										<br />
-										<a href="#" id_room={$data.id_room|escape:'html':'UTF-8'} date_from="{$data.date_from|escape:'html':'UTF-8'}" date_to="{$data.date_to|escape:'html':'UTF-8'}" id_product="{$data.id_product|escape:'html':'UTF-8'}" id_cart="{$data.id_cart|escape:'html':'UTF-8'}" class="open_rooms_extra_demands btn btn-success" title="{l s='Click here to add or remove the additinal facilities of this room type.'}">
-											<i class="icon-plus"></i>&nbsp;{l s='Facilities'}
+										<a href="#" id_room={$data.id_room|escape:'html':'UTF-8'} date_from="{$data.date_from|escape:'html':'UTF-8'}" date_to="{$data.date_to|escape:'html':'UTF-8'}" id_product="{$data.id_product|escape:'html':'UTF-8'}" id_cart="{$data.id_cart|escape:'html':'UTF-8'}" class="open_rooms_extra_demands btn btn-success" title="{l s='Click here to add or remove the extra services of this room type.'}">
+											<i class="icon-plus"></i>&nbsp;{l s='Services'}
 										</a>
 									{/if}
 								</td>

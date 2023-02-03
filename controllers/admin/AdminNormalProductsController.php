@@ -59,7 +59,6 @@ class AdminNormalProductsControllerCore extends AdminController
 
     protected $id_current_category;
 
-    protected $is_roomtype_list;
 
     public function __construct()
     {
@@ -239,34 +238,8 @@ class AdminNormalProductsControllerCore extends AdminController
                 'title' => $this->l('Default shop'),
                 'filter_key' => 'shop!name',
             );
-        } else {
-            if ($this->is_roomtype_list) {
-                $this->fields_list['hotel_name'] = array(
-                    'title' => $this->l('Hotel'),
-                    'filter_key' => 'hbl!hotel_name',
-                    'callback' => 'getHotelName',
-                );
-            }
         }
 
-        if ($this->is_roomtype_list) {
-            $this->fields_list['adults'] = array(
-                'title' => $this->l('Adults'),
-                'filter_key' => 'hrt!adults',
-                'align' => 'center',
-            );
-            $this->fields_list['child'] = array(
-                'title' => $this->l('Children'),
-                'filter_key' => 'hrt!children',
-                'align' => 'center',
-            );
-            // use it for total rooms
-            $this->fields_list['num_rooms'] = array(
-                'title' => $this->l('Total Rooms'),
-                'align' => 'center',
-                'havingFilter' => true,
-            );
-        }
         $this->fields_list['price'] = array(
             'title' => $this->l('Base price'),
             'type' => 'price',

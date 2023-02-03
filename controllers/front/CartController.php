@@ -542,6 +542,12 @@ class CartControllerCore extends FrontController
                         $operator,
                         $this->id_address_delivery
                     );
+                    if ($operator == 'up') {
+                        $this->context->cookie->currentAddedProduct = json_encode(array(
+                            'id_product' => $this->id_product,
+                            'qty' => $this->qty
+                        ));
+                    }
                 }
 
                 /*------  BY Webkul ------*/
@@ -609,13 +615,16 @@ class CartControllerCore extends FrontController
                 $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                 if ($objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idServiceProduct)) {
                     // validate quanitity
-                    $objProduct = new Product($objHotelCartBookingData->id_product);
-                    if ($objProduct->allow_multiple_quantity) {
-                        if (!Validate::isUnsignedInt($qty)) {
-                            $this->errors[] = Tools::displayError('The quantity you\'ve entered is invalid.');
+                    if (Validate::isLoadedObject($objProduct = new Product($idServiceProduct))) {
+                        if ($objProduct->allow_multiple_quantity) {
+                            if (!Validate::isUnsignedInt($qty)) {
+                                $this->errors[] = Tools::displayError('The quantity you\'ve entered is invalid.');
+                            }
+                        } else {
+                            $qty = 1;
                         }
                     } else {
-                        $qty = 1;
+                        $this->errors[] = Tools::displayError('This Service product is not available.');
                     }
                 } else {
                     $this->errors[] = Tools::displayError('This Service is not available with selected room.');

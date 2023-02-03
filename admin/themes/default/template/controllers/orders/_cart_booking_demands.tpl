@@ -29,7 +29,7 @@
 						<li role="presentation" class="active"><a href="#room_type_demands_desc" aria-controls="facilities" role="tab" data-toggle="tab">{l s='Facilities'}</a></li>
 					{/if}
 					{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
-						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_service_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Products'}</a></li>
+						<li role="presentation" {if !isset($selectedRoomDemands) || !$selectedRoomDemands}class="active"{/if}><a href="#room_type_service_product_desc" aria-controls="services" role="tab" data-toggle="tab">{l s='Services'}</a></li>
 					{/if}
 				</ul>
 			</div>
@@ -99,7 +99,7 @@
 					{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
 						<div id="room_type_service_product_desc" class="tab-pane{if !isset($selectedRoomDemands) || !$selectedRoomDemands} active{/if}">
 							<div class="rooms_extra_demands_head">
-								<p class="rooms_extra_demands_text">{l s='Add below products to the rooms for better hotel experience'}</p>
+								<p class="rooms_extra_demands_text">{l s='Add below services to the rooms for better hotel experience'}</p>
 							</div>
 							<div id="room_type_services_desc">
 								{assign var=roomCount value=1}
@@ -128,11 +128,7 @@
 																		<p>{$product['name']|escape:'html':'UTF-8'}</p>
 																		{if $product.allow_multiple_quantity}
 																			<div class="qty_container">
-																				<input type="text" class="form-control qty" id="qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
-																				<div class="qty_controls">
-																					<a href="#" class="qty_up"><span><i class="icon-plus"></i></span></a>
-																					<a href="#" class="qty_down"><span><i class="icon-minus"></i></span></a>
-																				</div>
+																				<input type="number" class="form-control qty" id="qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" min="1" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
 																			</div>
 																		{/if}
 																	</div>
@@ -140,7 +136,7 @@
 															</div>
 															<div class="col-xs-6">
 																{if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
-																	<span class="pull-right">{if !$priceDisplay}{convertPrice price=$product.price_tax_incl}{else}{convertPrice price=$product.price_tax_exc}{/if}</span>
+																	<span class="pull-right">{convertPrice price=$product.price_tax_exc}</span>
 																{/if}
 															</div>
 														</div>

@@ -566,7 +566,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $footer['service_products_price_tax_incl'] = $this->order->getTotalProductsWithTaxes(false, false, Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE);
         $footer['additional_service_price_tax_excl'] = $this->order->getTotalProductsWithoutTaxes(false, false, Product::SERVICE_PRODUCT_WITH_ROOMTYPE) + $totalDemandsPriceTE;
         $footer['additional_service_price_tax_incl'] = $this->order->getTotalProductsWithTaxes(false, false, Product::SERVICE_PRODUCT_WITH_ROOMTYPE) + $totalDemandsPriceTI;
-
         $data = array(
             'cart_htl_data' => $cart_htl_data,
             'service_product_data' => $service_product_data,
@@ -646,7 +645,6 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                 }
             }
         }
-
         $data = array(
             'showTaxName' => $showTaxName,
             'use_one_after_another_method' => $this->order_invoice->useOneAfterAnotherTaxComputationMethod(),

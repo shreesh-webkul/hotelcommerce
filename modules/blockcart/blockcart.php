@@ -235,20 +235,34 @@ class Blockcart extends Module
                 Product::defineProductImage($image, $this->context->language->id),
                 'cart_default'
             );
-            $price = $addedProduct['price'] = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
-                $objProduct->id,
-                $addedProduct['date_from'],
-                $addedProduct['date_to'],
-                $addedProduct['req_rm']
-            );
-
-            if ($priceDisplayMethod == PS_TAX_EXC) {
-                $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_incl']);
+            $addedProduct['booking_product'] = $objProduct->booking_product;
+            if ($objProduct->booking_product) {
+                $price = $addedProduct['price'] = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
+                    $objProduct->id,
+                    $addedProduct['date_from'],
+                    $addedProduct['date_to'],
+                    $addedProduct['req_rm']
+                );
+                if ($priceDisplayMethod == PS_TAX_EXC) {
+                    $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_incl']);
+                } else {
+                    $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_excl']);
+                }
+                $addedProduct['date_from'] = Tools::displayDate($addedProduct['date_from']);
+                $addedProduct['date_to'] = Tools::displayDate($addedProduct['date_to']);
             } else {
-                $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_excl']);
+                // @todo get price of added product from front
+                $addedProduct['price'] = ProductCore::getPriceStatic(
+                    $objProduct->id,
+                    $useTax,
+                    null,
+                    6,
+                    null,
+                    false,
+                    true,
+                    $addedProduct['qty']
+                ) * $addedProduct['qty'];
             }
-            $addedProduct['date_from'] = Tools::displayDate($addedProduct['date_from']);
-            $addedProduct['date_to'] = Tools::displayDate($addedProduct['date_to']);
 
             unset($this->context->cookie->currentAddedProduct);
         }

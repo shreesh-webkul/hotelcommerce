@@ -1720,30 +1720,12 @@
 			$('#room_extra_demand_content #back_to_service_btn').hide();
 		});
 
-		$(document).on('click', '#rooms_type_extra_demands .qty_up', function(e) {
-			e.preventDefault();
-			qtyfield = $(this).closest('.qty_container').find('input.qty');
-			var currentVal = parseInt(qtyfield.val());
-			qtyfield.val(currentVal + 1).trigger('focusout');
-		});
-
-		$(document).on('click', '#rooms_type_extra_demands .qty_down', function(e) {
-			e.preventDefault();
-			qtyfield = $(this).closest('.qty_container').find('input.qty');
-			var currentVal = parseInt(qtyfield.val());
-			if (!isNaN(currentVal) && currentVal > 1) {
-				qtyfield.val(currentVal - 1).trigger('focusout');
-			} else {
-				qtyfield.val(1).trigger('focusout');
-			}
-		});
-
 		$(document).on('focusout', '#rooms_type_extra_demands .qty', function(e) {
 			var qty_wntd = $(this).val();
 			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
 				$(this).val(1);
 			}
-			{* updateServiceProducts($(this)); *}
+			updateServiceProducts($(this));
 		});
 
 		function updateServiceProducts(element)

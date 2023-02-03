@@ -1581,24 +1581,6 @@
 			updateServiceProducts(this);
 		});
 
-		$(document).on('click', '#rooms_type_extra_demands .qty_up', function(e) {
-			e.preventDefault();
-			qtyfield = $(this).closest('.qty_container').find('input.qty');
-			var currentVal = parseInt(qtyfield.val());
-			qtyfield.val(currentVal + 1).trigger('focusout');
-		});
-
-		$(document).on('click', '#rooms_type_extra_demands .qty_down', function(e) {
-			e.preventDefault();
-			qtyfield = $(this).closest('.qty_container').find('input.qty');
-			var currentVal = parseInt(qtyfield.val());
-			if (!isNaN(currentVal) && currentVal > 1) {
-				qtyfield.val(currentVal - 1).trigger('focusout');
-			} else {
-				qtyfield.val(1).trigger('focusout');
-			}
-		});
-
 		$(document).on('focusout', '#rooms_type_extra_demands .qty', function(e) {
 			var qty_wntd = $(this).val();
 			if (qty_wntd == '' || !$.isNumeric(qty_wntd)) {
@@ -2045,7 +2027,7 @@
 				</div>
 				<div class="col-lg-2">
 					<div class="data-focus">
-						<span>{l s='Total additinal services (Tax excl.)'}</span><br/>
+						<span>{l s='Total extra services (Tax excl.)'}</span><br/>
 						<span id="total_extra_services" class="size_l text-success"></span>
 					</div>
 				</div>

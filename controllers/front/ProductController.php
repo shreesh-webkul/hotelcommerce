@@ -390,7 +390,7 @@ class ProductControllerCore extends FrontController
                             'id_hotel' => $hotel_id,
                             'room_type_demands' => $roomTypeDemands,
                             'room_type_info' => $room_info_by_product_id,
-                        'isHotelRefundable' => $hotel_branch_obj->isRefundable(),
+                            'isHotelRefundable' => $hotel_branch_obj->isRefundable(),
                             'max_order_date' => $max_order_date,
                             'preparation_time' => $preparationTime,
                             'warning_num' => Configuration::get('WK_ROOM_LEFT_WARNING_NUMBER'),
@@ -413,7 +413,6 @@ class ProductControllerCore extends FrontController
                             'hotel_has_images' => (bool) HotelImage::getCover($hotel_id),
                             'ftr_img_src' => _PS_IMG_.'rf/',
                             'order_date_restrict' => $order_date_restrict,
-                            'PS_SERVICE_PRODUCT_DISPLAY_TYPE' => Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE'),
                             'PS_SERVICE_PRODUCT_CATEGORY_FILTER' => Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER'),
                         )
                     );
@@ -510,11 +509,8 @@ class ProductControllerCore extends FrontController
     {
         // get service products for room type
         $p = 1;
-        $n = 0;
+        $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
         $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
-        if (Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE') == 'list') {
-            $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
-        }
         $smartyVars = array();
         if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER')) {
             $serviceProductsByCategory = $objRoomTypeServiceProduct->getServiceProductsGroupByCategory(
@@ -656,19 +652,17 @@ class ProductControllerCore extends FrontController
         $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
 
         // calculate demand price now
-        $demandsPrice = 0;
+        $demandsPricePerRoom = 0;
         $roomTypeDemands = $objHRTDemand->getRoomTypeDemands($idProduct);
         if ($jsonDemands !== '') {
             $cartDemands = json_decode($jsonDemands, true);
-            $demandsPrice = $objHRTDemandPrice->getRoomTypeDemandsTotalPrice(
+            $demandsPricePerRoom = $objHRTDemandPrice->getRoomTypeDemandsTotalPrice(
                 $idProduct,
                 $cartDemands,
                 $useTax,
                 $dateFrom,
                 $dateTo
             );
-
-            $demandsPrice *= $quantity;
 
             // send demand info to booking form
             foreach($cartDemands as &$demand) {
@@ -692,7 +686,6 @@ class ProductControllerCore extends FrontController
                         }
                     }
 
-                    $advanceOption = $objDemandAdvanceOption->getGlobalDemandAdvanceOptions($demand['id_global_demand'], $this->context->language->id);
                     $demand['price'] = HotelRoomTypeDemand::getPriceStatic(
                         $idProduct,
                         $objRoomTypeGlobalDemand->id,
@@ -717,12 +710,12 @@ class ProductControllerCore extends FrontController
                     $serviceProductsPrice += $productPrice;
                 }
                 $smartyVars['selected_service_product'] = $roomServiceProducts;
-                // multiply price by number of room required
-                $serviceProductsPrice *= $quantity;
             }
-            $demandsPrice += $serviceProductsPrice;
+            $demandsPricePerRoom += $serviceProductsPrice;
             $totalPrice += $serviceProductsPrice;
         }
+        // multiply price by number of room required
+        $demandsPrice = $demandsPricePerRoom * $quantity;
         // calculate total price
         $totalPrice = $totalRoomPrice + $demandsPrice;
         // send occupancy information searched by the user
@@ -745,6 +738,7 @@ class ProductControllerCore extends FrontController
         $smartyVars['total_available_rooms'] = $totalAvailableRooms;
         $smartyVars['has_room_type_demands'] = $roomTypeDemands ? true : false; // whether to show price breakup
         $smartyVars['rooms_price'] = $totalRoomPrice;
+        $smartyVars['demands_price_per_room'] = $demandsPricePerRoom;
         $smartyVars['demands_price'] = $demandsPrice;
         $smartyVars['total_price'] = $totalPrice;
         $this->context->smarty->assign($smartyVars);
@@ -1295,32 +1289,28 @@ class ProductControllerCore extends FrontController
             if ($p && $id_product) {
                 if (Validate::isLoadedObject($objProduct = new Product($id_product))) {
                     $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
-                    if (Configuration::get('PS_SERVICE_PRODUCT_DISPLAY_TYPE') == 'list') {
-                        $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
-                        if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER') && !$id_category) {
-                            $response['error'] = Tools::displayError('Invaild Request, please try again');
-                        }
-                        if (empty($response['error'])) {
-                            $response['status'] = true;
-                            if ($roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData(
-                                $objProduct->id,
-                                $p,
-                                $n,
-                                true,
-                                2,
-                                $id_category
-                            )) {
-                                $this->context->smarty->assign('service_products', $roomTypeServiceProducts);
-                                if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER')) {
-                                    $this->context->smarty->assign('group', $id_category);
-                                } else {
-                                    $this->context->smarty->assign('group', 'all');
-                                }
-                                $response['service_products'] = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/service-products-list.tpl');
-                            }
-                        }
-                    } else {
+                    $n = RoomTypeServiceProduct::WK_NUM_RESULTS;
+                    if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER') && !$id_category) {
                         $response['error'] = Tools::displayError('Invaild Request, please try again');
+                    }
+                    if (empty($response['error'])) {
+                        $response['status'] = true;
+                        if ($roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData(
+                            $objProduct->id,
+                            $p,
+                            $n,
+                            true,
+                            2,
+                            $id_category
+                        )) {
+                            $this->context->smarty->assign('service_products', $roomTypeServiceProducts);
+                            if (Configuration::get('PS_SERVICE_PRODUCT_CATEGORY_FILTER')) {
+                                $this->context->smarty->assign('group', $id_category);
+                            } else {
+                                $this->context->smarty->assign('group', 'all');
+                            }
+                            $response['service_products'] = $this->context->smarty->fetch(_PS_THEME_DIR_.'_partials/service-products-list.tpl');
+                        }
                     }
                 } else {
                     $response['error'] = Tools::displayError('Room Type not Found');

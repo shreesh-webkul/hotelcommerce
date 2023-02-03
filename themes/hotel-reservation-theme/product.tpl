@@ -365,7 +365,7 @@
 									{if $product->show_price && !isset($restricted_country_mode) && !$PS_CATALOG_MODE}
 										<div class="col-xs-1">
 											<p class="checkbox">
-												<input value="{$idGlobalDemand|escape:'html':'UTF-8'}" type="checkbox" class="id_room_type_demand" />
+												<input value="{$idGlobalDemand|escape:'html':'UTF-8'}" type="checkbox" class="id_room_type_demand" data-id_global_demand="{$idGlobalDemand|escape:'html':'UTF-8'}" />
 											</p>
 										</div>
 									{/if}
@@ -393,7 +393,7 @@
 
 		</div> <!-- end primary_block -->
 		{if !$content_only}
-	{if (isset($quantity_discounts) && count($quantity_discounts) > 0)}
+			{if (isset($quantity_discounts) && count($quantity_discounts) > 0)}
 				<!-- quantity discount -->
 				<section class="page-product-box ">
 					<h3 class="page-product-heading">{l s='Volume discounts'}</h3>
@@ -783,6 +783,7 @@
 	{addJsDefL name=wrong_qty_cond}{l s='you are trying for a invalid quantity.' js=1}{/addJsDefL}
 	{addJsDefL name=select_txt}{l s='Select' js=1}{/addJsDefL}
 	{addJsDefL name=remove_txt}{l s='Remove' js=1}{/addJsDefL}
+    {addJsDefL name=cart_extra_service_add}{l s='Service is added to cart' js=1}{/addJsDefL}
 
 	{/strip}
 {/if}

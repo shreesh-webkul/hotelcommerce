@@ -269,7 +269,7 @@
 								<tr class="item">
 									<td colspan="3"></td>
 									<td colspan="3">
-										<strong>{l s='Total service products cost (tax excl.)'}</strong>
+										<strong>{l s='Total extra services cost (tax excl.)'}</strong>
 									</td>
 									<td colspan="2">
 										<span>{displayWtPriceWithCurrency price=$orderTotalInfo['additional_service_te'] currency=$currency}</span>
@@ -279,7 +279,7 @@
 							<tr class="item">
 								<td colspan="3"></td>
 								<td colspan="3">
-									<strong>{l s='Total service products cost'} {if $use_tax}{l s='(tax incl.)'}{/if}</strong>
+									<strong>{l s='Total extra services cost'} {if $use_tax}{l s='(tax incl.)'}{/if}</strong>
 								</td>
 								<td colspan="2">
 									<span>{displayWtPriceWithCurrency price=$orderTotalInfo['additional_service_ti'] currency=$currency convert=1}</span>

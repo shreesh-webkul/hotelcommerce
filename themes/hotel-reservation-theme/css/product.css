@@ -1397,37 +1397,54 @@ Quick View Styles
   color: #505050;
 }
 
+/* service popup design */
 .price_desc_block .services-info {
   cursor: pointer;
 }
 .price_desc_block .services-info .popover {
+  background: transparent;
   border: unset;
-  background-color: #7EC77B;
-  min-width: 260px;
+  color: #333;
+  min-width: 300px;
+  padding: 0 10px;
 }
-.price_desc_block .services-info .popover .popover-title {
-  background-color: unset;
-  font-weight: 700;
-  border: unset;
-  font-size: 16px;
+.price_desc_block .services-info .popover-content {
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px 0 rgb(0 0 0 / 20%);
+  border-radius: 5px;
 }
-
 .price_desc_block .services-info .popover.bottom .arrow:after{
-  border-bottom-color: #7EC77B;
+  border-bottom-color: #FFFFFF;
 }
 .price_desc_block .services-info .popover .extra_service_panel + .extra_service_panel {
   margin-top: 15px;
 }
 .price_desc_block .services-info .popover .panel_title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 }
+.price_desc_block .services-info .popover .extra_service_panel .table {
+  margin-bottom: 0px;}
+  .price_desc_block .services-info .popover .extra_service_panel .table  th {
+    font-size: 12px;
+    background-color: #fff;
+  }
+  .price_desc_block .services-info .popover .extra_service_panel .table  td {
+    font-size: 13px;
+    border-top: unset;
+  }
+
 .price_desc_block .services-info .popover hr {
   margin: 9px 0px
 }
-.price_desc_block .services-info .popover .product-row + .product-row {
-  margin-top: 12px;
+.price_desc_block .services-info .popover .summary-row {
+  font-size: 13px;
 }
+.price_desc_block .services-info .popover .summary-row .service_price {
+  font-size: 14px;
+}
+
+
 
 /* extra demands Css */
 #rooms_extra_demands {
@@ -1504,33 +1521,19 @@ ul.service-product-nav > li:hover {
     margin-bottom: 25px;
   }
 }
-/* ul.service-products-slider {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display:  flex;
-  flex-wrap: wrap;
-} */
-/* ul.service-products-slider  > [class*='col-']  {
-  display: flex;
-  flex-direction: column;
-} */
-
 .service-product-element {
   color: #333333;
   position: relative;
 }
-.service-products-slider .service-product-element {
-  border: 1px solid #CCCCCC;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  padding: 10px;
+.service-product-block {
+    margin-bottom: 10px;
 }
-
-.service-products-slider .service-product-element .service-product-img {
-  margin-bottom : 9px;
+.service_product_action_block {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
 }
-
 .service-product-element .service-product-img {
   border-radius: 4px;
 }
@@ -1541,12 +1544,12 @@ ul.service-product-nav > li:hover {
 }
 .service-product-element .service-product-short-desc {
   font-size: 14px;
-  line-height: 19px;
+  line-height: 22px;
 }
 .service-product-element .service-product-price {
   font-weight: 600;
-  font-size: 14px;
-  line-height: 19px;
+  font-size: 22px;
+  line-height: 27.24px;
 }
 
 .service-product-element .service-product-actions {
@@ -1560,13 +1563,12 @@ ul.service-product-nav > li:hover {
 .service-product-element .qty_container > * {
   float: left;
 }
+.service-product-element .qty_container {
+    margin-right: 10px;
+}
 .service-product-element .service_product_qty {
   border-radius: 4px 0px 0px 4px;
   max-width: 70px;
-}
-.service-products-slider .service-product-element .service_product_qty {
-  max-width: 60px;
-  height: 40px;
 }
 .service-product-element .qty_controls a {
   display: block;
@@ -1576,10 +1578,6 @@ ul.service-product-nav > li:hover {
   padding: 5px;
   line-height: 11px;
   font-size: 12px;
-}
-.service-products-slider .service-product-element .qty_controls a {
-  line-height: 8px;
-  font-size: 7px;
 }
 
 .service-product-element .qty_controls a:first-of-type {
@@ -1591,10 +1589,11 @@ ul.service-product-nav > li:hover {
 }
 .service-product-element .btn-service-product {
   border-radius: 4px;
+  font-size: 14px;
   color: #ffffff;
   font-weight: bold;
   text-transform: uppercase;
-  padding: 10px 30px;
+  padding: 12px 30px;
   outline: none;
 }
 .service-product-element .btn-service-product.btn-success:hover, .service-product-element .btn-service-product.btn-success:focus, .service-product-element .btn-service-product.btn-success:active, .service-product-element .btn-service-product.btn-success.active {

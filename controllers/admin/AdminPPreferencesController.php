@@ -299,17 +299,6 @@ class AdminPPreferencesControllerCore extends AdminController
                         'type' => 'bool'
                     ),
 
-                    'PS_SERVICE_PRODUCT_DISPLAY_TYPE' => array(
-                        'title' => $this->l('Service Products display type'),
-                        'hint' => $this->l('Display style for service products on room type page.'),
-                        'type' => 'select',
-                        'list' => array(
-                            array('id' => '1', 'name' => $this->l('List'), 'value' => 'list'),
-                            array('id' => '2', 'name' => $this->l('Slider'), 'value' => 'slider'),
-                        ),
-                        'identifier' => 'value'
-                    ),
-
                     'PS_SERVICE_PRODUCT_CATEGORY_FILTER' => array(
                         'title' => $this->l('Show category filter for service products'),
                         'validation' => 'isBool',

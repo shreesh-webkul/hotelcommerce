@@ -26,15 +26,30 @@
         </div>
         <div class="col-xs-8 col-sm-9 col-md-10">
             <div class="row">
-                <div class="col-sm-12 col-md-8 col-lg-9 clearfix">
-                    <p class="service-product-name">{$product['name']}</p>
-                    {if $product['description_short']}
-                        <div class="service-product-short-desc">
-                            {$product['description_short']}
-                        </div>
+                <div class="col-sm-12 clearfix service-product-block">
+                    <span class="service-product-name">{$product['name']}</span>
+                </div>
+                {if $product['description_short']}
+                    <div class="col-sm-12 clearfix service-product-short-desc service-product-block">
+                        {$product['description_short']}
+                    </div>
+                {/if}
+
+                <div class="col-sm-12 service_product_action_block">
+                    {if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
+                        <span class="service-product-price">
+                            {if !$priceDisplay}{convertPrice price=$product.price_tax_incl}{else}{convertPrice price=$product.price_tax_exc}{/if}
+                        </span>
+                    {/if}
+
+                    <div>
+                    {if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
+                        {if $product.available_for_order && !$PS_CATALOG_MODE && !$order_date_restrict && !((isset($restricted_country_mode) && $restricted_country_mode))}
+                            <button class="btn btn-service-product{if isset($product.selected) && $product.selected} btn-danger remove_roomtype_product{else} btn-success add_roomtype_product{/if} pull-right" data-id-product="{$product.id_product}">{if isset($product.selected) && $product.selected}{l s='Remove'}{else}{l s='Select'}{/if}</button>
+                        {/if}
                     {/if}
                     {if $product.allow_multiple_quantity && $product.available_for_order}
-                        <div class="qty_container">
+                        <div class="qty_container pull-right">
                             <input type="hidden" class="service_product_qty" id="service_product_qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" value="{if isset($product.quantity_added) && $product.quantity_added}{$product.quantity_added|escape:'html':'UTF-8'}{else}1{/if}">
                             <div class="qty_count pull-left">
                                 <span>{if isset($product.quantity_added) && $product.quantity_added}{$product.quantity_added|escape:'html':'UTF-8'}{else}1{/if}</span>
@@ -46,16 +61,7 @@
                         </div>
                     {/if}
                 </div>
-                <div class="col-sm-12 col-md-4 col-lg-3 text-right product_actions">
-                    {if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
-                        <p class="service-product-price">
-                            {if !$priceDisplay}{convertPrice price=$product.price_tax_incl}{else}{convertPrice price=$product.price_tax_exc}{/if}
-                        </p>
-                        {if $product.available_for_order && !$PS_CATALOG_MODE && !$order_date_restrict && !((isset($restricted_country_mode) && $restricted_country_mode))}
-                            <button class="btn btn-service-product{if isset($product.selected) && $product.selected} btn-danger remove_roomtype_product{else} btn-success add_roomtype_product{/if}" data-id-product="{$product.id_product}">{if isset($product.selected) && $product.selected}{l s='Remove'}{else}{l s='Select'}{/if}</button>
-                        {/if}
-                    {/if}
-                </div>
+
             </div>
         </div>
     </li>

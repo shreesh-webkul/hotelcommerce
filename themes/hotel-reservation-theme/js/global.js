@@ -25,6 +25,8 @@
 //global variables
 var responsiveflag = false;
 
+
+
 $(document).ready(function(){
 	highdpiInit();
 	responsiveResize();
@@ -103,6 +105,8 @@ $(document).ready(function(){
 			next     : '<a title="' + FancyboxI18nNext + '" class="fancybox-nav fancybox-next" href="javascript:;"><span></span></a>',
 			prev     : '<a title="' + FancyboxI18nPrev + '" class="fancybox-nav fancybox-prev" href="javascript:;"><span></span></a>'
 		});
+	// change default overlay for fancybox
+	$.extend(true, $.fancybox.helpers.overlay, {defaults : {css : {background: 'rgba(255, 255, 255, 0.95)'}}});
 
 	// Close Alert messages
 	$(".alert.alert-danger").on('click', this, function(e){
@@ -144,13 +148,6 @@ $(document).ready(function(){
 					autoScale : true,
 					maxWidth : '100%',
 					'hideOnContentClick': false,
-					helpers: {
-						overlay: {
-							css: {
-								'background': 'rgba(255, 255, 255, 0.95)'
-							},
-						},
-					},
 					afterClose: function() {
 						if (result.reload) {
 							// reload so that changes prices will reflect everywhere

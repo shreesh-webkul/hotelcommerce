@@ -58,8 +58,6 @@ class AdminProductsControllerCore extends AdminController
 
     protected $id_current_category;
 
-    protected $is_roomtype_list;
-
     public function __construct()
     {
         $this->bootstrap = true;
@@ -239,33 +237,28 @@ class AdminProductsControllerCore extends AdminController
                 'filter_key' => 'shop!name',
             );
         } else {
-            if ($this->is_roomtype_list) {
-                $this->fields_list['hotel_name'] = array(
-                    'title' => $this->l('Hotel'),
-                    'filter_key' => 'hbl!hotel_name',
-                    'callback' => 'getHotelName',
-                );
-            }
-        }
-
-        if ($this->is_roomtype_list) {
-            $this->fields_list['adults'] = array(
-                'title' => $this->l('Adults'),
-                'filter_key' => 'hrt!adults',
-                'align' => 'center',
-            );
-            $this->fields_list['child'] = array(
-                'title' => $this->l('Children'),
-                'filter_key' => 'hrt!children',
-                'align' => 'center',
-            );
-            // use it for total rooms
-            $this->fields_list['num_rooms'] = array(
-                'title' => $this->l('Total Rooms'),
-                'align' => 'center',
-                'havingFilter' => true,
+            $this->fields_list['hotel_name'] = array(
+                'title' => $this->l('Hotel'),
+                'filter_key' => 'hbl!hotel_name',
+                'callback' => 'getHotelName',
             );
         }
+        $this->fields_list['adults'] = array(
+            'title' => $this->l('Adults'),
+            'filter_key' => 'hrt!adults',
+            'align' => 'center',
+        );
+        $this->fields_list['child'] = array(
+            'title' => $this->l('Children'),
+            'filter_key' => 'hrt!children',
+            'align' => 'center',
+        );
+        // use it for total rooms
+        $this->fields_list['num_rooms'] = array(
+            'title' => $this->l('Total Rooms'),
+            'align' => 'center',
+            'havingFilter' => true,
+        );
         $this->fields_list['price'] = array(
             'title' => $this->l('Base price'),
             'type' => 'price',
@@ -2268,11 +2261,7 @@ class AdminProductsControllerCore extends AdminController
             $this->tpl_list_vars['is_category_filter'] = (bool)$this->id_current_category;
 
             // Generate category selection tree
-            if ($this->is_roomtype_list) {
-                $catFilter = $this->l('Filter by Places');
-            } else {
-                $catFilter = $this->l('Filter by category');
-            }
+            $catFilter = $this->l('Filter by Places');
             $tree = new HelperTreeCategories('categories-tree', $catFilter);
             $tree->setAttribute('is_category_filter', (bool)$this->id_current_category)
                 ->setAttribute('base_url', preg_replace('#&id_category=[0-9]*#', '', self::$currentIndex).'&token='.$this->token)
@@ -2783,7 +2772,7 @@ class AdminProductsControllerCore extends AdminController
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
 
-    public function initFormStandardProduct($obj)
+    public function initFormServiceProduct($obj)
     {
         $data = $this->createTemplate($this->tpl_form);
         if ($obj->id) {
@@ -2825,41 +2814,41 @@ class AdminProductsControllerCore extends AdminController
                     $hotelRoomType['id_hotel'],
                     $obj->id
                 );
-                foreach ($serviceProducts as &$standardProduct) {
-                    $product = new Product($standardProduct['id_product'], false, $this->context->language->id);
-                    $standardProductPriceInfo = $objRoomTypeLinkPrice->getProductRoomTypeLinkPriceInfo(
+                foreach ($serviceProducts as &$serviceProduct) {
+                    $product = new Product($serviceProduct['id_product'], false, $this->context->language->id);
+                    $serviceProductPriceInfo = $objRoomTypeLinkPrice->getProductRoomTypeLinkPriceInfo(
                         $product->id,
                         $obj->id,
                         RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
                     );
-                    $standardProduct['id_product'] = $product->id;
-                    $standardProduct['name'] = $product->name;
-                    $standardProduct['category'] = $product->category;
-                    $standardProduct['default_price'] = $product->price;
-                    $standardProduct['id_tax_rules_group'] = $product->id_tax_rules_group;
-                    if ($standardProductPriceInfo) {
-                        $standardProduct['custom_price'] = $standardProductPriceInfo['price'];
-                        $standardProduct['id_tax_rules_group'] = $standardProductPriceInfo['id_tax_rules_group'];
-                        if ($standardProductPriceInfo['id_tax_rules_group'] == 0) {
-                            $standardProduct['tax_rules_group_name'] = 'No tax';
+                    $serviceProduct['id_product'] = $product->id;
+                    $serviceProduct['name'] = $product->name;
+                    $serviceProduct['category'] = $product->category;
+                    $serviceProduct['default_price'] = $product->price;
+                    $serviceProduct['id_tax_rules_group'] = $product->id_tax_rules_group;
+                    if ($serviceProductPriceInfo) {
+                        $serviceProduct['custom_price'] = $serviceProductPriceInfo['price'];
+                        $serviceProduct['id_tax_rules_group'] = $serviceProductPriceInfo['id_tax_rules_group'];
+                        if ($serviceProductPriceInfo['id_tax_rules_group'] == 0) {
+                            $serviceProduct['tax_rules_group_name'] = 'No tax';
                         } else {
                             $objTaxRuleGroup = new TaxRulesGroup(
-                                $standardProductPriceInfo['id_tax_rules_group'],
+                                $serviceProductPriceInfo['id_tax_rules_group'],
                                 $this->context->language->id
                             );
-                            $standardProduct['tax_rules_group_name'] = $objTaxRuleGroup->name;
+                            $serviceProduct['tax_rules_group_name'] = $objTaxRuleGroup->name;
                         }
-                        $standardProduct['id_room_type_service_product_price'] = $standardProductPriceInfo['id_room_type_service_product_price'];
+                        $serviceProduct['id_room_type_service_product_price'] = $serviceProductPriceInfo['id_room_type_service_product_price'];
                     }
 
                     if ($product->id_tax_rules_group == 0) {
-                        $standardProduct['default_tax_rules_group_name'] = 'No tax';
+                        $serviceProduct['default_tax_rules_group_name'] = 'No tax';
                     } else {
                         $objTaxRuleGroup = new TaxRulesGroup(
                             $product->id_tax_rules_group,
                             $this->context->language->id
                         );
-                        $standardProduct['default_tax_rules_group_name'] = $objTaxRuleGroup->name;
+                        $serviceProduct['default_tax_rules_group_name'] = $objTaxRuleGroup->name;
                     }
                 }
 

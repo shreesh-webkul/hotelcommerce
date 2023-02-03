@@ -121,11 +121,7 @@
 												<div>{$service['name']|escape:'html':'UTF-8'}</div>
 													{if $service['allow_multiple_quantity']}
 														<div class="qty_container">
-															<input type="text" class="form-control qty" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" data-id_product="{$service['id_product']|escape:'html':'UTF-8'}" value="{$service['quantity']|escape:'html':'UTF-8'}">
-															<div class="qty_controls">
-																<a href="#" class="qty_up"><span><i class="icon-plus"></i></span></a>
-																<a href="#" class="qty_down"><span><i class="icon-minus"></i></span></a>
-															</div>
+															<input type="number" class="form-control qty" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" data-id_product="{$service['id_product']|escape:'html':'UTF-8'}" value="{$service['quantity']|escape:'html':'UTF-8'}">
 														</div>
 													{/if}
 											</td>
@@ -158,11 +154,7 @@
 													<p>{$product['name']|escape:'html':'UTF-8'}</p>
 													{if $product.allow_multiple_quantity}
 														<div class="qty_container">
-															<input type="text" class="form-control qty" id="qty_{$product['id_product']|escape:'html':'UTF-8'}" name="service_qty[{$product['id_product']|escape:'html':'UTF-8'}]" data-id-product="{$product.id_product|escape:'html':'UTF-8'}" value="1">
-															<div class="qty_controls">
-																<a href="#" class="qty_up"><span><i class="icon-plus"></i></span></a>
-																<a href="#" class="qty_down"><span><i class="icon-minus"></i></span></a>
-															</div>
+															<input type="number" class="form-control qty" id="qty_{$product['id_product']|escape:'html':'UTF-8'}" name="service_qty[{$product['id_product']|escape:'html':'UTF-8'}]" data-id-product="{$product.id_product|escape:'html':'UTF-8'}" value="1">
 														</div>
 													{/if}
 												</div>

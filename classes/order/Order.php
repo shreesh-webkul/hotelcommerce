@@ -2440,7 +2440,6 @@ class OrderCore extends ObjectModel
             foreach ($tax_calculator->taxes as $tax) {
                 $tax_rates[$tax->id] = $tax->rate;
             }
-
             foreach ($tax_calculator->getTaxesAmount($discounted_price_tax_excl) as $id_tax => $unit_amount) {
                 $total_tax_base = 0;
                 switch ($round_type) {
@@ -2476,7 +2475,6 @@ class OrderCore extends ObjectModel
                 );
             }
         }
-
         if (!empty($order_detail_tax_rows)) {
             foreach ($breakdown as $data) {
                 $actual_total_tax += Tools::ps_round($data['tax_amount'], _PS_PRICE_COMPUTE_PRECISION_, $this->round_mode);

@@ -29,59 +29,31 @@
     </ul>
     <div class="card">
         <div class="row">
-            {if $PS_SERVICE_PRODUCT_DISPLAY_TYPE == 'list'}
-                <div class="col-sm-12 tab-content">
-                    {if $PS_SERVICE_PRODUCT_CATEGORY_FILTER}
-                        {foreach $service_products_by_category as $service_product_category}
-                            <div class="tab-pane {if $service_product_category@iteration == 1}active{/if}" id="category_{$service_product_category['id_category']}">
-                                <ul class="product-list">
-                                    {include file="{$tpl_dir}_partials/service-products-list.tpl" service_products=$service_product_category['products'] group=$service_product_category['id_category'] init=true}
-                                </ul>
-                                {if RoomTypeServiceProduct::WK_NUM_RESULTS < $service_product_category['num_products']}
-                                    <div class="show_more_btn_container">
-                                        <button class="btn btn-default get-service-products" data-id_category="{$service_product_category['id_category']}" data-page="2" data-num_total="{$service_product_category['num_products']}">{l s='Show More'}</button>
-                                    </div>
-                                {/if}
-                            </div>
-                        {/foreach}
-                    {else}
-                        <ul class="product-list">
-                            {include file="{$tpl_dir}_partials/service-products-list.tpl" service_products=$service_products group='all' init=true}
-                        </ul>
-                        {if RoomTypeServiceProduct::WK_NUM_RESULTS < $num_total_service_products}
-                            <div class="show_more_btn_container">
-                                <button class="btn btn-default get-service-products" data-page="2" data-num_total="{$num_total_service_products}">{l s='Show More'}</button>
-                            </div>
-                        {/if}
-                    {/if}
-                </div>
-            {else}
-                <div class="col-sm-12 {if $PS_SERVICE_PRODUCT_CATEGORY_FILTER}tab-content{/if}">
-                    {if $PS_SERVICE_PRODUCT_CATEGORY_FILTER}
-                        {foreach $service_products_by_category as $service_product_category}
-                            <div class="tab-pane row {if $service_product_category@iteration == 1}active{/if}" id="category_{$service_product_category['id_category']}">
-                                <ul class="service-products-slider">
-                                    {foreach $service_product_category['products'] as $product}
-                                        <li class="col-xs-4">
-                                            {include file="{$tpl_dir}_partials/service-products-card.tpl" product=$product group=$service_product_category@iteration}
-                                        </li>
-                                    {/foreach}
-                                </ul>
-                            </div>
-                        {/foreach}
-                    {else}
-                        <div class="row" id="all_products">
-                            <ul class="service-products-slider">
-                                {foreach $service_products as $product}
-                                    <li class="col-xs-4">
-                                        {include file="{$tpl_dir}_partials/service-products-card.tpl" product=$product group='all'}
-                                    </li>
-                                {/foreach}
+            <div class="col-sm-12 tab-content">
+                {if $PS_SERVICE_PRODUCT_CATEGORY_FILTER}
+                    {foreach $service_products_by_category as $service_product_category}
+                        <div class="tab-pane {if $service_product_category@iteration == 1}active{/if}" id="category_{$service_product_category['id_category']}">
+                            <ul class="product-list">
+                                {include file="{$tpl_dir}_partials/service-products-list.tpl" service_products=$service_product_category['products'] group=$service_product_category['id_category'] init=true}
                             </ul>
+                            {if RoomTypeServiceProduct::WK_NUM_RESULTS < $service_product_category['num_products']}
+                                <div class="show_more_btn_container">
+                                    <button class="btn btn-default get-service-products" data-id_category="{$service_product_category['id_category']}" data-page="2" data-num_total="{$service_product_category['num_products']}">{l s='Show More'}</button>
+                                </div>
+                            {/if}
+                        </div>
+                    {/foreach}
+                {else}
+                    <ul class="product-list">
+                        {include file="{$tpl_dir}_partials/service-products-list.tpl" service_products=$service_products group='all' init=true}
+                    </ul>
+                    {if RoomTypeServiceProduct::WK_NUM_RESULTS < $num_total_service_products}
+                        <div class="show_more_btn_container">
+                            <button class="btn btn-default get-service-products" data-page="2" data-num_total="{$num_total_service_products}">{l s='Show More'}</button>
                         </div>
                     {/if}
-                </div>
-            {/if}
+                {/if}
+            </div>
         </div>
     </div>
 {/if}

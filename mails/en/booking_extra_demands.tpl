@@ -6,7 +6,7 @@
 			</tr>
 			<tr>
 				<th>{l s='Room Type'}</th>
-				<th>{l s='Extra demand name'}</th>
+				<th>{l s='Name'}</th>
 				<th>{l s='Total'} <br /> {l s='(Tax excl.)'}</th>
 			</tr>
 		</thead>
@@ -51,11 +51,12 @@
 			{/if}
 			{if !isset($room_demand_exists)}
 				<tr>
-					<td colspan="3">{l s='No demand requested'}</td>
+					<td colspan="3">{l s='No facilities requested'}</td>
 				</tr>
 			{/if}
 		</tbody>
 	</table>
+	<br><br>
 	<table class="table table-recap extra-demand-table">
 		<thead>
 			<tr>
@@ -63,7 +64,7 @@
 			</tr>
 			<tr>
 				<th>{l s='Room Type'}</th>
-				<th>{l s='Additional service name'}</th>
+				<th>{l s='Name'}</th>
 				<th>{l s='Qty'}</th>
 				<th>{l s='Total'}</th>
 			</tr>
