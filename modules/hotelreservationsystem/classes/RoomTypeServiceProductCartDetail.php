@@ -52,19 +52,21 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         $idCart,
         $idHtlCartData
     ) {
-        if ($this->alreadyExists($idProduct, $idHtlCartData)) {
-            return false;
+        if ($id_room_type_service_product_cart_detail = $this->alreadyExists($idProduct, $idHtlCartData)) {
+            $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail($id_room_type_service_product_cart_detail);
         } else {
             $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
             $objRoomTypeServiceProductCartDetail->id_product = $idProduct;
-            $objRoomTypeServiceProductCartDetail->quantity = $quantity;
-            $objRoomTypeServiceProductCartDetail->id_cart = $idCart;
-            $objRoomTypeServiceProductCartDetail->htl_cart_booking_id = $idHtlCartData;
-            if ($objRoomTypeServiceProductCartDetail->save()) {
-                $objCart = new Cart($idCart);
-                $objCart->updateQty((int)($quantity), $idProduct);
-            }
         }
+        $objRoomTypeServiceProductCartDetail->quantity = $quantity;
+        $objRoomTypeServiceProductCartDetail->id_cart = $idCart;
+        $objRoomTypeServiceProductCartDetail->htl_cart_booking_id = $idHtlCartData;
+        if ($objRoomTypeServiceProductCartDetail->save()) {
+            $objCart = new Cart($idCart);
+            return $objCart->updateQty((int)($quantity), $idProduct);
+        }
+
+        return false;
     }
 
     public function removeServiceProductByIdHtlCartBooking($htlCartBookingId)

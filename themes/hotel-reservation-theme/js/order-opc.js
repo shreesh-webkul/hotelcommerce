@@ -362,49 +362,6 @@ $(document).ready(function()
 	if (typeof(open_multishipping_fancybox) !== 'undefined' && open_multishipping_fancybox)
 		$('#link_multishipping_form').click();
 
-	// fancybox for extra bed requirement edit on checkout page
-	// $('body').on('click', '.open_rooms_extra_services_panel', function() {
-	// 	var idProduct = $(this).data('id_product');
-	// 	var idOrder = $(this).data('id_order');
-	// 	var dateFrom = $(this).data('date_from');
-	// 	var dateTo = $(this).data('date_to');
-	// 	var action = $(this).data('action');
-	// 	$.ajax({
-	// 		type: 'POST',
-	// 		headers: {
-	// 			"cache-control": "no-cache"
-	// 		},
-	// 		url: action,
-	// 		dataType: 'html',
-	// 		cache: false,
-	// 		data: {
-	// 			date_from: dateFrom,
-	// 			date_to: dateTo,
-	// 			id_product: idProduct,
-	// 			id_order: idOrder,
-	// 			method: 'getRoomTypeBookingDemands',
-	// 			ajax: true,
-	// 			token: static_token
-	// 		},
-	// 		success: function(result) {
-	// 			$('#rooms_extra_services').html('');
-	// 			$('#rooms_extra_services').append(result);
-	// 			$.fancybox({
-	// 				href: "#rooms_extra_services",
-	// 				autoSize : true,
-	// 				autoScale : true,
-	// 				maxWidth : '100%',
-	// 				'hideOnContentClick': false,
-	// 				afterClose: function() {
-	// 					// reload so that changes prices will reflect everywhere
-	// 					location.reload();
-	// 				},
-	// 			});
-	// 		},
-	// 	});
-
-	// });
-
 	function close_accordion_section() {
         $('.accordion .accordion-section-title').removeClass('active');
         $('.accordion .accordion-section-content').slideUp(300).removeClass('open');

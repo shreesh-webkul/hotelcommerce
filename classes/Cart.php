@@ -2367,7 +2367,6 @@ class CartCore extends ObjectModel
                         } else {
                             if ($selectedServiceProducts = $objHotelServiceProductCartDetail->getHotelProducts($this->id, $product['id_product'])) {
                                 foreach($selectedServiceProducts as $hotelProduct) {
-                                    // ppp($hotelProduct);
                                     $serviceProduct = $product;
                                     $serviceProduct['cart_quantity'] = $hotelProduct['quantity'];
                                     $unitPrice = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, $product['id_product'], $hotelProduct['id_hotel'], false);

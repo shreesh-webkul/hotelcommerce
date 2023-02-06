@@ -38,7 +38,7 @@
 	<td class="text-center">
 		<p>{$data.room_type}</p>
 		<p class="room_extra_demands {if !isset($data['extra_demands']) || !$data['extra_demands']}edit_product_fields{/if}" {if (!isset($data['extra_demands']) || !$data['extra_demands']) && (!isset($data['additional_services']) || !$data['additional_services'])}style="display: none;"{/if}>
-			<a href="#" data-toggle="modal" data-target="#rooms_type_extra_demands" date_from="{$data['date_from']}" date_to="{$data['date_to']}" id_product="{$data['id_product']}" id_room="{$data['id_room']}" id_order="{$order->id}" class="open_room_extra_demands" id_htl_booking="{$data['id']}" edit_orde_line="0">
+			<a href="#" data-toggle="modal" data-target="#rooms_type_extra_demands" date_from="{$data['date_from']}" date_to="{$data['date_to']}" id_product="{$data['id_product']}" id_room="{$data['id_room']}" id_order="{$order->id}" class="open_room_extra_services" id_htl_booking="{$data['id']}" edit_orde_line="0">
 				{l s='Extra Services'}
 			</a>
 		</p>

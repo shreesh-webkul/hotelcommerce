@@ -275,8 +275,6 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
     public function delete()
     {
         // delete entry from order detail table.
-
-
         return parent::delete();
     }
 }

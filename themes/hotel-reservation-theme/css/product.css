@@ -1401,49 +1401,45 @@ Quick View Styles
 .price_desc_block .services-info {
   cursor: pointer;
 }
-.price_desc_block .services-info .popover {
-  background: transparent;
+.ui-tooltip.services-tootip {
+  box-shadow: 0 2px 6px 0 rgb(0 0 0 / 20%);
+  background: #FFFFFF;
   border: unset;
   color: #333;
-  min-width: 300px;
-  padding: 0 10px;
+  /* min-width: 300px; */
+  padding: 9px 15px;
+  max-height: 310px;
+  overflow-y: auto;
 }
-.price_desc_block .services-info .popover-content {
-  background: #FFFFFF;
-  box-shadow: 0 2px 6px 0 rgb(0 0 0 / 20%);
-  border-radius: 5px;
+.services-info-tooltip-cont {
+  min-width: 240px;
 }
-.price_desc_block .services-info .popover.bottom .arrow:after{
-  border-bottom-color: #FFFFFF;
-}
-.price_desc_block .services-info .popover .extra_service_panel + .extra_service_panel {
+.extra-service-panel + .extra-service-panel {
   margin-top: 15px;
 }
-.price_desc_block .services-info .popover .panel_title {
-  font-size: 14px;
+.extra-service-panel .panel_title {
+  font-size: 15px;
+  margin-bottom: 18px;
   font-weight: 600;
 }
-.price_desc_block .services-info .popover .extra_service_panel .table {
-  margin-bottom: 0px;}
-  .price_desc_block .services-info .popover .extra_service_panel .table  th {
-    font-size: 12px;
-    background-color: #fff;
-  }
-  .price_desc_block .services-info .popover .extra_service_panel .table  td {
-    font-size: 13px;
-    border-top: unset;
-  }
-
-.price_desc_block .services-info .popover hr {
-  margin: 9px 0px
-}
-.price_desc_block .services-info .popover .summary-row {
+.extra-service-panel .table td {
   font-size: 13px;
+  border-top: unset;
+  padding: 9px 15px;
 }
-.price_desc_block .services-info .popover .summary-row .service_price {
-  font-size: 14px;
+.extra-service-panel .services-list > div + div {
+  margin-top: 15px;
 }
-
+.extra-service-panel .services-list .services-list-row, .extra-service-panel .summary-row {
+  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.extra-service-panel .summary-row .service_price {
+  font-size: 16px;
+}
+/* end */
 
 
 /* extra demands Css */

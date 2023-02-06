@@ -1301,10 +1301,44 @@ var BookingForm = {
         BookingForm.initDatepicker(max_order_date, preparation_time, $('#room_check_in').val(), $('#room_check_out').val());
         // initialize tootltip for extra service
         if ($('.price_desc_block .services-info').length) {
-            $('.price_desc_block .services-info img').popover({
-                content: $('.price_desc_block .services-info-content').html(),
-                html: true,
-                trigger: 'click'
+            console.log('dsadad');
+            $('.price_desc_block .services-info img').tooltip({
+                content: $('.price_desc_block .services-info-container').html(),
+                items: "div",
+                trigger : 'hover',
+                position: { my: "left-15 top", at: "left bottom" },
+                tooltipClass: "services-tootip",
+                open: function(event, ui)
+                    {
+                        if (typeof(event.originalEvent) === 'undefined')
+                        {
+                            return false;
+                        }
+
+                        var $id = $(ui.tooltip).attr('id');
+
+                        // close any lingering tooltips
+                        if ($('div.ui-tooltip').not('#' + $id).length) {
+                            return false;
+                        }
+
+                        // ajax function to pull in data and add it to the tooltip goes here
+                    },
+                    close: function(event, ui)
+                    {
+                        ui.tooltip.hover(function()
+                        {
+                            $(this).stop(true).fadeTo(400, 1);
+                        },
+                        function()
+                        {
+                            $(this).fadeOut('400', function()
+                            {
+                                $(this).remove();
+                            });
+                        });
+                    }
+
             });
         }
     },

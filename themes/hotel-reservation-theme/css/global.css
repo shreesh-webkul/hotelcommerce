@@ -8938,6 +8938,11 @@ a.open_rooms_extra_services_panel {
 #rooms_extra_services {
   width: 100%;
   font-size: 16px;}
+  @media (min-width: 540px) {
+    #rooms_extra_services {
+      min-width: 460px;
+    }
+  }
 
 #rooms_extra_services .nav-tabs {
   border: none;

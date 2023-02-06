@@ -74,7 +74,7 @@
 						<div class="card">
 							<div class="row">
 								<div class="col-sm-12 demand_header">
-									{l s='Room'}&nbsp;
+									{l s='Room'} {$roomCount|escape:'html':'UTF-8'}&nbsp;
 									<span>({if {$roomAdditionalService['adults']} <= 9}0{$roomAdditionalService['adults']}{else}{$roomAdditionalService['adults']}{/if} {if $roomAdditionalService['adults'] > 1}{l s='Adults'}{else}{l s='Adult'}{/if}, {if {$roomAdditionalService['children']} <= 9}0{$roomAdditionalService['children']}{else}{$roomAdditionalService['children']}{/if} {if $roomAdditionalService['children'] > 1}{l s='Children'}{else}{l s='Child'}{/if})</span>
 								</div>
 								<div class="col-sm-12 room_demand_detail">

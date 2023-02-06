@@ -259,43 +259,5 @@ $(document).ready(function(){
 			showErrorMessage(no_bookings_selected);
 		}
 	});
-
-	// fancybox for room services
-	// $('body').on('click', '.open_rooms_extra_services_panel', function() {
-	// 	var idProduct = $(this).data('id_product');
-	// 	var idOrder = $(this).data('id_order');
-	// 	var dateFrom = $(this).data('date_from');
-	// 	var dateTo = $(this).data('date_to');
-	// 	$.ajax({
-	// 		type: 'POST',
-	// 		headers: {
-	// 			"cache-control": "no-cache"
-	// 		},
-	// 		url: historyUrl,
-	// 		dataType: 'html',
-	// 		cache: false,
-	// 		data: {
-	// 			date_from: dateFrom,
-	// 			date_to: dateTo,
-	// 			id_product: idProduct,
-	// 			id_order: idOrder,
-	// 			method: 'getRoomTypeBookingDemands',
-	// 			ajax: true,
-	// 			token: static_token
-	// 		},
-	// 		success: function(result) {
-	// 			$('#rooms_extra_services').html('');
-	// 			$('#rooms_extra_services').append(result);
-	// 			$.fancybox({
-	// 				href: "#rooms_extra_services",
-	// 				autoSize : true,
-	// 				autoScale : true,
-	// 				maxWidth : '100%',
-	// 				'hideOnContentClick': false,
-	// 			});
-	// 		},
-	// 	});
-
-	// });
 });
 

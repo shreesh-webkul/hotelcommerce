@@ -1638,7 +1638,7 @@
 		});
 
 		{* open fancybox for extra demands *}
-		$('.open_room_extra_demands').on('click', function(e) {
+		$('.open_room_extra_services').on('click', function(e) {
 			e.preventDefault();
 			var idProduct = $(this).attr('id_product');
 			var idOrder = $(this).attr('id_order');
@@ -1779,6 +1779,9 @@
 				contentType: false,
 				success: function(jsonData) {
 					if (!jsonData.hasError) {
+						if (jsonData.service_panel) {
+							$('#room_type_service_product_desc').replaceWith(jsonData.service_panel);
+						}
 						showSuccessMessage(txtExtraDemandSucc);
 					} else {
 						showErrorMessage(jsonData.errors);
@@ -1817,10 +1820,12 @@
 							action: 'EditRoomExtraDemands',
 							ajax: true
 						},
-						success: function(result) {
-							if (result == 1) {
+						success: function(jsonData) {
+							if (jsonData.success) {
 								showSuccessMessage(txtExtraDemandSucc);
-								$('#rooms_type_extra_demands').modal('hide');
+								if (jsonData.facilities_panel) {
+									$('#room_type_demands_desc').replaceWith(jsonData.facilities_panel);
+								}
 							} else {
 								showErrorMessage(txtSomeErr);
 							}
@@ -1852,10 +1857,12 @@
 							action: 'DeleteRoomExtraDemand',
 							ajax: true
 						},
-						success: function(result) {
-							if (result == 1) {
-								$currentItem.closest('tr').remove();
+						success: function(jsonData) {
+							if (jsonData.success) {
 								showSuccessMessage(txtDeleteSucc);
+								if (jsonData.facilities_panel) {
+									$('#room_type_demands_desc').replaceWith(jsonData.facilities_panel);
+								}
 							} else {
 								showErrorMessage(txtSomeErr);
 							}
@@ -1888,6 +1895,7 @@
 						},
 						success: function(jsonData) {
 							if (!jsonData.hasError) {
+							$('#room_type_service_product_desc').replaceWith(jsonData.service_panel);
 							showSuccessMessage(txtExtraDemandSucc);
 						} else {
 							showErrorMessage(jsonData.errors);

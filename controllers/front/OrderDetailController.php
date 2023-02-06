@@ -489,7 +489,6 @@ class OrderDetailControllerCore extends FrontController
                             } else {
                                 // get all products that are independent.
                                 if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE) {
-                                //     ddd($type_value);
                                     $product = new Product($type_value['product_id'], false, $this->context->language->id);
                                     $cover_image_arr = $product->getCover($type_value['product_id']);
 
