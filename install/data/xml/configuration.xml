@@ -773,7 +773,7 @@
 	<configuration id="PS_LOCATIONS_CATEGORY" name="PS_LOCATIONS_CATEGORY">
 		<value>3</value>
 	</configuration>
-	<configuration id="PS_PRODUCTS_CATEGORY" name="PS_PRODUCTS_CATEGORY">
+	<configuration id="PS_SERVICE_CATEGORY" name="PS_SERVICE_CATEGORY">
 		<value>4</value>
 	</configuration>
 	<configuration id="PS_CONFIGURATION_AGREMENT" name="PS_CONFIGURATION_AGREMENT">

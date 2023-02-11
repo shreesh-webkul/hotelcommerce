@@ -49,7 +49,21 @@ class RoomTypeServiceProductPrice extends ObjectModel
         )
     );
 
-    public static function getProductRoomTypeLinkPriceAndTax($idProduct, $idElement, $elementType)
+    public static function deleteRoomProductPrices($idProduct, $elementType = 0)
+    {
+        $where = '`id_product`='.(int)$idProduct;
+
+        if ($elementType) {
+            $where .= ' AND `element_type`='.(int)$elementType;
+        }
+
+        return Db::getInstance()->delete(
+            'htl_room_type_service_product_price',
+            $where
+        );
+    }
+
+    public static function getProductRoomTypePriceAndTax($idProduct, $idElement, $elementType)
     {
         return Db::getInstance()->getRow(
             'SELECT `price`, `id_tax_rules_group` FROM `'._DB_PREFIX_.'htl_room_type_service_product_price`
@@ -98,11 +112,6 @@ class RoomTypeServiceProductPrice extends ObjectModel
         );
 
         return $price * (int)$quantity;
-    }
-
-    public function getPrice($tax = true, $decimals = 6, $quantity = 1)
-    {
-
     }
 }
 

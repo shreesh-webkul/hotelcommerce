@@ -41,7 +41,12 @@
 												</div>
 											{/if}
 									</td>
-									<td>{displayPrice price=$demand['total_price_tax_incl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
+									<td>
+										{if $service['auto_added']}
+											<span class="badge badge-info">{l s='Included in room price'}</span>
+										{/if}
+									</td>
+									<td>{displayPrice price=$service['total_price_tax_incl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
 									<td><a class="btn btn-danger pull-right del_room_additional_service" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" href="#"><i class="icon-trash"></i></a></td>
 								</tr>
 							{/foreach}
@@ -95,10 +100,15 @@
 				{foreach $additionalServices['additional_services'] as $service}
 					<div class="col-sm-12 room_demand_block">
 						<div class="row">
-							<div class="col-xs-8">
+							<div class="col-xs-5">
 								<div>{$service['name']|escape:'html':'UTF-8'}</div>
 								{if $service['allow_multiple_quantity']}
 									<div class="quantity">{l s='Qty:'}&nbsp;{$service['quantity']|escape:'html':'UTF-8'}</div>
+								{/if}
+							</div>
+							<div class="col-xs-3">
+								{if $service['auto_added']}
+									<span class="badge badge-info">{l s='Included in room price'}</span>
 								{/if}
 							</div>
 							<div class="col-xs-4">

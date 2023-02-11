@@ -179,12 +179,26 @@ class HotelBranchInformation extends ObjectModel
      * @param integer $onlyhotelIds  send 1 if only hotel ids needed
      * @return [hotelaccessInfo or id_hotel array]
      */
-    public static function getProfileAccessedHotels($idProfile, $access = 2, $onlyhotelIds = 0)
+    public static function getProfileAccessedHotels($idProfile, $access = 2, $onlyhotelIds = 0, $idLang = false)
     {
-        $sql = 'SELECT `id_hotel` FROM `'._DB_PREFIX_.'htl_access` WHERE `id_profile` = '.(int)$idProfile;
+        if (!$idLang) {
+            $idLang = Context::getContext()->language->id;
+        }
+        $sql = 'SELECT ha.`id_hotel`';
+        if (!$onlyhotelIds) {
+            $sql .= ', hbl.`hotel_name`, hbi.`id_category`, hbi.`active`';
+        }
+        $sql .= ' FROM `'._DB_PREFIX_.'htl_access` ha';
+        if (!$onlyhotelIds) {
+            $sql .= ' INNER JOIN `'._DB_PREFIX_.'htl_branch_info` hbi ON (hbi.`id` = ha.`id_hotel`)';
+            $sql .= ' INNER JOIN `'._DB_PREFIX_.'htl_branch_info_lang` hbl
+                ON (hbl.`id` = hbi.`id` AND hbl.`id_lang` = '.(int)$idLang.')';
+        }
+        $sql .= ' WHERE `id_profile` = '.(int)$idProfile;
         if ($access != 2) {
             $sql .= ' AND access = 1';
         }
+
         if ($hotelAccessInfo =  Db::getInstance()->executeS($sql)) {
             if ($onlyhotelIds) {
                 $hotels = array();

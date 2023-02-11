@@ -229,7 +229,7 @@ $(document).ready(function () {
 		</div>
 	</div>
 	{/if}
-	<div class="form-group">
+	{* <div class="form-group">
 		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="on_sale" type="default"}</span></div>
 		<label class="control-label col-lg-2" for="on_sale">&nbsp;</label>
 		<div class="col-lg-9">
@@ -240,7 +240,7 @@ $(document).ready(function () {
 				</label>
 			</div>
 		</div>
-	</div>
+	</div> *}
 	<div class="form-group">
 		<div class="col-lg-9 col-lg-offset-3">
 			<div class="alert alert-warning">

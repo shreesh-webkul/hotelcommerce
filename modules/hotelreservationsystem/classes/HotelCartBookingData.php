@@ -484,6 +484,17 @@ class HotelCartBookingData extends ObjectModel
                         $obj_htl_cart_booking_data->child_ages = json_encode(array());
                     }
                     if ($obj_htl_cart_booking_data->save()) {
+                        // get auto add service product
+                        if ($services = RoomTypeServiceProduct::getAutoAddServices($id_product)) {
+                            foreach($services as $service) {
+                                $objRoomTypeServiceProductCartDetail->addServiceProductInCart(
+                                    $service['id_product'],
+                                    1,
+                                    $id_cart,
+                                    $obj_htl_cart_booking_data->id
+                                );
+                            }
+                        }
                         if (count($serviceProducts)) {
                             foreach($serviceProducts as $product) {
                                 $objRoomTypeServiceProductCartDetail->addServiceProductInCart(
@@ -494,6 +505,7 @@ class HotelCartBookingData extends ObjectModel
                                 );
                             }
                         }
+
                     }
                     ++$chkQty;
                 } else {

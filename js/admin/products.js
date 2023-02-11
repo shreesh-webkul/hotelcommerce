@@ -440,12 +440,12 @@ product_tabs['ServiceProduct'] = new function(){
 		});
 	}
 
-		$(this).find('.button-edit-price').on('click', function(e){
+		$(this).on('click', '.button-edit-price', function(e){
 			e.preventDefault();
 			togglelinkedProductEditForm(this, true);
 		});
 
-		$(this).find('.btn-cancel').on('click', function(e){
+		$(this).on('click', '.btn-cancel', function(e){
 			e.preventDefault();
 			togglelinkedProductEditForm(this, false);
 		});
@@ -456,7 +456,7 @@ product_tabs['ServiceProduct'] = new function(){
 			$(triggeredElement).closest('tr').find('.field-view').toggle(!showform);;
 		}
 
-		$(this).find('.btn-save').on('click', function(e){
+		$(this).on('click', '.btn-save', function(e){
 			e.preventDefault();
 			selectedElement = this;
 			var price = $(this).closest('tr').find('.service-product-price').val();

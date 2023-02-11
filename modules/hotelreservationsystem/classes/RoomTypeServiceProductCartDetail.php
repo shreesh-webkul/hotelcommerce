@@ -71,7 +71,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
 
     public function removeServiceProductByIdHtlCartBooking($htlCartBookingId)
     {
-        if ($stadardProductsData  = Db::getInstance()->executeS(
+        if ($stadardProductsData = Db::getInstance()->executeS(
             'SELECT * FROM `'._DB_PREFIX_.'htl_room_type_service_product_cart_detail`
             WHERE `htl_cart_booking_id` = '.(int)$htlCartBookingId
         )) {
@@ -100,6 +100,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         $htlCartBookingId = 0,
         $getTotalPrice = 0,
         $useTax = null,
+        $autoAddToCart = 0,
         $id_address = null
     ) {
         if ($useTax === null)
@@ -108,12 +109,17 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         $sql = 'SELECT rscd.`id_product`, rscd.`quantity`, cbd.`id_cart`, cbd.`id` as `htl_cart_booking_id` ,
             cbd.`id_product` as `room_type_id_product`, cbd.`adults`, cbd.`children`';
         if (!$getTotalPrice) {
-            $sql .= ', cbd.`id_guest`, cbd.`id_customer`,
+            $sql .= ', cbd.`id_guest`, cbd.`id_customer`, p.`auto_add_to_cart`,
                 cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_cart_booking_data` cbd
             LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_cart_detail` rscd ON(rscd.`htl_cart_booking_id` = cbd.`id`)
+            LEFT JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = rscd.`id_product`)
             WHERE 1';
+
+        if (!is_null($autoAddToCart)) {
+            $sql .= ' AND p.`auto_add_to_cart` = '. (int)$autoAddToCart;
+        }
         if ($idCart) {
             $sql .= ' AND cbd.`id_cart`='.(int) $idCart;
         }
@@ -165,6 +171,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
                             } else {
                                 $selectedServiceProducts[$product['htl_cart_booking_id']]['selected_products_info'][$product['id_product']] = array(
                                     'id_product' => $product['id_product'],
+                                    'auto_add_to_cart' => $product['auto_add_to_cart'],
                                     'quantity' => $product['quantity'],
                                 );
                             }
@@ -230,6 +237,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
                                 $product['id_product'] => array(
                                     'id_product' => $product['id_product'],
                                     'quantity' => $product['quantity'],
+                                    'auto_add_to_cart' => $product['auto_add_to_cart'],
                                     'unit_price_tax_excl' => $objRoomTypeServiceProductPrice->getProductPrice(
                                         (int)$product['id_product'],
                                         (int)$product['room_type_id_product'],

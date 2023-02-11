@@ -22,7 +22,7 @@
         {if !$PS_SERVICE_PRODUCT_CATEGORY_FILTER}
             <li class="active"><a href="#all_products" class="idTabHrefShort" data-toggle="tab">{l s='Services'}</a></li>
         {else}
-            {foreach $service_products_categories as $category}
+            {foreach $service_products_by_category as $category}
                 <li {if $category@iteration == 1}class="active"{/if}><a class="idTabHrefShort" href="#category_{$category['id_category']}" data-toggle="tab">{$category['name']}</a></li>
             {/foreach}
         {/if}

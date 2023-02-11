@@ -408,6 +408,7 @@ class HotelReservationSystemDb
                 `total_price_tax_incl` decimal(20,6) NOT NULL,
                 `name` varchar(255) DEFAULT NULL,
                 `quantity` INT(11) UNSIGNED NOT NULL,
+                `auto_added` tinyint(1) unsigned NOT NULL,
                 `date_add` datetime NOT NULL,
                 `date_upd` datetime NOT NULL,
                 PRIMARY KEY (`id_room_type_service_product_order_detail`)

@@ -81,11 +81,11 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->context = Context::getContext();
 
         // START send access query information to the admin controller
-        $this->access_select = ' SELECT a.`id_product` FROM '._DB_PREFIX_.'product a';
-        $this->access_join = ' LEFT JOIN '._DB_PREFIX_.'htl_room_type hrt ON (hrt.id_product = a.id_product)';
-        if ($acsHtls = HotelBranchInformation::getProfileAccessedHotels($this->context->employee->id_profile, 1, 1)) {
-            $this->access_where = ' WHERE (hrt.id_hotel IN ('.implode(',', $acsHtls).') OR hrt.id_hotel IS NULL)';
-        }
+        // $this->access_select = ' SELECT a.`id_product` FROM '._DB_PREFIX_.'product a';
+        // $this->access_join = ' LEFT JOIN '._DB_PREFIX_.'htl_room_type hrt ON (hrt.id_product = a.id_product)';
+        // if ($acsHtls = HotelBranchInformation::getProfileAccessedHotels($this->context->employee->id_profile, 1, 1)) {
+        //     $this->access_where = ' WHERE (hrt.id_hotel IN ('.implode(',', $acsHtls).') OR hrt.id_hotel IS NULL)';
+        // }
 
         parent::__construct();
 
@@ -185,10 +185,11 @@ class AdminNormalProductsControllerCore extends AdminController
 				LEFT JOIN `'._DB_PREFIX_.'image_shop` image_shop ON (image_shop.`id_product` = a.`id_product` AND image_shop.`cover` = 1 AND image_shop.id_shop = '.$id_shop.')
 				LEFT JOIN `'._DB_PREFIX_.'image` i ON (i.`id_image` = image_shop.`id_image`)
                 LEFT JOIN `'._DB_PREFIX_.'product_download` pd ON (pd.`id_product` = a.`id_product` AND pd.`active` = 1)
+                LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product` rsp ON (rsp.`id_product` = a.`id_product`)
 				LEFT JOIN `'._DB_PREFIX_.'address` aa ON (aa.`id_hotel` = hb.`id`)';
 
-        $this->_select .= ' (SELECT COUNT(hri.`id`) FROM `'._DB_PREFIX_.'htl_room_information` hri WHERE hri.`id_product` = a.`id_product`) as num_rooms, ';
-        $this->_select .= 'hrt.`adults`, hrt.`children`, hb.`id` as id_hotel, aa.`city`, hbl.`hotel_name`, ';
+        $this->_select .= ' IF(a.`auto_add_to_cart`, "'.$this->l('Yes').'", "'.$this->l('No').'") as auto_added, IF(a.`auto_add_to_cart`, 1, 0) as badge_success, (SELECT COUNT(hri.`id`) FROM `'._DB_PREFIX_.'htl_room_information` hri WHERE hri.`id_product` = a.`id_product`) as num_rooms, ';
+        $this->_select .= ' COUNT(rsp.`id_product`) as products_associated, hrt.`adults`, hrt.`children`, hb.`id` as id_hotel, aa.`city`, hbl.`hotel_name`, ';
         $this->_select .= 'shop.`name` AS `shopname`, a.`id_shop_default`, ';
         $this->_select .= $alias_image.'.`id_image` AS `id_image`, cl.`name` AS `name_category`, '.$alias.'.`price`, 0 AS `price_final`, a.`is_virtual`, pd.`nb_downloadable`, sav.`quantity` AS `sav_quantity`, '.$alias.'.`active`, IF(sav.`quantity`<=0, 1, 0) AS `badge_danger`';
 
@@ -201,7 +202,7 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->_where .= ' AND a.`booking_product` = 0';
 
         $this->_use_found_rows = false;
-        $this->_group = '';
+        $this->_group = 'GROUP BY rsp.`id_product`';
 
         $this->fields_list = array();
         $this->fields_list['id_product'] = array(
@@ -222,17 +223,29 @@ class AdminNormalProductsControllerCore extends AdminController
             'title' => $this->l('Name'),
             'filter_key' => 'b!name'
         );
-        $serviceProductType = array(
-            Product::SERVICE_PRODUCT_WITH_ROOMTYPE => $this->l('Bought with room type'),
-            Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE => $this->l('Bought without room type')
+        $this->fields_list['products_associated'] = array(
+            'title' => $this->l('Associated Rooms types'),
+            'class' => 'fixed-width-sm',
+            'havingFilter' => true,
         );
-        $this->fields_list['service_product_type'] = array(
-            'type' => 'select',
-            'list' => $serviceProductType,
-            'title' => $this->l('Buying option'),
-            'filter_key' => 'a!service_product_type',
-            'callback' => 'getBuyingOption'
+        $this->fields_list['auto_added'] = array(
+            'title' => $this->l('Auto Added'),
+            'filter_key' => 'a!auto_add_to_cart',
+            'align' => 'text-center',
+            'type' => 'bool',
+            'badge_success' => true
         );
+        // $serviceProductType = array(
+        //     Product::SERVICE_PRODUCT_WITH_ROOMTYPE => $this->l('Bought with room type'),
+        //     Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE => $this->l('Bought without room type')
+        // );
+        // $this->fields_list['service_product_type'] = array(
+        //     'type' => 'select',
+        //     'list' => $serviceProductType,
+        //     'title' => $this->l('Buying option'),
+        //     'filter_key' => 'a!service_product_type',
+        //     'callback' => 'getBuyingOption'
+        // );
         if (Shop::isFeatureActive() && Shop::getContext() != Shop::CONTEXT_SHOP) {
             $this->fields_list['shopname'] = array(
                 'title' => $this->l('Default shop'),
@@ -378,10 +391,6 @@ class AdminNormalProductsControllerCore extends AdminController
                 $object->available_for_order = (int)Tools::getValue('available_for_order');
             }
 
-            if ($this->checkMultishopBox('auto_add_to_cart', $this->context)) {
-                $object->auto_add_to_cart = $object->available_for_order ? (int)Tools::getValue('auto_add_to_cart') : 0;
-            }
-
             if ($this->checkMultishopBox('show_price', $this->context)) {
                 $object->show_price = $object->available_for_order ? 1 : (int)Tools::getValue('show_price');
             }
@@ -393,6 +402,7 @@ class AdminNormalProductsControllerCore extends AdminController
         if ($this->isTabSubmitted('Prices')) {
             $object->on_sale = (int)Tools::getValue('on_sale');
         }
+
     }
 
     public function checkMultishopBox($field, $context = null)
@@ -1948,6 +1958,8 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->object = new $this->className();
         $this->_removeTaxFromEcotax();
         $this->copyFromPost($this->object, $this->table);
+        $this->object->service_product_type = Product::SERVICE_PRODUCT_WITH_ROOMTYPE;
+
 
         // set product visibility to none for current flow.
         $this->object->visibility = 'none';
@@ -2398,14 +2410,6 @@ class AdminNormalProductsControllerCore extends AdminController
                 }
             }
         }
-
-        // validations for normal product
-        // $productType = Tools::getValue('service_product_type');
-        // if (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $productType)  {
-        //     if (!Tools::getValue('hotelBox') && !Tools::getValue('roomTypeBox')) {
-        //         $this->errors[] = Tools::displayError('Select atleast one hotel or room type to link with this product.');
-        //     }
-        // }
     }
 
     /**
@@ -2596,6 +2600,12 @@ class AdminNormalProductsControllerCore extends AdminController
             if ($this->ajax) {
                 $this->content_only = true;
             } else {
+                if (($object = $this->loadObject(true)) && $object->isAssociatedToShop()) {
+                    if ($object->booking_product) {
+                        $this->errors[] = $this->l('Service not found.');
+                        return;
+                    }
+                }
                 $product_tabs = array();
 
                 // tab_display defines which tab to display first
@@ -2643,7 +2653,7 @@ class AdminNormalProductsControllerCore extends AdminController
             $tree->setAttribute('is_category_filter', (bool)$this->id_current_category)
                 ->setAttribute('base_url', preg_replace('#&id_category=[0-9]*#', '', self::$currentIndex).'&token='.$this->token)
                 ->setInputName('id-category')
-                ->setRootCategory((int)Configuration::get('PS_PRODUCTS_CATEGORY'))
+                ->setRootCategory((int)Configuration::get('PS_SERVICE_CATEGORY'))
                 ->setSelectedCategories(array((int)$id_category));
             $this->tpl_list_vars['category_tree'] = $tree->render();
 
@@ -2654,49 +2664,6 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->tpl_form_vars['vat_number'] = file_exists(_PS_MODULE_DIR_.'vatnumber/ajax.php');
 
         parent::initContent();
-    }
-
-    public function renderKpis()
-    {
-        $time = time();
-        $kpis = array();
-
-        /* The data generation is located in AdminStatsControllerCore */
-
-        $helper = new HelperKpi();
-        $helper->id = 'box-avg-gross-margin';
-        $helper->icon = 'icon-tags';
-        $helper->color = 'color2';
-        $helper->title = $this->l('Average Gross Margin %', null, null, false);
-        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=product_avg_gross_margin';
-        $helper->tooltip = $this->l('Gross margin expressed in percentage assesses how cost-effectively you sell your room types / products. Out of $100, you will retain $X to cover profit and expenses.', null, null, false);
-        $kpis[] = $helper->generate();
-
-        $helper = new HelperKpi();
-        $helper->id = 'box-8020-sales-catalog';
-        $helper->icon = 'icon-beaker';
-        $helper->color = 'color3';
-        $helper->title = $this->l('Purchased references', null, null, false);
-        $helper->subtitle = $this->l('30 days', null, null, false);
-        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=8020_sales_catalog';
-        $helper->tooltip = $this->l('X% of your references have been purchased for the past 30 days', null, null, false);
-        if (Module::isInstalled('statsbestproducts')) {
-            $helper->href = Context::getContext()->link->getAdminLink('AdminStats').'&module=statsbestproducts&datepickerFrom='.date('Y-m-d', strtotime('-30 days')).'&datepickerTo='.date('Y-m-d');
-        }
-        $kpis[] = $helper->generate();
-
-        $helper = new HelperKpi();
-        $helper->id = 'box-disabled-products';
-        $helper->icon = 'icon-off';
-        $helper->color = 'color4';
-        $helper->title = $this->l('Disabled Products', null, null, false);
-        $helper->source = $this->context->link->getAdminLink('AdminStats').'&ajax=1&action=getKpi&kpi=disabled_products';
-        $helper->tooltip = $this->l('X% of your products are disabled and not visible to your customers', null, null, false);
-        $kpis[] = $helper->generate();
-
-        $helper = new HelperKpiRow();
-        $helper->kpis = $kpis;
-        return $helper->generate();
     }
 
     public function renderList()
@@ -3230,10 +3197,10 @@ class AdminNormalProductsControllerCore extends AdminController
     public function updateLinkedHotelsAndRooms($product)
     {
         if (Validate::isLoadedObject($product)) {
-            $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
-            $objRoomTypeServiceProduct->deleteRoomProductLink($product->id);
+            RoomTypeServiceProduct::deleteRoomProductLink($product->id);
 
             if (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product->service_product_type) {
+                $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                 // add product link for room types
                 if ($selectedRoomTypes = Tools::getValue('roomTypeBox')) {
                     $objRoomTypeServiceProduct->addRoomProductLink(
@@ -3263,7 +3230,7 @@ class AdminNormalProductsControllerCore extends AdminController
             // $root = Category::getRootCategory();
             // $default_category = $this->context->cookie->id_category_products_filter ? $this->context->cookie->id_category_products_filter : Context::getContext()->shop->id_category;
             // default category for normal products
-            $default_category = Configuration::get('PS_PRODUCTS_CATEGORY');
+            $default_category = Configuration::get('PS_SERVICE_CATEGORY');
             if (!$product->id || !$product->isAssociatedToShop()) {
                 $selected_cat = Category::getCategoryInformations(Tools::getValue('categoryBox', array($default_category)), $this->default_form_language);
             } else {
@@ -4138,7 +4105,8 @@ class AdminNormalProductsControllerCore extends AdminController
             ->setRoomsOnly(false)
             ->setSelectedHotels($selectedElements['hotels'])
             ->setSelectedRoomTypes($selectedElements['room_types'])
-            ->setUseBulkActions(false);
+            ->setUseBulkActions(false)
+            ->setAccessedHotels(HotelBranchInformation::getProfileAccessedHotels($this->context->employee->id_profile, 1, 0));
 
         $data->assign('hotel_tree', $tree->render());
 

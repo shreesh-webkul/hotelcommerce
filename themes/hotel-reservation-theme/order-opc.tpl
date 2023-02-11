@@ -227,12 +227,13 @@
 										<span class="cart_total_values">{displayPrice price=($total_extra_demands + $total_additional_services)}</span>
 									</p>
 								{/if}
-								{if $total_service_products}
+								{* {if $total_service_products}
 									<p>
 										<span>{l s='Total service products cost'}{if $display_tax_label}{l s=' (tax excl.)'}{/if}</span>
 										<span class="cart_total_values">{displayPrice price=$total_service_products}</span>
 									</p>
-								{/if}
+								{/if} *}
+
 								{if $use_taxes && $show_taxes && $total_tax != 0 }
 									{if $priceDisplay != 0}
 										<p class="cart_total_price">
@@ -258,6 +259,12 @@
 									<p class="cart_total_tax">
 										<span>{l s='Tax on service products'}</span>
 										<span class="cart_total_values">{displayPrice price=($total_service_products_wt - $total_service_products)}</span>
+									</p>
+								{/if}
+								{if $convenience_fee_wt}
+									<p>
+										<span>{l s='Convenience Fees'}{if $display_tax_label}{l s=' (tax incl.)'}{/if}</span>
+										<span class="cart_total_values">{displayPrice price=$convenience_fee_wt}</span>
 									</p>
 								{/if}
 								<p {if $total_wrapping == 0}class="unvisible"{/if}>

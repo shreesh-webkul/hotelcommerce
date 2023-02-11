@@ -232,8 +232,70 @@
 			var product_name_redirected = '{$product_name_redirected|escape:'html':'UTF-8'}';
 		</script>
 	</div>
+	<div class="form-group" id="associated_hotel_rooms_tree" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if}>
+		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="category_box" type="category_box"}</span></div>
+		<label class="control-label col-lg-2" for="category_block">
+			<span class="label-tooltip" data-toggle="tooltip" title="{l s='Select room type and hotels for which this service will be available.'}">
+				{l s='Associated Hotels and Room Types'}
+			</span>
+		</label>
+		<div class="col-lg-9">
+			<div id="category_block">
+				{$hotel_tree}
+			</div>
+		</div>
+	</div>
+	<div class="form-group" id="auto_add_to_cart_container">
+		<label class="control-label col-lg-3" for="">
+			<span class="label-tooltip" data-toggle="tooltip" title="{l s='When enabled, this service will be added in cart for each associated Room type or Hotel when they are added in cart. Also auto added services will not be visible to customers.'}">
+				{l s='Auto add to cart this product'}
+			</span>
+		</label>
+		<div class="col-lg-3">
+			<span class="switch prestashop-switch fixed-width-lg">
+				<input type="radio" name="auto_add_to_cart" id="auto_add_to_cart_on" value="1" {if $product->auto_add_to_cart}checked="checked"{/if}/>
+				<label for="auto_add_to_cart_on" class="radioCheck">
+					{l s='Yes'}
+				</label>
+				<input type="radio" name="auto_add_to_cart" id="auto_add_to_cart_off" value="0" {if !$product->auto_add_to_cart || !$product->isAssociatedToShop()}checked="checked"{/if}/>
+				<label for="auto_add_to_cart_off" class="radioCheck">
+					{l s='No'}
+				</label>
+				<a class="slide-button btn"></a>
+			</span>
+		</div>
+	</div>
 
-	<div class="form-group" id="global_product_type_container">
+	<div id="price_addition_type_container" {if !$product->auto_add_to_cart || !$product->isAssociatedToShop()}style="display:none;"{/if}>
+		<div class="form-group">
+			<label class="control-label col-lg-3" for="service_product_type">
+				<span class="label-tooltip" data-toggle="tooltip" title="{l s='Select whether price will be added in the base room price or as Convenience Fee'}">
+					{l s='Price display preference'}
+				<span>
+			</label>
+			<div class="col-lg-4">
+				<select name="price_addition_type" id="price_addition_type">
+					<option value="{Product::PRICE_ADDITION_TYPE_WITH_ROOM}" {if $product->price_addition_type == Product::PRICE_ADDITION_TYPE_WITH_ROOM}selected="selected"{/if} >{l s='Add price in room price'}</option>
+					<option value="{Product::PRICE_ADDITION_TYPE_INDEPENDENT}" {if $product->price_addition_type == Product::PRICE_ADDITION_TYPE_INDEPENDENT}selected="selected"{/if} >{l s='Add price as convenience Fee'}</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-lg-8 col-lg-offset-3">
+				<div class="alert alert-info">
+					{l s='Select how this service price will be added in booking.'}
+					<ul>
+						<li>
+							<b>{l s='Add price in room price'}</b> : {l s='Service price will be added in room base price.'}<br>{l s='(e.g., Room price : 500, service price: 50, final room price : 550)'}
+						</li>
+						<li><b>{l s='Add price as convenience fee'}</b> : {l s='Service price will be dispalyed in order summary as "Convenience Fees"'}</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{* <div class="form-group" id="global_product_type_container">
 		<label class="control-label col-lg-3" for="service_product_type">
 			<span class="label-tooltip" data-toggle="tooltip" title="{l s='Select whether this product will be sold with room type or as an independent product'}">
 				{l s='Product selling preference'}
@@ -245,15 +307,15 @@
 				<option value="{Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}selected="selected"{/if} >{l s='Sell as independent product'}</option>
 			</select>
 		</div>
-	</div>
-	<div class="form-group" id="independent_product_info" {if $product->service_product_type != Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none"{/if}>
+	</div> *}
+	{* <div class="form-group" id="independent_product_info" {if $product->service_product_type != Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none"{/if}>
 		<div class="col-lg-6 col-lg-offset-3">
 			<div class="alert alert-info">
 			{l s='Independent products can only be bought from backoffice.'}
 			</div>
 		</div>
-	</div>
-	<div class="form-group" id="show_at_front_container" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if}>
+	</div> *}
+	<div class="form-group" id="show_at_front_container" {if $product->auto_add_to_cart}style="display:none;"{/if}>
 		<label class="control-label col-lg-3" for="">
 			<span class="label-tooltip" data-toggle="tooltip" title="{l s='Enable if you want this product to be visible at front office of your website.'}">
 				{l s='Show at front office'}
@@ -273,7 +335,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="form-group" id="available_for_order_container" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE || (!$product->show_at_front  && $product->isAssociatedToShop())}style="display:none;"{/if}>
+	<div class="form-group" id="available_for_order_container" {if (!$product->show_at_front  && $product->isAssociatedToShop()) || $product->auto_add_to_cart}style="display:none;"{/if}>
 		<label class="control-label col-lg-3" for="">
 			<span class="label-tooltip" data-toggle="tooltip" title="{l s='Enable if you want this product to be sold from front office of your website.'}">
 				{l s='Availabe for order'}
@@ -293,7 +355,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="form-group" id="show_price_container" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE || $product->show_price || !$product->isAssociatedToShop()}style="display:none;"{/if}>
+	<div class="form-group" id="show_price_container" {if $product->available_for_order || (!$product->show_at_front  && $product->isAssociatedToShop()) || !$product->isAssociatedToShop() || $product->auto_add_to_cart}style="display:none;"{/if}>
 		<label class="control-label col-lg-3" for="">
 			<span class="label-tooltip" data-toggle="tooltip" title="{l s='Enable if you want show product price even when product is not availabe to be sold at front office.'}">
 				{l s='Show price'}
@@ -313,17 +375,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="form-group" id="associated_hotel_rooms_tree" {if $product->service_product_type == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE}style="display:none;"{/if}>
-		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="category_box" type="category_box"}</span></div>
-		<label class="control-label col-lg-2" for="category_block">
-			{l s='Associated Hotels and Room Types'}
-		</label>
-		<div class="col-lg-9">
-			<div id="category_block">
-				{$hotel_tree}
-			</div>
-		</div>
-	</div>
+
 	<div class="form-group hidden">
 		<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="visibility" type="default"}</span></div>
 		<label class="control-label col-lg-2" for="visibility">
@@ -375,31 +427,32 @@
 			</table>
 		</div>
 	</div> *}
-
-	<div class="form-group" id="allow_multiple_quantity_container">
-		<label class="control-label col-lg-3">
-			<span class="label-tooltip" data-toggle="tooltip" title="{l s='When enabled, customer can order multiple quantity of product otherwise only one quantity can be purchased by customer per room/hotel'}">
-				{l s='Allow ordering of multiple quantities'}
-			</span>
-		</label>
-		<div class="col-lg-9">
-			<span class="switch prestashop-switch fixed-width-lg">
-				<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_on"{if $product->allow_multiple_quantity}checked="checked"{/if} value="1"/>
-				<label for="allow_multiple_quantity_on" class="radioCheck">
-					{l s='Yes'}
-				</label>
-				<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_off"{if !$product->allow_multiple_quantity}checked="checked"{/if} value="0"/>
-				<label for="allow_multiple_quantity_off" class="radioCheck">
-					{l s='No'}
-				</label>
-				<a class="slide-button btn"></a>
-			</span>
+	<div id="allow_multiple_quantity_container" {if (!$product->available_for_order && $product->isAssociatedToShop()) || $product->auto_add_to_cart}style="display:none;"{/if}>
+		<div class="form-group">
+			<label class="control-label col-lg-3">
+				<span class="label-tooltip" data-toggle="tooltip" title="{l s='When enabled, customer can order multiple quantity of product otherwise only one quantity can be purchased by customer per room/hotel'}">
+					{l s='Allow ordering of multiple quantities'}
+				</span>
+			</label>
+			<div class="col-lg-9">
+				<span class="switch prestashop-switch fixed-width-lg">
+					<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_on"{if $product->allow_multiple_quantity}checked="checked"{/if} value="1"/>
+					<label for="allow_multiple_quantity_on" class="radioCheck">
+						{l s='Yes'}
+					</label>
+					<input type="radio" name="allow_multiple_quantity" id="allow_multiple_quantity_off"{if !$product->allow_multiple_quantity}checked="checked"{/if} value="0"/>
+					<label for="allow_multiple_quantity_off" class="radioCheck">
+						{l s='No'}
+					</label>
+					<a class="slide-button btn"></a>
+				</span>
+			</div>
 		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-lg-6 col-lg-offset-3">
-			<div class="alert alert-info">
-			{l s='By default all products have infinte quantity, Using this setting you can restrict customer to purchase only one product per room/hotel.'}
+		<div class="form-group">
+			<div class="col-lg-6 col-lg-offset-3">
+				<div class="alert alert-info">
+				{l s='By default all products have infinte quantity, Using this setting you can restrict customer to purchase only one product per room.'}
+				</div>
 			</div>
 		</div>
 	</div>

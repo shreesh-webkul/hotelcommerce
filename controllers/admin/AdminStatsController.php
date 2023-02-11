@@ -390,7 +390,7 @@ class AdminStatsControllerCore extends AdminStatsTabController
 			) t ON t.`id_product` = pr.`id_product`
 		) t	ON t.`id_product` = capr.`id_product`
         RIGHT JOIN `'._DB_PREFIX_.'category` c2
-        ON c2.`id_category` = '.(int)Configuration::get('PS_PRODUCTS_CATEGORY').' AND ca.`nleft` >= c2.`nleft` AND ca.`nright` <= c2.`nright`
+        ON c2.`id_category` = '.(int)Configuration::get('PS_SERVICE_CATEGORY').' AND ca.`nleft` >= c2.`nleft` AND ca.`nright` <= c2.`nright`
 		WHERE ca.`level_depth` > 1
 		GROUP BY ca.`id_category`
 		ORDER BY SUM(t.`totalPriceSold`) DESC');

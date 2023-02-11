@@ -114,17 +114,17 @@ class AdminCategoriesControllerCore extends AdminController
         if (($id_category = Tools::getvalue('id_category')) && $this->action != 'select_delete') {
             $this->_category = new Category($id_category);
             // check if this category lies in location, if true then set category to products category.
-            if (!$this->_category->hasParent(Configuration::get('PS_PRODUCTS_CATEGORY'))) {
-                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
+            if (!$this->_category->hasParent(Configuration::get('PS_SERVICE_CATEGORY'))) {
+                $this->_category = new Category(Configuration::get('PS_SERVICE_CATEGORY'));
             }
         } else {
             if (Shop::getContext() == Shop::CONTEXT_SHOP) {
 
-                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
+                $this->_category = new Category(Configuration::get('PS_SERVICE_CATEGORY'));
             } elseif (count(Category::getCategoriesWithoutParent()) > 1 && Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE') && count(Shop::getShops(true, null, true)) != 1) {
                 $this->_category = Category::getTopCategory();
             } else {
-                $this->_category = new Category(Configuration::get('PS_PRODUCTS_CATEGORY'));
+                $this->_category = new Category(Configuration::get('PS_SERVICE_CATEGORY'));
             }
         }
 
@@ -143,7 +143,7 @@ class AdminCategoriesControllerCore extends AdminController
                 $id_parent = (int)Configuration::get('PS_ROOT_CATEGORY');
             }
         } else {
-            $id_parent = Configuration::get('PS_PRODUCTS_CATEGORY');
+            $id_parent = Configuration::get('PS_SERVICE_CATEGORY');
         }
         $this->_select = 'sa.position position';
         $this->original_filter = $this->_filter .= ' AND `id_parent` = '.(int)$id_parent.' ';
@@ -174,8 +174,6 @@ class AdminCategoriesControllerCore extends AdminController
 
     public function initPageHeaderToolbar()
     {
-        parent::initPageHeaderToolbar();
-
         if ($this->display != 'edit' && $this->display != 'add') {
             if (Configuration::get('PS_MULTISHOP_FEATURE_ACTIVE')) {
                 $this->page_header_toolbar_btn['new-url'] = array(
@@ -191,6 +189,7 @@ class AdminCategoriesControllerCore extends AdminController
                 'icon' => 'process-icon-new'
             );
         }
+        parent::initPageHeaderToolbar();
     }
 
     public function initContent()
@@ -336,7 +335,7 @@ class AdminCategoriesControllerCore extends AdminController
             }
         }
         if (!$this->lite_display && isset($this->toolbar_btn['back']['href']) && $this->_category->level_depth > 1
-            && $this->_category->id_parent && $this->_category->id_parent != (int)Configuration::get('PS_PRODUCTS_CATEGORY')) {
+            && $this->_category->id_parent && $this->_category->id_parent != (int)Configuration::get('PS_SERVICE_CATEGORY')) {
             $this->toolbar_btn['back']['href'] .= '&id_category='.(int)$this->_category->id_parent;
         }
     }
@@ -507,7 +506,7 @@ class AdminCategoriesControllerCore extends AdminController
                         'id'                  => 'categories-tree',
                         'selected_categories' => $selected_categories,
                         'disabled_categories' => (!Tools::isSubmit('add'.$this->table) && !Tools::isSubmit('submitAdd'.$this->table)) ? array($this->_category->id) : null,
-                        'root_category'       => Configuration::get('PS_PRODUCTS_CATEGORY')
+                        'root_category'       => Configuration::get('PS_SERVICE_CATEGORY')
                     )
                 ),
                 array(

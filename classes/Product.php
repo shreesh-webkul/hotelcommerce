@@ -181,6 +181,11 @@ class ProductCore extends ObjectModel
     // Room type required to buy
     public $service_product_type;
 
+    // add product to cart automatically
+    public $auto_add_to_cart = false;
+
+    public $price_addition_type;
+
     public $show_at_front;
 
     /** @var string Object available order date */
@@ -293,7 +298,7 @@ class ProductCore extends ObjectModel
             'is_virtual' =>                array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'booking_product' =>                array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'is_invisible' =>                array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
-            'service_product_type' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'service_product_type' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
 
             /* Shop fields */
             'id_category_default' =>        array('type' => self::TYPE_INT, 'shop' => true, 'validate' => 'isUnsignedId'),
@@ -317,6 +322,8 @@ class ProductCore extends ObjectModel
             'available_for_order' =>        array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
             'available_date' =>            array('type' => self::TYPE_DATE, 'shop' => true, 'validate' => 'isDateFormat'),
             'condition' =>                    array('type' => self::TYPE_STRING, 'shop' => true, 'validate' => 'isGenericName', 'values' => array('new', 'used', 'refurbished'), 'default' => 'new'),
+            'auto_add_to_cart' =>            array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
+            'price_addition_type' =>         array('type' => self::TYPE_INT, 'shop' => true, 'validate' => 'isUnsignedInt'),
             'show_at_front' =>                array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
             'show_price' =>                array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
             'indexed' =>                    array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
@@ -495,6 +502,9 @@ class ProductCore extends ObjectModel
 
     const SERVICE_PRODUCT_WITH_ROOMTYPE = 1;
     const SERVICE_PRODUCT_WITHOUT_ROOMTYPE = 2;
+
+    const PRICE_ADDITION_TYPE_WITH_ROOM = 1;
+    const PRICE_ADDITION_TYPE_INDEPENDENT = 2;
 
 
     public function __construct($id_product = null, $full = false, $id_lang = null, $id_shop = null, Context $context = null)
@@ -949,6 +959,12 @@ class ProductCore extends ObjectModel
             return true;
         }
 
+        if (!$this->booking_product) {
+            if (!$this->deleteServiceInfo()) {
+                return false;
+            }
+        }
+
         Hook::exec('actionProductDelete', array('id_product' => (int)$this->id, 'product' => $this));
         if (!$result ||
             !GroupReduction::deleteProductReduction($this->id) ||
@@ -970,6 +986,16 @@ class ProductCore extends ObjectModel
             return false;
         }
 
+        return true;
+    }
+
+    public function deleteServiceInfo()
+    {
+        if (!RoomTypeServiceProduct::deleteRoomProductLink($this->id)
+            ||RoomTypeServiceProductPrice::deleteRoomProductPrices($this->id)
+        ) {
+            return false;
+        }
         return true;
     }
 
@@ -1311,7 +1337,7 @@ class ProductCore extends ObjectModel
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                 .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
-                .($front ? ' AND product_shop.`show_at_front` = 1':'')
+                .($front ? ' AND product_shop.`auto_add_to_cart` = 0 AND product_shop.`show_at_front` = 1':'')
                 .($front ? ' AND p.`is_invisible` = 0':'')
                 .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                 .($active ? ' AND product_shop.`active` = 1' : '');
@@ -1355,7 +1381,7 @@ class ProductCore extends ObjectModel
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                     .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
-                    .($front ? ' AND product_shop.`show_at_front` = 1':'')
+                    .($front ? ' AND product_shop.`auto_add_to_cart` = 0 AND product_shop.`show_at_front` = 1':'')
                     .($front ? ' AND p.`is_invisible` = 0':'')
                     .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                     .($active ? ' AND product_shop.`active` = 1' : '');
@@ -1401,7 +1427,7 @@ class ProductCore extends ObjectModel
                     )
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
-                    .($front ? ' AND product_shop.`show_at_front` = 1':'')
+                    .($front ? ' AND product_shop.`auto_add_to_cart` = 0 AND product_shop.`show_at_front` = 1':'')
                     .($front ? ' AND p.`is_invisible` = 0':'')
                     .($active ? ' AND product_shop.`active` = 1' : '');
                     // .($displayPosition ? ' AND pdp.`id_position` = '.(int) $displayPosition : '');
@@ -3188,7 +3214,7 @@ class ProductCore extends ObjectModel
 
         // get price per room type
         if ($id_roomtype) {
-            $priceForRoomInfo = RoomTypeServiceProductPrice::getProductRoomTypeLinkPriceAndTax(
+            $priceForRoomInfo = RoomTypeServiceProductPrice::getProductRoomTypePriceAndTax(
                 $id_product,
                 $id_roomtype,
                 RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
@@ -3219,6 +3245,9 @@ class ProductCore extends ObjectModel
                 $price += $attribute_price;
             }
         }
+
+        // find and add if any auto_add services are attached
+
 
         Hook::exec(
 			'actionProductPriceModifier',
@@ -3321,6 +3350,13 @@ class ProductCore extends ObjectModel
 
         if ($only_reduc) {
             return Tools::ps_round($specific_price_reduction, $decimals);
+        }
+
+        // add auto added room price
+        if ($services = RoomTypeServiceProduct::getAutoAddServices($id_product, Product::PRICE_ADDITION_TYPE_WITH_ROOM, $use_tax)) {
+            foreach($services as $service) {
+                $price += $service['price'];
+            }
         }
 
         $price = Tools::ps_round($price, $decimals);

@@ -30,6 +30,9 @@
 		<div id="no_default_category" class="alert alert-info">
 			{l s='Please select a default category.'}
 		</div>
+		<div class="alert alert-info">
+            {l s='To create new categories '} <a target="_blank" href="{$link->getAdminLink('AdminCategories')}">{l s='click here.'}</a>
+        </div>
 		<div class="form-group">
 			<div class="col-lg-1"><span class="pull-right">{include file="controllers/products/multishop/checkbox.tpl" field="category_box" type="category_box"}</span></div>
 			<label class="control-label col-lg-2" for="category_block">
@@ -42,6 +45,11 @@
 				{* <a class="btn btn-link bt-icon confirm_leave" href="{$link->getAdminLink('AdminCategories')|escape:'html':'UTF-8'}&amp;addcategory">
 					<i class="icon-plus-sign"></i> {l s='Create new category'} <i class="icon-external-link-sign"></i>
 				</a> *}
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-6 col-sm-offset-3 alert alert-info">
+				{l s='Associations are used to display service product category wise on room type page when'} <a href="{$link->getAdminLink('AdminPPreferences')}#conf_id_PS_SERVICE_PRODUCT_CATEGORY_FILTER" target="_blank">{l s='Category filter'}</a> {l s='is enabled'}
 			</div>
 		</div>
 		<div class="form-group">

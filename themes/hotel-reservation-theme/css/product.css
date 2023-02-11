@@ -1420,8 +1420,9 @@ Quick View Styles
 .extra-service-panel .panel_title {
   font-size: 15px;
   margin-bottom: 18px;
-  font-weight: 600;
-}
+  font-weight: 600;}
+  .extra-service-panel .panel_title span {
+    font-weight: 400;}
 .extra-service-panel .table td {
   font-size: 13px;
   border-top: unset;
@@ -1437,7 +1438,7 @@ Quick View Styles
   justify-content: space-between;
 }
 .extra-service-panel .summary-row .service_price {
-  font-size: 16px;
+  font-weight: 700;
 }
 /* end */
 

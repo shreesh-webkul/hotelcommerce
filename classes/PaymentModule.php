@@ -935,7 +935,9 @@ abstract class PaymentModuleCore extends Module
                                 0,
                                 0,
                                 0,
-                                0
+                                0,
+                                null,
+                                null
                             )) {
                                 $idOrderDetail = $objBookingDetail->getPsOrderDetailIdByIdProduct($idProduct, $order->id);
                                 foreach ($cartAdditialServices as $additionalService) {
@@ -958,6 +960,7 @@ abstract class PaymentModuleCore extends Module
                                     $objRoomTypeServiceProductOrderDetail->total_price_tax_incl = $additionalService['total_price_tax_incl'];
                                     $objRoomTypeServiceProductOrderDetail->name = $product['name'];
                                     $objRoomTypeServiceProductOrderDetail->quantity = $additionalService['quantity'];
+                                    $objRoomTypeServiceProductOrderDetail->auto_added = $additionalService['auto_add_to_cart'];
                                     $objRoomTypeServiceProductOrderDetail->save();
                                 }
                             }

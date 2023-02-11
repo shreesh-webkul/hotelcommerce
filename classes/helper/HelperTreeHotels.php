@@ -44,6 +44,7 @@ class HelperTreeHotelsCore extends TreeCore
     private $_use_shop_restriction;
     private $_rooms_only = false;
     private $_disable_all_categories = false;
+    private $_accessed_hotels = false;
 
     public function __construct($id, $title = null, $root_category = null,
         $lang = null, $use_shop_restriction = true)
@@ -70,19 +71,19 @@ class HelperTreeHotelsCore extends TreeCore
         foreach($hotels as $hotel) {
 
             if (!$onlyRoomType) {
-                $tree[$hotel['id']] = array(
-                    'id_hotel' => $hotel['id'],
+                $tree[$hotel['id_hotel']] = array(
+                    'id_hotel' => $hotel['id_hotel'],
                     'id_category' => $hotel['id_category'],
                     'name' => $hotel['hotel_name'],
                     'children' => array()
                 );
             }
 
-            if (!empty($roomTypes = $objRoomType->getRoomTypeByHotelId($hotel['id'], $idLang))) {
+            if (!empty($roomTypes = $objRoomType->getRoomTypeByHotelId($hotel['id_hotel'], $idLang))) {
                 if ($onlyRoomType) {
                     $tree = array_merge($tree, $roomTypes);
                 } else {
-                    $tree[$hotel['id']]['children'] = array_merge($tree[$hotel['id']]['children'], $roomTypes);
+                    $tree[$hotel['id_hotel']]['children'] = array_merge($tree[$hotel['id_hotel']]['children'], $roomTypes);
                 }
             }
         }
@@ -96,8 +97,10 @@ class HelperTreeHotelsCore extends TreeCore
             $shop = $this->getShop();
             $lang = $this->getLang();
             $root_category = (int)$this->getRootCategory();
-            $objHotelBanch = new HotelBranchInformation();
-            $hotels = $objHotelBanch->hotelBranchesInfo();
+            if (($hotels = $this->getAccessedHotels()) === false) {
+                $objHotelBanch = new HotelBranchInformation();
+                $hotels = $objHotelBanch->hotelBranchesInfo();
+            }
             $tree = $this->fillTree($hotels, $this->_rooms_only);
             if (!empty($children)) {
                 $tree[$root_category]['children'] = $children;
@@ -132,6 +135,17 @@ class HelperTreeHotelsCore extends TreeCore
     {
         $this->_disabled_categories = $value;
         return $this;
+    }
+
+    public function setAccessedHotels($values)
+    {
+        $this->_accessed_hotels = $values;
+        return $this;
+    }
+
+    public function getAccessedHotels()
+    {
+        return $this->_accessed_hotels;
     }
 
     public function setDisablAllCategories($value)

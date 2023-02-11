@@ -31,13 +31,16 @@
                     {if isset($service_products) && $service_products}
 						{foreach from=$service_products key=key item=product}
                             <tr>
-                                <td class="col-sm-1">{$product.id_product|escape:'html':'UTF-8'} <a target="blank" href="{$link->getAdminLink('AdminProducts')|escape:'html':'UTF-8'}&amp;id_product={$product.id_product|escape:'html':'UTF-8'}&amp;updateproduct"><i class="icon-external-link-sign"></i></a></td>
+                                <td class="col-sm-1">{$product.id_product|escape:'html':'UTF-8'} <a target="blank" href="{$link->getAdminLink('AdminNormalProducts')|escape:'html':'UTF-8'}&amp;id_product={$product.id_product|escape:'html':'UTF-8'}&amp;updateproduct"><i class="icon-external-link-sign"></i></a></td>
                                 <td class="">{$product.name}</td>
                                 <td class="">{$product.category}</td>
                                 <td class="">
                                     <span class="field-view service-product-price-text">{if isset($product.custom_price) && $product.custom_price}{displayPrice price=$product.custom_price currency=$id_currency}{else}{displayPrice price=$product.default_price currency=$id_currency}{/if}</span>
                                     <div class="field-edit" style="display:none">
-                                        <input type="text" value="{if isset($product.custom_price) && $product.custom_price}{$product.custom_price|escape:'html':'UTF-8'}{else}{$product.default_price|escape:'html':'UTF-8'}{/if}" class="service-product-price" data-id_product="{$product.id_product|escape:'html':'UTF-8'}">
+                                        <div class="input-group">
+                                            <input type="text" value="{if isset($product.custom_price) && $product.custom_price}{$product.custom_price|escape:'html':'UTF-8'}{else}{$product.default_price|escape:'html':'UTF-8'}{/if}" class="service-product-price" data-id_product="{$product.id_product|escape:'html':'UTF-8'}">
+                                            <span class="input-group-addon">{$currency->prefix}{$currency->suffix}</span>
+                                        </div>
                                     </div>
                                     <div class="help-block">{l s='Default price: %s' sprintf={displayPrice price=$product.default_price currency=$id_currency}}
                                 </td>

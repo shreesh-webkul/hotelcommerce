@@ -991,7 +991,11 @@ class OrderOpcControllerCore extends ParentOrderController
                     0,
                     $idProduct,
                     $dateFrom,
-                    $dateTo
+                    $dateTo,
+                    0,
+                    0,
+                    null,
+                    null
                 )) {
                     $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                     $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct, 1, 0, true, 1);

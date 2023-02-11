@@ -521,12 +521,10 @@ class ProductControllerCore extends FrontController
                 $n,
                 true
             );
-            $serviceProductsCategories = $this->product->getAvailableServiceProductsCategories($this->context->language->id);
             if ($serviceProductsByCategory) {
                 $smartyVars['service_products_exists'] = 1;
             }
             $smartyVars['service_products_by_category'] = $serviceProductsByCategory;
-            $smartyVars['service_products_categories'] = $serviceProductsCategories;
         } else {
             $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData(
                 $this->product->id,
@@ -548,8 +546,8 @@ class ProductControllerCore extends FrontController
             $smartyVars['service_products'] = $roomTypeServiceProducts;
             $smartyVars['num_total_service_products'] = $numTotalServiceProducts;
         }
-        $this->context->smarty->assign($smartyVars);
 
+        $this->context->smarty->assign($smartyVars);
     }
 
 
@@ -652,7 +650,6 @@ class ProductControllerCore extends FrontController
         $featurePriceDiff = (float) ($productPriceWithoutReduction - $featurePrice);
 
         $totalRoomPrice = $roomTypeDateRangePrice * $quantity;
-
         // calculate demand price now
         $demandsPricePerRoom = 0;
         $roomTypeDemands = $objHRTDemand->getRoomTypeDemands($idProduct);

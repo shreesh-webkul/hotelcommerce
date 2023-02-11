@@ -1154,11 +1154,14 @@ class AdminProductsControllerCore extends AdminController
                     $error = $this->l('Unable to save price, please try again.');
                 } else {
                     $response['price'] = Tools::DisplayPrice($price);
-                    $objTaxRuleGroup = new TaxRulesGroup(
+                    if (Validate::isLoadedObject($objTaxRuleGroup = new TaxRulesGroup(
                         $objRoomTypeServiceProductPrice->id_tax_rules_group,
                         $this->context->language->id
-                    );
-                    $response['tax_rules_group_name'] = $objTaxRuleGroup->name;
+                    ))) {
+                        $response['tax_rules_group_name'] = $objTaxRuleGroup->name;
+                    } else {
+                        $response['tax_rules_group_name'] = $this->l('No tax');
+                    }
                 }
             }
         } else {
@@ -2219,6 +2222,12 @@ class AdminProductsControllerCore extends AdminController
             if ($this->ajax) {
                 $this->content_only = true;
             } else {
+                if (($object = $this->loadObject(true)) && $object->isAssociatedToShop()) {
+                    if (!$object->booking_product) {
+                        $this->errors[] = $this->l('Room type not found.');
+                        return;
+                    }
+                }
                 $product_tabs = array();
 
                 // tab_display defines which tab to display first
@@ -2808,15 +2817,15 @@ class AdminProductsControllerCore extends AdminController
 
             $objRoomType = new HotelRoomType();
             if ($hotelRoomType = $objRoomType->getRoomTypeInfoByIdProduct($obj->id)) {
-                $objRoomTypeLink = new RoomTypeServiceProduct();
-                $objRoomTypeLinkPrice = new RoomTypeServiceProductPrice();
-                $serviceProducts = $objRoomTypeLink->getIdProductsForHotelAndRoomType(
+                $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
+                $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
+                $serviceProducts = $objRoomTypeServiceProduct->getIdProductsForHotelAndRoomType(
                     $hotelRoomType['id_hotel'],
                     $obj->id
                 );
                 foreach ($serviceProducts as &$serviceProduct) {
                     $product = new Product($serviceProduct['id_product'], false, $this->context->language->id);
-                    $serviceProductPriceInfo = $objRoomTypeLinkPrice->getProductRoomTypeLinkPriceInfo(
+                    $serviceProductPriceInfo = $objRoomTypeServiceProductPrice->getProductRoomTypeLinkPriceInfo(
                         $product->id,
                         $obj->id,
                         RoomTypeServiceProduct::WK_ELEMENT_TYPE_ROOM_TYPE
@@ -2854,6 +2863,7 @@ class AdminProductsControllerCore extends AdminController
 
                 $data->assign(array(
                     'product' => $obj,
+                    'currency' => $this->context->currency,
                     'service_products' => $serviceProducts,
                     'tax_rules_groups' => $tax_rules_groups,
                     'taxesRatesByGroup' => $tax_rates,

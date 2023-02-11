@@ -1068,7 +1068,9 @@ $(document).ready(function() {
         extraDemandPrice = parseFloat(extraDemandPrice);
         extraDemandPrice = formatCurrency(extraDemandPrice, currency_format, currency_sign, currency_blank);
         $(this).closest('.room_demand_block').find('.extra_demand_option_price').text(extraDemandPrice);
-        BookingForm.refresh();
+        if ($(this).closest('.room_demand_block').find('.id_room_type_demand:checked').val()) {
+            BookingForm.refresh();
+        }
     });
 
 
@@ -1247,7 +1249,9 @@ $(document).ready(function() {
                             value: qty
                         }).appendTo('#additional_products');
                     }
-
+                    // reset input
+                    $(that).closest('.service_product_action_block').find('input.service_product_qty').val(1);
+                    $(that).closest('.service_product_action_block').find('.qty_count span').text(1);
                     showSuccessMessage(cart_extra_service_add);
                     BookingForm.refresh();
                 } else {
@@ -1301,7 +1305,6 @@ var BookingForm = {
         BookingForm.initDatepicker(max_order_date, preparation_time, $('#room_check_in').val(), $('#room_check_out').val());
         // initialize tootltip for extra service
         if ($('.price_desc_block .services-info').length) {
-            console.log('dsadad');
             $('.price_desc_block .services-info img').tooltip({
                 content: $('.price_desc_block .services-info-container').html(),
                 items: "div",

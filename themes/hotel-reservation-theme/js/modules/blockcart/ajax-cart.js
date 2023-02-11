@@ -1054,6 +1054,7 @@ var ajaxCart = {
     },
 
     updateLayer: function(product) {
+        console.log(product);
         // change text labels according to product type
         $('#layer_cart .layer_cart_room_txt').hide();
         $('#layer_cart .layer_cart_product_txt').hide();
@@ -1236,7 +1237,7 @@ function crossselling_serialScroll() {
 }
 
 function resetRoomtypeServices() {
-    $('.room_demands_container').find('input:checkbox.id_room_type_demand').prop('checked', false);
+    $('.room_demands_container').find('input.id_room_type_demand:checked').prop('checked', false).uniform();
     $('#additional_products').empty();
     $('#additional_products div')
     $('.remove_roomtype_product').text(select_txt).removeClass('btn-danger remove_roomtype_product').addClass('btn-success add_roomtype_product');

@@ -74,7 +74,7 @@
                                                 <div class="services-info-tooltip-cont">
                                                     {if isset($selected_service_product) && $selected_service_product}
                                                         <div class="extra-service-panel">
-                                                            <p class="panel_title">{l s='Selected services'}</p>
+                                                            <p class="panel_title">{l s='Selected services'} <span>{l s='(Per room)'}</span></p>
                                                             <div class="services-list">
                                                                 {foreach $selected_service_product as $product}
                                                                     <div class="services-list-row">
@@ -95,7 +95,7 @@
                                                     {/if}
                                                     {if isset($selected_demands) && $selected_demands}
                                                         <div class="extra-service-panel">
-                                                            <p class="panel_title">{l s='Selected facilities'}</p>
+                                                            <p class="panel_title">{l s='Selected facilities'} <span>{l s='(Per room)'}</span></p>
                                                             <div class="services-list">
                                                                 {foreach $selected_demands as $product}
                                                                     <div class="services-list-row">
@@ -175,17 +175,7 @@
                         {/if}
                     {/if}
                 {else}
-                    <div class="row">
-                        <div class="total_price_block col-xs-7 form-group">
-                            <label class="control-label">{l s='Price'}</label>
-                            <p>
-                                {convertPrice price=$productPrice|floatval}
-                            </p>
-                        </div>
-                        {* <div class="col-xs-5 form-group pull-right num_quantity_alert">
-                            <span class="num_searched_avail_rooms">{$total_available_rooms|escape:'html':'UTF-8'}</span> {l s='Room(s) Left !'}
-                        </div> *}
-                    </div>
+
                     {if $product->allow_multiple_quantity}
                         <div class="row">
                             <div class="form-group col-sm-6" id="quantity_wanted_p"{if (!$allow_oosp && $product->quantity <= 0) || !$product->available_for_order || $PS_CATALOG_MODE} style="display: none;"{/if}>
@@ -211,6 +201,14 @@
                             </div>
                         </div>
                     {/if}
+                    <div class="row">
+                        <div class="total_price_block col-xs-7 form-group">
+                            <label class="control-label">{l s='Price'}</label>
+                            <p>
+                                {convertPrice price=$productPrice|floatval}
+                            </p>
+                        </div>
+                    </div>
                 {/if}
             {/if}
             {if $order_date_restrict}

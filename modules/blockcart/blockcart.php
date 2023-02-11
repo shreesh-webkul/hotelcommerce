@@ -244,9 +244,9 @@ class Blockcart extends Module
                     $addedProduct['req_rm']
                 );
                 if ($priceDisplayMethod == PS_TAX_EXC) {
-                    $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_incl']);
-                } else {
                     $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_excl']);
+                } else {
+                    $addedProduct['price'] = Tools::displayPrice($price['total_price_tax_incl']);
                 }
                 $addedProduct['date_from'] = Tools::displayDate($addedProduct['date_from']);
                 $addedProduct['date_to'] = Tools::displayDate($addedProduct['date_to']);
@@ -267,7 +267,7 @@ class Blockcart extends Module
             unset($this->context->cookie->currentAddedProduct);
         }
 
-        $totalAdditionalServicesPrice = $this->context->cart->getOrderTotal(false, Cart::ONLY_ADDITITONAL_SERVICES);
+        $totalAdditionalServicesPrice = $this->context->cart->getOrderTotal(false, Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD);
 
         $response = array(
             'products' => $products,

@@ -1026,54 +1026,12 @@ product_tabs['Informations'] = new function(){
 		$('input[name=available_for_order]').on('change', function(e) {
 			if ($(this).val() == 1) {
 				$('#show_price_container').hide('fast');
-				$('#show_price_off').prop("checked", true).change();
+				$('#allow_multiple_quantity_container').show('fast');
 			} else {
 				$('#show_price_container').show('fast');
-				$('#show_price_off').prop("checked", true).change();
+				$('#allow_multiple_quantity_container').hide('fast');
 			}
 		});
-		$('#service_product_type').on('change',function(){
-			if (parseInt($(this).val()) == with_room_type) {
-				$('#associated_hotel_rooms_tree').show('fast');
-				$('#show_at_front_container').show('fast');
-				$('#product_options').show('fast');
-				$('#independent_product_info').hide('fast');
-			} else {
-				$('#associated_hotel_rooms_tree').hide('fast');
-				$('#show_at_front_container').hide('fast');
-				$('#product_options').hide('fast');
-				$('#independent_product_info').show('fast');
-			}
-		});
-
-		// function updateTextInfo(product_type){
-		// 	if (product_type == with_room_type) {
-		// 		$('input#auto_add_to_cart').closest('label').find('span').text(with_room_type_txt.autoadd_label);
-		// 	} else {
-		// 		$('input#auto_add_to_cart').closest('label').find('span').text(without_room_type_txt.autoadd_label);
-		// 	}
-		// }
-
-		// $('input[name="is_global_product"]').on('change', function(){
-		// 	if (parseInt($(this).val())) {
-		// 		// $("#global_product_type_container").show('slow');
-		// 		$("#price_display_method_container").hide('slow');
-		// 		$("#allow_multiple_quantity_container").hide('slow');
-		// 		$('#auto_add_to_cart').attr('checked', false).attr('disabled', false).closest('.checkbox').show();
-		// 	} else {
-		// 		$('#auto_add_to_cart').attr('checked', false).attr('disabled', true).closest('.checkbox').hide();
-
-		// 		// $("#global_product_type_container").hide('slow');
-		// 		$("#price_display_method_container").show('slow');
-		// 		$("#allow_multiple_quantity_container").show('slow');
-		// 		// if ($('#available_for_order').is(':checked') || ($('input[name=\'multishop_check[show_price]\']').length && !$('input[name=\'multishop_check[show_price]\']').prop('checked')))
-		// 		// {
-		// 		// }
-		// 	}
-		// });
-
-
-
 
 		$('#related_product_autocomplete_input')
 			.autocomplete('ajax_products_list.php?exclude_packs=0&excludeVirtuals=0&excludeIds='+id_product, {
@@ -1094,6 +1052,31 @@ product_tabs['Informations'] = new function(){
 			});
 		 addRelatedProduct(id_product_redirected, product_name_redirected);
 	};
+
+	this.bindAutoAddProduct = function (){
+		$('input[name="auto_add_to_cart"]').on('change',function(){
+			if ($(this).val() == 1) {
+				$("#price_addition_type_container").show('fast');
+				$("#show_at_front_container").hide('fast');
+				// $('#show_at_front_off').prop("checked", true).change();
+				$("#available_for_order_container").hide('fast');
+				$('#show_price_container').hide('fast');
+				$("#allow_multiple_quantity_container").hide('fast');
+			} else {
+				$("#price_addition_type_container").hide('fast');
+				$("#show_at_front_container").show('fast');
+				if ($('input[name="show_at_front"]:checked').val() == 1) {
+					$("#available_for_order_container").show('fast');
+				}
+				if ($('input[name=available_for_order]:checked').val() == 0) {
+					$('#show_price_container').show('fast');
+				}
+				if ($('input[name=available_for_order]:checked').val() == 1) {
+					$("#allow_multiple_quantity_container").show('fast');
+				}
+			}
+		});
+	}
 
 	this.bindTagImage = function (){
 		function changeTagImage(){
@@ -1125,6 +1108,20 @@ product_tabs['Informations'] = new function(){
 	};
 
 	this.switchProductType = function(){
+
+		$('#service_product_type').on('change',function(){
+			if (parseInt($(this).val()) == with_room_type) {
+				$('#associated_hotel_rooms_tree').show('fast');
+				$('#show_at_front_container').show('fast');
+				$('#product_options').show('fast');
+				$('#independent_product_info').hide('fast');
+			} else {
+				$('#associated_hotel_rooms_tree').hide('fast');
+				$('#show_at_front_container').hide('fast');
+				$('#product_options').hide('fast');
+				$('#independent_product_info').show('fast');
+			}
+		});
 		// if (product_type == product_type_pack)
 		// {
 		// 	$('#pack_product').attr('checked', true);
@@ -1244,6 +1241,7 @@ product_tabs['Informations'] = new function(){
 	this.onReady = function(){
 		// loadPack();
 		self.bindAvailableForOrder();
+		self.bindAutoAddProduct();
 		self.bindTagImage();
 		self.switchProductType();
 

@@ -24,10 +24,10 @@
     <meta_keywords/>
     <meta_description/>
   </category>
-  <category id="Products" id_shop="1">
-    <name>Products</name>
+  <category id="Services" id_shop="1">
+    <name>Services</name>
     <description/>
-    <link_rewrite>products</link_rewrite>
+    <link_rewrite>services</link_rewrite>
     <meta_title/>
     <meta_keywords/>
     <meta_description/>

@@ -32,7 +32,7 @@ class RoomTypeServiceProduct extends ObjectModel
     const WK_ELEMENT_TYPE_HOTEL = 1;
     const WK_ELEMENT_TYPE_ROOM_TYPE = 2;
 
-    const WK_NUM_RESULTS = 2;
+    const WK_NUM_RESULTS = 4;
 
     public static $definition = array(
         'table' => 'htl_room_type_service_product',
@@ -44,7 +44,7 @@ class RoomTypeServiceProduct extends ObjectModel
         )
     );
 
-    public function deleteRoomProductLink($idProduct, $elementType = 0)
+    public static function deleteRoomProductLink($idProduct, $elementType = 0)
     {
         $where = '`id_product`='.(int)$idProduct;
 
@@ -53,7 +53,7 @@ class RoomTypeServiceProduct extends ObjectModel
         }
 
         return Db::getInstance()->delete(
-            $this->def['table'],
+            'htl_room_type_service_product',
             $where
         );
     }
@@ -125,6 +125,32 @@ class RoomTypeServiceProduct extends ObjectModel
         return Db::getInstance()->getValue($sql);
     }
 
+    public static function getAutoAddServices($idProduct, $priceAdditionType = null, $useTax = null)
+    {
+        if (Product::isBookingProduct($idProduct)) {
+            $sql = 'SELECT p.`id_product` FROM  `'._DB_PREFIX_.'htl_room_type_service_product` rsp
+            INNER JOIN `'._DB_PREFIX_.'product` p ON (rsp.`id_product` = p.`id_product` AND p.`auto_add_to_cart` = 1)
+            WHERE `id_element` = '.(int)$idProduct.' AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE;
+            if (!is_null($priceAdditionType)) {
+                $sql .= ' AND p.`price_addition_type` = '.$priceAdditionType;
+            }
+            if ($services = Db::getInstance()->executeS($sql)) {
+                $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
+                foreach($services as &$service) {
+                    $service['price'] = $objRoomTypeServiceProductPrice->getProductPrice(
+                        (int)$service['id_product'],
+                        (int)$idProduct,
+                        1,
+                        $useTax
+                    );
+                }
+                return $services;
+            }
+        }
+
+        return false;
+    }
+
     public function getServiceProductsData($idProductRoomType, $p = 1, $n = 0, $front = false, $available_for_order = 2, $subCategory = false, $idLang = false)
     {
         if (!$idLang) {
@@ -178,7 +204,7 @@ class RoomTypeServiceProduct extends ObjectModel
         }
 
         $objProduct = new Product($idProduct);
-        if ($serviceProductsCategories = $objProduct->getAvailableServiceProductsCategories($idLang)) {
+        if ($serviceProductsCategories = $objProduct->getAvailableServiceProductsCategories($idLang, 1)) {
             foreach ($serviceProductsCategories as $key => $category) {
                 if ($products = $this->getServiceProductsData($idProduct, $p, $n, $front, $available_for_order, $category['id_category'], $idLang)) {
                     $serviceProductsCategories[$key]['products'] = $products;
