@@ -192,10 +192,10 @@ $(document).ready(function() {
         }
     }
 
-    toggleSearchFields();
-    $('#booking_product').on('change', function() {
-        toggleSearchFields();
-    });
+    // toggleSearchFields();
+    // $('#booking_product').on('change', function() {
+    //     toggleSearchFields();
+    // });
 
     // search form changes
     $('#search_hotel_list').on('click', function(e) {

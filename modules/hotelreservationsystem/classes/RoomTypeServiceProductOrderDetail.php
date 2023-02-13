@@ -67,7 +67,8 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
         $idRoom = 0,
         $getTotalPrice = 0,
         $useTax = null,
-        $autoAddToCart = 0
+        $autoAddToCart = 0,
+        $priceAdditionType = null
     ) {
 
         if ($useTax === null) {
@@ -79,16 +80,16 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
             $sql .= ', hbd.`id_product` as `room_type_id_product`, od.`product_allow_multiple_quantity`, hbd.`id_room`, hbd.`adults`, hbd.`children`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
-            LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` rsod ON(rsod.`id_htl_booking_detail` = hbd.`id`)
-            LEFT JOIN `'._DB_PREFIX_.'product` p ON(p.`id_product` = rsod.`id_product`)';
+            LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` rsod ON(rsod.`id_htl_booking_detail` = hbd.`id`)';
 
-        if (!$getTotalPrice) {
-            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
-        }
+        $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
         $sql .= ' WHERE rsod.`id_order` = '.(int)$idOrder;
 
         if (!is_null($autoAddToCart)) {
-            $sql .= ' AND p.`auto_add_to_cart` = '. (int)$autoAddToCart;
+            $sql .= ' AND od.`product_auto_add` = '. (int)$autoAddToCart;
+            if ($autoAddToCart == 1 && !is_null($priceAdditionType)) {
+                $sql .= ' AND od.`product_price_addition_type` = '.$priceAdditionType;
+            }
         }
         if ($idProduct) {
             $sql .= ' AND rsod.`id_product`='.(int) $idProduct;
@@ -110,6 +111,7 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
         if ($getTotalPrice) {
             $totalPrice = 0;
         }
+
         $selectedAdditionalServices = array();
         if ($additionalServices = Db::getInstance()->executeS($sql)) {
             $moduleObj = Module::getInstanceByName('hotelreservationsystem');
@@ -198,14 +200,11 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
 
         $sql = 'SELECT rsod.*';
         if (!$getTotalPrice) {
-            $sql .= ', hbd.`id_product` as `room_type_id_product`, od.`product_allow_multiple_quantity`, hbd.`id_room`';
+            $sql .= ', hbd.`id_product` as `room_type_id_product`, od.`product_allow_multiple_quantity`, hbd.`id_room`, od.`product_auto_add`, od.`product_price_addition_type`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
             LEFT JOIN `'._DB_PREFIX_.'htl_room_type_service_product_order_detail` rsod ON(rsod.`id_htl_booking_detail` = hbd.`id`)';
-
-        if (!$getTotalPrice) {
-            $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
-        }
+        $sql .= ' LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON(od.`product_id` = rsod.`id_product` AND od.`id_order` = '.(int)$idOrder.')';
         $sql .= ' WHERE rsod.`id_order` = '.(int)$idOrder.' AND hbd.`id_product`='.(int) $roomTypeIdProduct .' AND hbd.`date_from` = \''.pSQL($dateFrom).'\' AND hbd.`date_to` = \''.pSQL($dateTo).'\' AND hbd.`id_room`='.(int) $idRoom;
 
         if ($getTotalPrice) {
@@ -231,7 +230,8 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
                             'name' => $product['name'],
                             'quantity' => $product['quantity'],
                             'allow_multiple_quantity' => $product['product_allow_multiple_quantity'],
-                            'auto_added' => $product['auto_added'],
+                            'product_auto_add' => $product['product_auto_add'],
+                            'product_price_addition_type' => $product['product_price_addition_type'],
                             'total_price_tax_excl' => $product['total_price_tax_excl'],
                             'total_price_tax_incl' => $product['total_price_tax_incl'],
                         );
@@ -251,7 +251,8 @@ class RoomTypeServiceProductOrderDetail extends ObjectModel
                                 'name' => $product['name'],
                                 'quantity' => $product['quantity'],
                                 'allow_multiple_quantity' => $product['product_allow_multiple_quantity'],
-                                'auto_added' => $product['auto_added'],
+                                'product_auto_add' => $product['product_auto_add'],
+                                'product_price_addition_type' => $product['product_price_addition_type'],
                                 'total_price_tax_excl' => $product['total_price_tax_excl'],
                                 'total_price_tax_incl' => $product['total_price_tax_incl'],
                             ),

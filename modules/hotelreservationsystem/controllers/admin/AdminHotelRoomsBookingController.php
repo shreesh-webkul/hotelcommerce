@@ -120,14 +120,14 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $occupancy = array();
         }
 
-        $booking_product = 1;
-        if (Tools::getisset('booking_product')) {
-            $booking_product = Tools::getValue('booking_product');
-        }
+        // $booking_product = 1;
+        // if (Tools::getisset('booking_product')) {
+        //     $booking_product = Tools::getValue('booking_product');
+        // }
 
         if (Tools::isSubmit('search_hotel_list')) {
             $urlData = array (
-                'booking_product' => $booking_product,
+                // 'booking_product' => $booking_product,
                 'date_from' => $date_from,
                 'date_to' => $date_to,
                 'id_hotel' => $id_hotel,
@@ -210,7 +210,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $this->id_room_type = $id_room_type;
         $this->date_from = $date_from;
         $this->date_to = $date_to;
-        $this->booking_product = $booking_product;
+        // $this->booking_product = $booking_product;
+        $this->booking_product = 1;
         $this->occupancy = $occupancy;
 
         parent::postprocess();

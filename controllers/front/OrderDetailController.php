@@ -314,6 +314,8 @@ class OrderDetailControllerCore extends FrontController
                     $cartServiceProducts = array();
                     $total_demands_price_te = 0;
                     $total_demands_price_ti = 0;
+                    $total_convenience_fee_te = 0;
+                    $total_convenience_fee_ti = 0;
                     if (!empty($products)) {
                         foreach ($products as $type_key => $type_value) {
                             if (in_array($type_value['product_id'], $processedProducts)) {
@@ -486,6 +488,33 @@ class OrderDetailControllerCore extends FrontController
                                     $value['avg_price_diff_tax_excl'] = abs(Tools::ps_round($value['avg_paid_unit_price_tax_excl'] - $value['product_price_tax_excl'], 6));
                                     $value['avg_price_diff_tax_incl'] = abs(Tools::ps_round($value['avg_paid_unit_price_tax_incl'] - $value['product_price_tax_incl'], 6));
                                 }
+                            } else if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_WITH_ROOMTYPE) {
+                                if ($type_value['product_auto_add'] && $type_value['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_INDEPENDENT) {
+                                    $total_convenience_fee_ti += $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                        $id_order,
+                                        $type_value['product_id'],
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        1,
+                                        1,
+                                        1
+                                    );
+                                    $total_convenience_fee_te += $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                        $id_order,
+                                        $type_value['product_id'],
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        1,
+                                        0,
+                                        1
+                                    );
+                                }
                             } else {
                                 // get all products that are independent.
                                 if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE) {
@@ -510,6 +539,8 @@ class OrderDetailControllerCore extends FrontController
                         array(
                             'id_cms_refund_policy' => Configuration::get('WK_GLOBAL_REFUND_POLICY_CMS'),
                             'THEME_DIR' => _THEME_DIR_,
+                            'total_convenience_fee_ti' => $total_convenience_fee_ti,
+                            'total_convenience_fee_te' => $total_convenience_fee_te,
                             'total_demands_price_ti' => $total_demands_price_ti,
                             'total_demands_price_te' => $total_demands_price_te,
                             'any_back_order' => $anyBackOrder,

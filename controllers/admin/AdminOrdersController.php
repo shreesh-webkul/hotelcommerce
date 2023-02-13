@@ -1483,6 +1483,8 @@ class AdminOrdersControllerCore extends AdminController
 
         $total_room_tax = 0;
         $totalRoomsCostTE = 0;
+        $totalConvenienceFeeTE = 0;
+        $totalConvenienceFeeTI = 0;
         $totalDemandsPriceTE = 0;
         $totalDemandsPriceTI = 0;
         if ($order_detail_data = $objBookingDetail->getOrderFormatedBookinInfoByIdOrder($order->id)) {
@@ -1549,6 +1551,32 @@ class AdminOrdersControllerCore extends AdminController
                     1,
                     0
                 );
+                $totalConvenienceFeeTI += $order_detail_data[$key]['convenience_fee_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                    $order->id,
+                    0,
+                    0,
+                    $value['id_product'],
+                    $value['date_from'],
+                    $value['date_to'],
+                    $value['id_room'],
+                    1,
+                    1,
+                    1,
+                    Product::PRICE_ADDITION_TYPE_INDEPENDENT
+                );
+                $totalConvenienceFeeTE += $order_detail_data[$key]['convenience_fee_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                    $order->id,
+                    0,
+                    0,
+                    $value['id_product'],
+                    $value['date_from'],
+                    $value['date_to'],
+                    $value['id_room'],
+                    1,
+                    0,
+                    1,
+                    Product::PRICE_ADDITION_TYPE_INDEPENDENT
+                );
                 $cust_obj = new Customer($value['id_customer']);
                 if ($cust_obj->firstname) {
                     $order_detail_data[$key]['alloted_cust_name'] = $cust_obj->firstname.' '.$cust_obj->lastname;
@@ -1573,7 +1601,6 @@ class AdminOrdersControllerCore extends AdminController
                 $order_detail_data[$key]['amt_with_qty_tax_excl'] = $value['total_price_tax_excl'];
                 $order_detail_data[$key]['amt_with_qty_tax_incl'] = $value['total_price_tax_incl'];
                 $order_detail_data[$key]['room_type_info'] = $objHotelRoomType->getRoomTypeInfoByIdProduct($value['id_product']);
-
             }
         }
 
@@ -1596,9 +1623,10 @@ class AdminOrdersControllerCore extends AdminController
             'refundReqBookings' => $refundReqBookings,
             'hasCompletelyRefunded' => $order->hasCompletelyRefunded(),
             'refundedAmount' => $refundedAmount,
-
             'totalDemandsPriceTI' => $totalDemandsPriceTI,
             'totalDemandsPriceTE' => $totalDemandsPriceTE,
+            'totalConvenienceFeeTI' => $totalConvenienceFeeTI,
+            'totalConvenienceFeeTE' => $totalConvenienceFeeTE,
             'totalRoomsCostTE' => $totalRoomsCostTE,
             'total_room_tax' => $total_room_tax,
             'htl_booking_order_data' => $bookingOrderInfo,

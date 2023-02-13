@@ -7,7 +7,7 @@
 			<div class="panel-body">
 				<form method="post" action="">
 					<div class="row">
-						<div class="form-group col-sm-12">
+						{* <div class="form-group col-sm-12">
 							<label for="booking_product" class="control-label col-sm-4 required">
 								<span title="" data-toggle="tooltip" class="label-tooltip">{l s='Product type' mod='hotelreservationsystem'}</span>
 							</label>
@@ -17,7 +17,7 @@
 									<option value="0" {if isset($booking_product) && $booking_product == 0}selected{/if}>{l s='Service Products'}</option>
 								</select>
 							</div>
-						</div>
+						</div> *}
 						<div class="form-group col-sm-12">
 							<label for="date_from" class="control-label col-sm-4 required">
 								<span title="" data-toggle="tooltip" class="label-tooltip">{l s='Check-In' mod='hotelreservationsystem'}</span>

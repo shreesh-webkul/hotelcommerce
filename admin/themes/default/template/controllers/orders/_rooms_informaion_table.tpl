@@ -12,6 +12,7 @@
                     <th class="text-center"><span class="title_box">{l s='Hotel Name'}</span></th>
                     <th class="text-center"><span class="title_box">{l s='Duration'}</span></th>
                     <th class="text-center fixed-width-lg"><span class="title_box">{l s='Occupancy'}</span></th>
+                    <th class="text-center"><span class="title_box">{l s='Convenience Fee'}</span></th>
                     <th class="text-center"><span class="title_box">{l s='Unit Price (Tax excl.)'}</span></th>
                     <th class="text-center"><span class="title_box">{l s='Total Price (Tax incl.)'}</span></th>
                     {if isset($refundReqBookings) && $refundReqBookings}

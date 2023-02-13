@@ -195,7 +195,9 @@ class OrderDetailCore extends ObjectModel
             'product_quantity_discount' =>    array('type' => self::TYPE_FLOAT, 'validate' => 'isFloat'),
             'is_booking_product' =>                array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'product_service_type' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'product_allow_multiple_quantity' =>     array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
+            'product_auto_add' =>            array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'product_price_addition_type' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'product_allow_multiple_quantity' => array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
             'product_ean13' =>                array('type' => self::TYPE_STRING, 'validate' => 'isEan13'),
             'product_upc' =>                array('type' => self::TYPE_STRING, 'validate' => 'isUpc'),
             'product_reference' =>            array('type' => self::TYPE_STRING, 'validate' => 'isReference'),
@@ -652,6 +654,8 @@ class OrderDetailCore extends ObjectModel
 
         $this->is_booking_product = $product['booking_product'];
         $this->product_service_type = $product['service_product_type'];
+        $this->product_auto_add = $product['auto_add_to_cart'];
+        $this->product_price_addition_type = $product['price_addition_type'];
         $this->product_allow_multiple_quantity = $product['allow_multiple_quantity'];
 
         $this->setVirtualProductInformation($product);

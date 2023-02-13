@@ -93,6 +93,7 @@
 							<p class="room_remove_block">
 								<a href="{$rm_v['link']}"><i class="icon-trash"></i> &nbsp;{l s='Remove'}</a>
 							</p>
+							{hook h='displayCartRoomImageAfter' id_product=$data_v['id_product']}
 						</div>
 						<div class="col-sm-10">
 							<div class="room-info-container">
@@ -133,16 +134,10 @@
 									<p class="room_duration_block_head">{l s='CHECK OUT'}</p>
 									<p class="room_duration_block_value">{$rm_v['data_to']|date_format:"%d %b, %a"}</p>
 								</div>
-								<div class="col-sm-2 col-xs-6">
-									<p class="room_duration_block_head">{l s='ROOMS'}</p>
+								<div class="col-sm-6 col-xs-6">
+									<p class="room_duration_block_head">{l s='OCCUPANCY'}</p>
 									<p class="room_duration_block_value">
-										{if {$rm_v['num_rm']} <= 9}0{$rm_v['num_rm']}{else}{$rm_v['num_rm']}{/if}
-									</p>
-								</div>
-								<div class="col-sm-4 col-xs-6">
-									<p class="room_duration_block_head">{l s='NO. OF GUESTS'}</p>
-									<p class="room_duration_block_value">
-										{if {$data_v['adults']} <= 9}0{$data_v['adults']}{else}{$data_v['adults']}{/if} {l s='Adults'}, {if {$data_v['children']} <= 9}0{$data_v['children']}{else}{$data_v['children']}{/if} {l s='Child'}
+										{if {$rm_v['adults']} <= 9}0{$rm_v['adults']}{else}{$rm_v['adults']}{/if} {if $rm_v['adults'] > 1}{l s='Adults'}{else}{l s='Adult'}{/if}{if $rm_v['children']}, {if $rm_v['children'] <= 9}0{$rm_v['children']}{else}{$rm_v['children']}{/if} {if $rm_v['children'] > 1}{l s='Children'}{else}{l s='Child'}{/if}{/if}, {if {$rm_v['num_rm']} <= 9}0{/if}{$rm_v['num_rm']}{if $rm_v['num_rm'] > 1} {l s='Rooms'}{else} {l s='Room'}{/if}
 									</p>
 								</div>
 							</div>
@@ -203,7 +198,6 @@
 				{/foreach}
 			{/foreach}
 		{/if}
-
 		{if isset($cart_normal_data) && $cart_normal_data}
 			<p class="cart_section_title">{l s='service product information'}</p>
 			{foreach from=$cart_normal_data key=data_k item=product}

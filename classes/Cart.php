@@ -1710,7 +1710,7 @@ class CartCore extends ObjectModel
                         }
 
                         if (Product::PRICE_ADDITION_TYPE_WITH_ROOM == $product['price_addition_type']) {
-                            if ($type == Cart::ONLY_CONVENIENCE_FEE) {
+                            if ($type == Cart::ONLY_CONVENIENCE_FEE || $type == Cart::BOTH_WITHOUT_SHIPPING) {
                                 continue;
                             }
                         } else {
@@ -1915,7 +1915,18 @@ class CartCore extends ObjectModel
         $order_total_discount = 0;
         $order_shipping_discount = 0;
         $advance_payment_products_discount = 0;
-        if (!in_array($type, array(Cart::ONLY_SHIPPING, Cart::ONLY_PRODUCTS, Cart::ADVANCE_PAYMENT_ONLY_PRODUCTS)) && CartRule::isFeatureActive()) {
+        if (!in_array($type, array(
+            Cart::ONLY_SHIPPING,
+            Cart::ONLY_PRODUCTS,
+            Cart::ONLY_ROOMS,
+            Cart::ADVANCE_PAYMENT_ONLY_PRODUCTS,
+            Cart::ONLY_ROOM_SERVICES,
+            Cart::ONLY_SERVICE_PRODUCTS,
+            Cart::ONLY_CONVENIENCE_FEE,
+            Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD,
+            Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE)
+            ) && CartRule::isFeatureActive()
+        ) {
             // First, retrieve the cart rules associated to this "getOrderTotal"
             if ($with_shipping || $type == Cart::ONLY_DISCOUNTS) {
                 $cart_rules = $this->getCartRules(CartRule::FILTER_ACTION_ALL);
@@ -3669,10 +3680,11 @@ class CartCore extends ObjectModel
         $total_products = $this->getOrderTotal(false, Cart::ONLY_PRODUCTS);
         $total_rooms_wt = $this->getOrderTotal(true, Cart::ONLY_ROOMS);
         $total_rooms = $this->getOrderTotal(false, Cart::ONLY_ROOMS);
-        $total_additional_services_wt = $this->getOrderTotal(true, Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE);
-        $total_additional_services = $this->getOrderTotal(false, Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE);
+        $total_additional_services_wt = $this->getOrderTotal(true, Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD);
+        $total_additional_services = $this->getOrderTotal(false, Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD);
         $convenience_fee_wt = $this->getOrderTotal(true, Cart::ONLY_CONVENIENCE_FEE);
         $convenience_fee = $this->getOrderTotal(false, Cart::ONLY_CONVENIENCE_FEE);
+        $convenience_fee_tax = $convenience_fee_wt - $convenience_fee;
         $total_service_products_wt = $this->getOrderTotal(true, Cart::ONLY_SERVICE_PRODUCTS);
         $total_service_products = $this->getOrderTotal(false, Cart::ONLY_SERVICE_PRODUCTS);
         $total_discounts = $this->getOrderTotal(true, Cart::ONLY_DISCOUNTS);
@@ -3798,6 +3810,7 @@ class CartCore extends ObjectModel
             'total_additional_services' => $total_additional_services,
             'convenience_fee_wt' => $convenience_fee_wt,
             'convenience_fee' => $convenience_fee,
+            'convenience_fee_tax' => $convenience_fee_tax,
             'total_service_products_wt' => $total_service_products_wt,
             'total_service_products' => $total_service_products,
             'total_extra_demands_wt' => $total_demands_wt,

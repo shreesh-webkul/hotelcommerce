@@ -8932,8 +8932,8 @@ hr.theme-text-underline {
   display: block;}
 
 a.open_rooms_extra_services_panel {
-  font-size:12px;
-  font-weight: 600;
+  /* font-size:12px;
+  font-weight: 600; */
   color: #0000FF;}
 #rooms_extra_services {
   width: 100%;

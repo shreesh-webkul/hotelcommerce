@@ -96,6 +96,7 @@ function showOrder(mode, var_content, file)
 				$('html, body').animate({
 					scrollTop: $('#block-order-detail').offset().top
 				}, 1200);
+				initPriceTooltip();
 			});
 		});
 	});
@@ -154,7 +155,47 @@ function sendOrderMessage()
 	});
 	return false;
 }
+function initPriceTooltip()
+{
+	if ($('.order-price-info').length) {
+		$('.order-price-info').each(function() {
+			$(this).tooltip({
+				content: $(this).closest('td').find('.price-info-container').html(),
+				items: "span",
+				trigger : 'hover',
+                tooltipClass: "price-tootip",
+				open: function(event, ui) {
+					if (typeof(event.originalEvent) === 'undefined')
+					{
+						return false;
+					}
 
+					var $id = $(ui.tooltip).attr('id');
+
+					// close any lingering tooltips
+					if ($('div.ui-tooltip').not('#' + $id).length) {
+						return false;
+					}
+
+					// ajax function to pull in data and add it to the tooltip goes here
+				},
+				close: function(event, ui) {
+					ui.tooltip.hover(function()
+					{
+						$(this).stop(true).fadeTo(400, 1);
+					},
+					function()
+					{
+						$(this).fadeOut('400', function()
+						{
+							$(this).remove();
+						});
+					});
+				}
+			});
+		});
+	}
+}
 $(document).ready(function(){
 	var page = $('html, body');
 	page.on('mousewheel', function () {
@@ -259,5 +300,7 @@ $(document).ready(function(){
 			showErrorMessage(no_bookings_selected);
 		}
 	});
+
+	initPriceTooltip();
 });
 

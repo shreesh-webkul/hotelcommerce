@@ -427,18 +427,57 @@ product_tabs['Associations'] = new function(){
 
 product_tabs['ServiceProduct'] = new function(){
 	this.onReady = function(){
-
-		// Display datatables in lead request page
 		if ($("table.hotel-roomtype-link-table").length) {
-		roomtypeLinkDataTable = $('table.hotel-roomtype-link-table').DataTable({
-			"order": [],
-			"autoWidth": false,
-			"columnDefs": [{
-				"targets": 'no-sort',
-				"orderable": false,
-			}]
-		});
-	}
+			roomtypeLinkDataTable = $('table.hotel-roomtype-link-table').tableDnD({
+				dragHandle: 'dragHandle',
+				onDragClass: 'myDragClass',
+				onDrop: function (table, row) {
+					id_product = $(row).attr("id_product");
+					id_element = $(row).attr("id_element");
+					id_row = $(row).attr("id");
+					position = $(row).attr("position");
+					// id_slider_image = $(row).attr("id_slider_image");
+					var to_row_index = $('#' + id_row).index();
+					$.ajax({
+						method: 'POST',
+						url: $(row).data('roomtype_url'),
+						dataType: 'JSON',
+						async: false,
+						data: {
+							ajax: true,
+							action: 'changeServicePosition',
+							changeServicePosition: "1",
+							id_product: id_product,
+							id_element: id_element,
+							position: position,
+							to_row_index: to_row_index
+						},
+
+						success: function (response) {
+							if (response.success) {
+								$($('.hotel-roomtype-link-table tbody')).find('tr').each(function (index, value) {
+									$(value).attr('position', parseInt(index + 1));
+								});
+
+								$($('.hotel-roomtype-link-table tbody')).find('tr td.dragHandle .positions').each(function (i, val) {
+									$(val).text(parseInt(i + 1));
+								});
+								showSuccessMessage(response.msg);
+							}
+						},
+						error: function (xhr, status, error) {
+							showErrorMessage(error);
+						}
+					});
+				},
+				"order": [],
+				"autoWidth": false,
+				"columnDefs": [{
+					"targets": 'no-sort',
+					"orderable": false,
+				}]
+			});
+		}
 
 		$(this).on('click', '.button-edit-price', function(e){
 			e.preventDefault();

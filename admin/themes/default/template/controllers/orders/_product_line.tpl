@@ -161,6 +161,9 @@
 		{/if}
 	</td>
 	<td class="text-center">
+		<span class="convenience_fee_show">{convertPriceWithCurrency price=$data.convenience_fee_ti currency=$currency->id}</span>
+	</td>
+	<td class="text-center">
 		<span class="room_unit_price_show">
 			{if $data.feature_price_diff != 0}
 				<span class="product_original_price room_type_old_price">
@@ -176,7 +179,7 @@
 		</div>
 	</td>
 	<td class="text-center">
-		<span class="product_price_show">{convertPriceWithCurrency price=$data.amt_with_qty_tax_incl currency=$currency->id}</span>
+		<span class="product_price_show">{convertPriceWithCurrency price=($data.amt_with_qty_tax_incl + $data['extra_demands_price_ti'] + $data['additional_services_price_ti']) currency=$currency->id}</span>
 		{if $can_edit}
 		<div class="product_price_edit" style="display:none;">
 			<div class="form-group">

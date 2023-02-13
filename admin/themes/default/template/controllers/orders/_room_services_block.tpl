@@ -42,8 +42,8 @@
 											{/if}
 									</td>
 									<td>
-										{if $service['auto_added']}
-											<span class="badge badge-info">{l s='Included in room price'}</span>
+										{if $service['product_auto_add']}
+											<span class="badge badge-info">{l s='Auto added'}</span>
 										{/if}
 									</td>
 									<td>{displayPrice price=$service['total_price_tax_incl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
@@ -100,16 +100,20 @@
 				{foreach $additionalServices['additional_services'] as $service}
 					<div class="col-sm-12 room_demand_block">
 						<div class="row">
-							<div class="col-xs-5">
+							<div class="col-xs-8">
+								<span class="pull-right">
+									{if $service['product_auto_add']}
+										<span class="badge badge-sm badge-info">{l s='Auto added'}</span>
+										{if $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_WITH_ROOM}
+											<span class="badge badge-info">{l s='Included in room price'}</span>
+										{/if}
+									{/if}
+								</span>
 								<div>{$service['name']|escape:'html':'UTF-8'}</div>
 								{if $service['allow_multiple_quantity']}
 									<div class="quantity">{l s='Qty:'}&nbsp;{$service['quantity']|escape:'html':'UTF-8'}</div>
 								{/if}
-							</div>
-							<div class="col-xs-3">
-								{if $service['auto_added']}
-									<span class="badge badge-info">{l s='Included in room price'}</span>
-								{/if}
+
 							</div>
 							<div class="col-xs-4">
 								<span class="pull-right">{displayPrice price=$service['total_price_tax_incl'] currency=$orderCurrency}</span>

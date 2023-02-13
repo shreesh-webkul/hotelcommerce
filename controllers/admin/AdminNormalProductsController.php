@@ -202,7 +202,7 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->_where .= ' AND a.`booking_product` = 0';
 
         $this->_use_found_rows = false;
-        $this->_group = 'GROUP BY rsp.`id_product`';
+        $this->_group = 'GROUP BY a.`id_product`';
 
         $this->fields_list = array();
         $this->fields_list['id_product'] = array(

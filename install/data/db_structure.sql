@@ -1251,6 +1251,8 @@ CREATE TABLE `PREFIX_order_detail` (
   `product_quantity_discount` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `is_booking_product` tinyint(1) NOT NULL DEFAULT '0',
   `product_service_type` tinyint(1) NOT NULL DEFAULT '1',
+  `product_auto_add` tinyint(1) NOT NULL DEFAULT '0',
+  `product_price_addition_type` tinyint(1) NOT NULL DEFAULT '0',
   `product_allow_multiple_quantity` tinyint(1) unsigned NOT NULL DEFAULT '1',
   `product_ean13` varchar(13) DEFAULT NULL,
   `product_upc` varchar(12) DEFAULT NULL,

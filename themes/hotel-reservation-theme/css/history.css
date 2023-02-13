@@ -168,3 +168,21 @@
 
   .refund_request_fields {
       display: none;}
+
+
+.ui-tooltip.price-tootip {
+  box-shadow: 0 2px 6px 0 rgb(0 0 0 / 20%);
+  background: #FFFFFF;
+  border: unset;
+  color: #333;
+  padding: 9px 15px;
+  max-height: 310px;
+  overflow-y: auto;
+}
+.price-info-tooltip-cont {
+  min-width: 180px;
+}
+.price-info-tooltip-cont .list-row {
+  display: flex;
+  justify-content: space-between;
+}

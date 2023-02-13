@@ -354,6 +354,7 @@ class HotelReservationSystemDb
             "CREATE TABLE `"._DB_PREFIX_."htl_room_type_service_product` (
                 `id_room_type_service_product` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                 `id_product` int(11) UNSIGNED NOT NULL,
+                `position` smallint(2) unsigned NOT NULL DEFAULT '0',
                 `id_element` int(11) unsigned NOT NULL,
                 `element_type` tinyint(11) unsigned NOT NULL,
                 PRIMARY KEY (`id_room_type_service_product`),

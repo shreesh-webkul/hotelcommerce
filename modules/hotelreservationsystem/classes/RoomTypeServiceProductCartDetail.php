@@ -101,7 +101,8 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         $getTotalPrice = 0,
         $useTax = null,
         $autoAddToCart = 0,
-        $id_address = null
+        $id_address = null,
+        $priceAdditionType = null
     ) {
         if ($useTax === null)
             $useTax = Product::$_taxCalculationMethod == PS_TAX_EXC ? false : true;
@@ -109,7 +110,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         $sql = 'SELECT rscd.`id_product`, rscd.`quantity`, cbd.`id_cart`, cbd.`id` as `htl_cart_booking_id` ,
             cbd.`id_product` as `room_type_id_product`, cbd.`adults`, cbd.`children`';
         if (!$getTotalPrice) {
-            $sql .= ', cbd.`id_guest`, cbd.`id_customer`, p.`auto_add_to_cart`,
+            $sql .= ', cbd.`id_guest`, cbd.`id_customer`, p.`auto_add_to_cart`, p.`price_addition_type`,
                 cbd.`id_hotel`, cbd.`id_room`, cbd.`date_from`, cbd.`date_to`, cbd.`is_refunded`';
         }
         $sql .= ' FROM `'._DB_PREFIX_.'htl_cart_booking_data` cbd
@@ -119,6 +120,9 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
 
         if (!is_null($autoAddToCart)) {
             $sql .= ' AND p.`auto_add_to_cart` = '. (int)$autoAddToCart;
+            if ($autoAddToCart == 1 && !is_null($priceAdditionType)) {
+                $sql .= ' AND AND p.`price_addition_type` = '.$priceAdditionType;
+            }
         }
         if ($idCart) {
             $sql .= ' AND cbd.`id_cart`='.(int) $idCart;
@@ -172,6 +176,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
                                 $selectedServiceProducts[$product['htl_cart_booking_id']]['selected_products_info'][$product['id_product']] = array(
                                     'id_product' => $product['id_product'],
                                     'auto_add_to_cart' => $product['auto_add_to_cart'],
+                                    'price_addition_type' => $product['price_addition_type'],
                                     'quantity' => $product['quantity'],
                                 );
                             }
@@ -216,6 +221,8 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
                         if ($idProduct) {
                             $selectedServiceProducts[$product['htl_cart_booking_id']]['id_product'] = $product['id_product'];
                             $selectedServiceProducts[$product['htl_cart_booking_id']]['quantity'] = $product['quantity'];
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['auto_add_to_cart'] = $product['auto_add_to_cart'];
+                            $selectedServiceProducts[$product['htl_cart_booking_id']]['price_addition_type'] = $product['price_addition_type'];
                             $selectedServiceProducts[$product['htl_cart_booking_id']]['unit_price_tax_excl'] = $objRoomTypeServiceProductPrice->getProductPrice(
                                 (int)$product['id_product'],
                                 (int)$product['room_type_id_product'],
@@ -238,6 +245,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
                                     'id_product' => $product['id_product'],
                                     'quantity' => $product['quantity'],
                                     'auto_add_to_cart' => $product['auto_add_to_cart'],
+                                    'price_addition_type' => $product['price_addition_type'],
                                     'unit_price_tax_excl' => $objRoomTypeServiceProductPrice->getProductPrice(
                                         (int)$product['id_product'],
                                         (int)$product['room_type_id_product'],

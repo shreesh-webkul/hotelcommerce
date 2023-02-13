@@ -23,6 +23,8 @@ class RoomTypeServiceProduct extends ObjectModel
     /** @var int id_product */
     public $id_product;
 
+    public $position;
+
     /** @var int id_hotel or id_room_type */
     public $id_element;
 
@@ -38,9 +40,10 @@ class RoomTypeServiceProduct extends ObjectModel
         'table' => 'htl_room_type_service_product',
         'primary' => 'id_room_type_service_product',
         'fields' => array(
-            'id_product' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'id_element' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'element_type' =>        array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId')
+            'id_product' =>     array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'position' =>       array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
+            'id_element' =>     array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'element_type' =>   array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId')
         )
     );
 
@@ -68,7 +71,8 @@ class RoomTypeServiceProduct extends ObjectModel
         foreach($values as $value) {
             $rowData[] = array(
                 'id_product' => $idProduct,
-                'id_element' =>$value,
+                'position' => self::getHigherPosition(),
+                'id_element' => $value,
                 'element_type' => $elementType
             );
         }
@@ -93,25 +97,11 @@ class RoomTypeServiceProduct extends ObjectModel
         return $rows;
     }
 
-    public function getIdProductsForHotelAndRoomType($idHotel = false, $idProductRoomType = false)
+    public function getProductsForRoomType($idProductRoomType)
     {
-        if (!$idHotel && !$idProductRoomType) {
-            return false;
-        }
-
-        if ($idHotel) {
-            $sql = 'SELECT `id_product` FROM `'._DB_PREFIX_.'htl_room_type_service_product`
-                WHERE `element_type` = '.self::WK_ELEMENT_TYPE_HOTEL.' AND `id_element` = '.(int)$idHotel;
-        }
-        if ($idHotel && $idProductRoomType) {
-            $sql  .= ' UNION ';
-        } else {
-            $sql = '';
-        }
-        if ($idProductRoomType) {
-            $sql .= 'SELECT `id_product` FROM `'._DB_PREFIX_.'htl_room_type_service_product`
-                WHERE `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$idProductRoomType;
-        }
+        $sql .= 'SELECT `id_room_type_service_product`, `id_product`, `position` FROM `'._DB_PREFIX_.'htl_room_type_service_product`
+            WHERE `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$idProductRoomType.'
+            ORDER BY `position` ASC';
 
         return Db::getInstance()->executeS($sql);
     }
@@ -216,5 +206,50 @@ class RoomTypeServiceProduct extends ObjectModel
         return $serviceProductsCategories;
     }
 
+    public static function getHigherPosition()
+    {
+        $position = DB::getInstance()->getValue(
+            'SELECT MAX(`position`) FROM `'._DB_PREFIX_.'htl_room_type_service_product`'
+        );
+        $result = (is_numeric($position)) ? $position : -1;
+        return $result + 1;
+    }
 
+    public function cleanPositions($idProductRoomType)
+    {
+        Db::getInstance()->execute('SET @i = -1', false);
+        $sql = 'UPDATE `'._DB_PREFIX_.'htl_room_type_service_product` SET `position` = @i:=@i+1
+            WHERE `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.' AND `id_element` = '.(int)$idProductRoomType.'
+            ORDER BY `position` ASC';
+
+        return Db::getInstance()->execute($sql);
+    }
+
+    /**
+     * This function will change position on drag and drop
+     *
+     * @param int $idSlider
+     * @param int $idImage
+     * @param int $toRowIndex
+     * @param int $idPosition
+     * @return boolean
+     */
+    public static function changePositions($idProduct, $idElement, $toRowIndex, $idPosition)
+    {
+        if ($toRowIndex >= $idPosition) {
+            Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'htl_room_type_service_product` SET `position` = position -1
+            WHERE  `id_product` != '.(int) $idProduct.' AND `id_element` ='.(int) $idElement .' AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.'
+            AND `position`  <= '.(int) ($toRowIndex). ' AND `position` >= ' .(int) $idPosition);
+
+            return Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'htl_room_type_service_product` SET `position` = '.(int) ($toRowIndex).'
+            WHERE  `id_product` = '.(int) $idProduct.' AND `id_element` ='.(int) $idElement .' AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE);
+        } elseif ($toRowIndex < $idPosition) {
+            Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'htl_room_type_service_product` SET `position` = position +1
+            WHERE  `id_product` != '.(int) $idProduct.' AND `id_element` ='.(int) $idElement .' AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE.'
+            AND `position`  >= '. (int) $toRowIndex. ' AND `position` <= ' .(int) $idPosition);
+
+            return Db::getInstance()->execute('UPDATE `'._DB_PREFIX_.'htl_room_type_service_product` SET `position` = '.$toRowIndex.'
+            WHERE  `id_product` = '.(int) $idProduct.' AND `id_element` ='.(int) $idElement .' AND `element_type` = '.self::WK_ELEMENT_TYPE_ROOM_TYPE);
+        }
+    }
 }

@@ -1100,6 +1100,21 @@ class AdminProductsControllerCore extends AdminController
             $this->redirect_after = self::$currentIndex.'&'.$this->table.'Orderby=position&'.$this->table.'Orderway=asc&action=Customization&conf=5'.(($id_category = (Tools::getIsset('id_category') ? (int)Tools::getValue('id_category') : '')) ? ('&id_category='.$id_category) : '').'&token='.Tools::getAdminTokenLite('AdminProducts');
         }
     }
+    public function ajaxProcessChangeServicePosition()
+    {
+        $response = array('success' => false);
+        $idElement = Tools::getValue('id_element');
+        $idProduct = Tools::getValue('id_product');
+        if ($idElement && $idProduct) {
+            $position = Tools::getValue('position');
+            $toRowIndex = Tools::getValue('to_row_index');
+            if (RoomTypeServiceProduct:: changePositions($idProduct, $idElement, $toRowIndex, $position)) {
+                $response['msg'] = $this->l('Updated Successfully');
+                $response['success'] = true;
+            }
+        }
+        die(json_encode($response));
+    }
 
     public function ajaxProcessUpdatedServiceProductPrice()
     {
@@ -2819,8 +2834,7 @@ class AdminProductsControllerCore extends AdminController
             if ($hotelRoomType = $objRoomType->getRoomTypeInfoByIdProduct($obj->id)) {
                 $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                 $objRoomTypeServiceProductPrice = new RoomTypeServiceProductPrice();
-                $serviceProducts = $objRoomTypeServiceProduct->getIdProductsForHotelAndRoomType(
-                    $hotelRoomType['id_hotel'],
+                $serviceProducts = $objRoomTypeServiceProduct->getProductsForRoomType(
                     $obj->id
                 );
                 foreach ($serviceProducts as &$serviceProduct) {
