@@ -1388,7 +1388,7 @@ class ProductCore extends ObjectModel
                     // .($displayPosition ? ' AND pdp.`id_position` = '.(int) $displayPosition : '');
 
         $sql .= ' GROUP BY p.`id_product`';
-        // $sql .= ' ORDER BY '.(!empty($order_by_prefix) ? $order_by_prefix.'.' : '').'`'.bqSQL($order_by).'` '.pSQL($order_way);
+        $sql .= ' ORDER BY rsp.`position` ASC';
         if ($p && $n) {
             $sql .= ' LIMIT '.(((int)$p - 1) * (int)$n).','.(int)$n;
         }
