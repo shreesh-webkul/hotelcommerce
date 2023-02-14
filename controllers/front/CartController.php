@@ -512,6 +512,7 @@ class CartControllerCore extends FrontController
                         $occupancy,
                         $operator,
                         $id_hotel,
+                        0,
                         $date_from,
                         $date_to,
                         $roomDemand,

@@ -444,7 +444,8 @@ class HotelCartBookingData extends ObjectModel
         $roomDemand,
         $serviceProducts,
         $roomsAvailableList,
-        $id_cart
+        $id_cart,
+        $id_room = 0
     ) {
         $chkQty = 0;
         $num_days = HotelHelper::getNumberOfDays($date_from, $date_to);
@@ -457,6 +458,7 @@ class HotelCartBookingData extends ObjectModel
             $roomsRequired = $occupancy;
         }
         if (Validate::isLoadedObject($objCart = new Cart($id_cart))) {
+            $res = true;
             foreach ($roomsAvailableList as $hotelRoomInfo) {
                 if ($chkQty < $roomsRequired) {
 
@@ -483,7 +485,7 @@ class HotelCartBookingData extends ObjectModel
                         $obj_htl_cart_booking_data->children = $roomTypeInfo['children'];
                         $obj_htl_cart_booking_data->child_ages = json_encode(array());
                     }
-                    if ($obj_htl_cart_booking_data->save()) {
+                    if ($res &= $obj_htl_cart_booking_data->save()) {
                         // get auto add service product
                         if ($services = RoomTypeServiceProduct::getAutoAddServices($id_product)) {
                             foreach($services as $service) {
@@ -512,7 +514,13 @@ class HotelCartBookingData extends ObjectModel
                     break;
                 }
             }
-            return $objCart->updateQty((int)($roomsRequired * $num_days), $id_product);
+            if ($res && $objCart->updateQty((int)($roomsRequired * $num_days), $id_product)) {
+                if ($id_room) {
+                    return $obj_htl_cart_booking_data->id;
+                } else {
+                    return true;
+                }
+            }
         } else {
             return false;
         }
@@ -522,13 +530,14 @@ class HotelCartBookingData extends ObjectModel
         $id_product,
         $occupancy,
         $operator,
-        $id_hotel = false,
-        $date_from = false,
-        $date_to = false,
+        $id_hotel = 0,
+        $id_room = 0,
+        $date_from = '',
+        $date_to = '',
         $roomDemand = array(),
         $serviceProducts = array(),
-        $id_cart = false,
-        $id_guest = false
+        $id_cart = 0,
+        $id_guest = 0
     ) {
         $context = Context::getContext();
         if (!$id_cart) {
@@ -558,6 +567,9 @@ class HotelCartBookingData extends ObjectModel
                 'hotel_id' => $id_hotel,
                 'id_room_type' => $id_product,
                 'only_search_data' => 1,
+                'search_booked' => 0,
+                'search_unavai' => 0,
+                'search_partial' => 0,
                 'id_cart' => $id_cart,
                 'id_guest' => $id_guest,
             );
@@ -568,13 +580,29 @@ class HotelCartBookingData extends ObjectModel
                 $roomsRequired = $occupancy;
             }
 
-            if ($hotelRoomData = $objBookingDtl->dataForFrontSearch($bookingParams)) {
+            if ($hotelRoomData = $objBookingDtl->getBookingData($bookingParams)) {
+                if ($id_room) {
+                    if (in_array($id_room, array_column($hotelRoomData['rm_data'][$id_product]['data']['available'], 'id_room'))) {
+                        $hotelRoomData['rm_data'][$id_product]['data']['available'] = array_filter(
+                            $hotelRoomData['rm_data'][$id_product]['data']['available'],
+                            function($room) use ($id_room) {
+                                return $room['id_room'] == $id_room ? true : false;
+                            }
+                        );
+                        $hotelRoomData['stats']['num_avail'] = count($hotelRoomData['rm_data'][$id_product]['data']['available']);
+                    } else {
+                        return false;
+                    }
+                }
                 if (isset($hotelRoomData['stats']['num_avail'])) {
                     $totalAvailableRooms = $hotelRoomData['stats']['num_avail'];
                     if ($operator == 'up') {
                         if ($totalAvailableRooms >= $roomsRequired) {
                             // add rooms to cart
                             $roomsAvailableList = $hotelRoomData['rm_data'][$id_product]['data']['available'];
+                            if (is_array($roomDemand)) {
+                                $roomDemand = json_encode($roomDemand);
+                            }
                             return $this->addCartBookingData(
                                 $id_product,
                                 $occupancy,
@@ -584,7 +612,8 @@ class HotelCartBookingData extends ObjectModel
                                 $roomDemand,
                                 $serviceProducts,
                                 $roomsAvailableList,
-                                $id_cart
+                                $id_cart,
+                                $id_room
                             );
                         } else {
                             return false;

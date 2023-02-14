@@ -1082,7 +1082,10 @@ class AdminCartsControllerCore extends AdminController
                     $idProduct,
                     $dateFrom,
                     $dateTo,
-                    $htlCartBoookingata['id']
+                    $htlCartBoookingata['id'],
+                    0,
+                    null,
+                    null
                 )) {
                     $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                     $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct);

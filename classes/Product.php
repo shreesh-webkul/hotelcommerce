@@ -1310,7 +1310,7 @@ class ProductCore extends ObjectModel
     }
 
 
-    public function getProductServiceProducts($id_lang, $p, $n, $front = false, $available_for_order = 2, $get_total = false, $active = true, $sub_category = false, Context $context = null)
+    public function getProductServiceProducts($id_lang, $p, $n, $front = false, $available_for_order = 2, $auto_add_to_cart = 0, $get_total = false, $active = true, $sub_category = false, Context $context = null)
     {
         if (!$context) {
             $context = Context::getContext();
@@ -1337,7 +1337,8 @@ class ProductCore extends ObjectModel
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                 .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
-                .($front ? ' AND product_shop.`auto_add_to_cart` = 0 AND product_shop.`show_at_front` = 1':'')
+                .($front ? ' AND product_shop.`show_at_front` = 1':'')
+                .(!is_null($auto_add_to_cart) ? ' AND product_shop.`auto_add_to_cart` = '.$auto_add_to_cart:'')
                 .($front ? ' AND p.`is_invisible` = 0':'')
                 .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                 .($active ? ' AND product_shop.`active` = 1' : '');
@@ -1381,7 +1382,8 @@ class ProductCore extends ObjectModel
                     AND p.`service_product_type` = '.(int)self::SERVICE_PRODUCT_WITH_ROOMTYPE. '
                     AND product_shop.`id_shop` = '.(int)$context->shop->id
                     .($sub_category? ' AND product_shop.`id_category_default` = '.(int)$sub_category : '')
-                    .($front ? ' AND product_shop.`auto_add_to_cart` = 0 AND product_shop.`show_at_front` = 1':'')
+                    .($front ? ' AND product_shop.`show_at_front` = 1':'')
+                    .(!is_null($auto_add_to_cart) ? ' AND product_shop.`auto_add_to_cart` = '.$auto_add_to_cart:'')
                     .($front ? ' AND p.`is_invisible` = 0':'')
                     .($available_for_order != 2 ? ' AND p.`available_for_order` = '.(int)$available_for_order:'')
                     .($active ? ' AND product_shop.`active` = 1' : '');

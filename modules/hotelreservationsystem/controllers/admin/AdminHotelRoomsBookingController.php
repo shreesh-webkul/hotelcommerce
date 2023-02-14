@@ -244,11 +244,6 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         );
         $all_room_type = $obj_rm_type->getRoomTypeByHotelId($this->id_hotel, Configuration::get('PS_LANG_DEFAULT'), 1);
 
-        $occupancyRequiredForBooking = false;
-        if (Configuration::get('PS_BACKOFFICE_ROOM_BOOKING_TYPE') == HotelBookingDetail::PS_FRONT_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY) {
-            $occupancyRequiredForBooking = true;
-        }
-
         $isOccupancyWiseSearch = false;
         if (Configuration::get('PS_BACKOFFICE_SEARCH_TYPE') == HotelBookingDetail::SEARCH_TYPE_OWS) {
             $isOccupancyWiseSearch = true;
@@ -263,7 +258,6 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'occupancy' => $this->occupancy,
             'id_room_type' => $this->id_room_type,
             'booking_product' => $this->booking_product,
-            'occupancy_required_for_booking' => $occupancyRequiredForBooking,
             'is_occupancy_wise_search' => $isOccupancyWiseSearch,
         ));
     }
@@ -305,6 +299,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         );
 
         $allotmentTypes = HotelBookingDetail::getAllAllotmentTypes();
+        $occupancyRequiredForBooking = false;
+        if (Configuration::get('PS_BACKOFFICE_ROOM_BOOKING_TYPE') == HotelBookingDetail::PS_FRONT_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY) {
+            $occupancyRequiredForBooking = true;
+        }
 
         $this->context->smarty->assign(array(
             'adults' => $adults,
@@ -315,6 +313,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'occupancy' => $this->occupancy,
             'date_from' => $this->date_from,
             'date_to' => $this->date_to,
+            'occupancy_required_for_booking' => $occupancyRequiredForBooking,
             'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
             'max_child_in_room' => Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'),
         ));
@@ -630,8 +629,6 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $direction = 'down';
         }
 
-        $this->context->cart->updateQty($num_day, $id_product, null, false, $direction);
-
         $id_cart = $this->context->cart->id;
         $id_guest = $this->context->cookie->id_guest;
 
@@ -644,37 +641,33 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $objRoomType = new HotelRoomType();
             $roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($id_product);
 
-            $obj_cart_book_data = new HotelCartBookingData();
-            $obj_cart_book_data->id_cart = $id_cart;
-            $obj_cart_book_data->id_guest = $id_guest;
-            $obj_cart_book_data->id_product = $id_product;
-            $obj_cart_book_data->id_room = $id_room;
-            $obj_cart_book_data->id_hotel = $id_hotel;
-            $obj_cart_book_data->quantity = $num_day;
-            $obj_cart_book_data->id_currency = Configuration::get('PS_CURRENCY_DEFAULT');
-            $obj_cart_book_data->booking_type = $booking_type;
-            $obj_cart_book_data->comment = $comment;
-            $obj_cart_book_data->date_from = $date_from;
-            $obj_cart_book_data->date_to = $date_to;
-            if (Configuration::get('PS_BACKOFFICE_ROOM_BOOKING_TYPE') == HotelBookingDetail::PS_FRONT_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY && is_array($occupancy)) {
-                $room_occupancy = array_shift($occupancy);
-                $obj_cart_book_data->adults = $room_occupancy['adults'];
-                $obj_cart_book_data->children = $room_occupancy['children'];
-                $obj_cart_book_data->child_ages = $room_occupancy['children'] ? json_encode($room_occupancy['child_ages']) : json_encode(array());
-            } else {
-                $obj_cart_book_data->adults = $roomTypeInfo['adults'];
-                $obj_cart_book_data->children = $roomTypeInfo['children'];
-                $obj_cart_book_data->child_ages = json_encode(array());
-            }
-            if ($obj_cart_book_data->save()) {
+            $objHotelCartBookingData = new HotelCartBookingData();
+            if ($idHotelCartBooking = $objHotelCartBookingData->updateRoomCartBookingData(
+                $id_product,
+                $occupancy,
+                $direction,
+                $id_hotel,
+                $id_room,
+                $date_from,
+                $date_to,
+                array(),
+                array(),
+                $id_cart,
+                $id_guest
+            )) {
                 $response['success'] = true;
-                $response['data']['id_cart_book_data'] = $obj_cart_book_data->id;
+                $response['data']['id_cart_book_data'] = $idHotelCartBooking;
             }
         } else {
             // remove room from cart
-            $obj_cart_book_data = new HotelCartBookingData();
-            $data_dlt = $obj_cart_book_data->deleteRowById($id_cart_book_data);
-            if ($data_dlt) {
+            $objHotelCartBookingData = new HotelCartBookingData($id_cart_book_data);
+            if ($objHotelCartBookingData->deleteCartBookingData(
+                $obj_booking_dtl->id_cart,
+                $objHotelCartBookingData->id_product,
+                $objHotelCartBookingData->id_room,
+                $objHotelCartBookingData->date_from,
+                $objHotelCartBookingData->date_to
+            )) {
                 $response['success'] = true;
                 if ($ajax_delete) {
                     // deleting from cart modal
@@ -718,7 +711,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $id_guest
     ) {
         $obj_booking_dtl = new HotelBookingDetail();
-        $obj_cart_book_data = new HotelCartBookingData();
+        $objHotelCartBookingData = new HotelCartBookingData();
 
         $bookingParams = array();
         $bookingParams['date_from'] = $date_from;

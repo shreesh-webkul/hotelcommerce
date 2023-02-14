@@ -538,6 +538,7 @@ class ProductControllerCore extends FrontController
                 $n,
                 true,
                 2,
+                0,
                 true
             );
             if ($roomTypeServiceProducts) {
@@ -1300,6 +1301,7 @@ class ProductControllerCore extends FrontController
                             $n,
                             true,
                             2,
+                            0,
                             $id_category
                         )) {
                             $this->context->smarty->assign('service_products', $roomTypeServiceProducts);
