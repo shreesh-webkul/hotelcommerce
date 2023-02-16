@@ -71,6 +71,8 @@
 								{l s='Rooms' pdf='true'}
 							{elseif $label == 'extra_demands_tax'}
 								{l s='Facilities' pdf='true'}
+							{elseif $label == 'convenience_fee_tax'}
+								{l s='Convenience Fees' pdf='true'}
 							{elseif $label == 'service_products_tax'}
 								{l s='Service Products' pdf='true'}
 							{elseif $label == 'shipping_tax'}

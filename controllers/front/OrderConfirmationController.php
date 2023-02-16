@@ -315,6 +315,39 @@ class OrderConfirmationControllerCore extends FrontController
                                         1,
                                         0
                                     );
+                                    // get auto added price to be displayed with room price
+                                    if (empty($cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_ti'])) {
+                                        $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_ti'] = 0;
+                                    }
+                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_ti'] += $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                        $idOrder,
+                                        0,
+                                        0,
+                                        $type_value['product_id'],
+                                        $data_v['date_from'],
+                                        $data_v['date_to'],
+                                        $data_v['id_room'],
+                                        1,
+                                        1,
+                                        1,
+                                        Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                                    );
+                                    if (empty($cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'])) {
+                                        $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'] = 0;
+                                    }
+                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'] += $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                        $idOrder,
+                                        0,
+                                        0,
+                                        $type_value['product_id'],
+                                        $data_v['date_from'],
+                                        $data_v['date_to'],
+                                        $data_v['id_room'],
+                                        1,
+                                        0,
+                                        1,
+                                        Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                                    );
                                 }
                             } else if ($product->service_product_type == Product::SERVICE_PRODUCT_WITH_ROOMTYPE) {
                                 if ($product->auto_add_to_cart && $product->price_addition_type == Product::PRICE_ADDITION_TYPE_INDEPENDENT) {
@@ -368,7 +401,6 @@ class OrderConfirmationControllerCore extends FrontController
                     if (!$objCartOrder->hasInvoice()) {
                         $orders_has_invoice = 0;
                     }
-
                     $orderTotalInfo['total_wrapping'] += $objCartOrder->total_wrapping;
                     $orderTotalInfo['total_rooms_te'] += $objCartOrder->getTotalProductsWithoutTaxes(false, true);
                     $orderTotalInfo['total_rooms_ti'] += $objCartOrder->getTotalProductsWithTaxes(false, true);

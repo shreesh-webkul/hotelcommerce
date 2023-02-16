@@ -119,22 +119,30 @@
 											{if isset($roomTypeServiceProducts) && $roomTypeServiceProducts}
 												{foreach $roomTypeServiceProducts as $product}
 													<div class="row room_demand_block">
-															<div class="col-xs-6">
+															<div class="col-xs-5">
 																<div class="row">
 																	<div class="col-xs-2">
 																		<input data-id_cart_booking="{$cartRoom['htl_cart_booking_id']}" value="{$product['id_product']|escape:'html':'UTF-8'}" type="checkbox" class="change_room_type_service_product" {if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}checked{/if}/>
 																	</div>
-																	<div class="col-xs-10 demand_adv_option_block">
+																	<div class="col-xs-10">
 																		<p>{$product['name']|escape:'html':'UTF-8'}</p>
 																		{if $product.allow_multiple_quantity}
 																			<div class="qty_container">
-																				<input type="number" class="form-control qty" id="qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" min="1" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
+																				<input type="number" class="form-control room_type_service_product_qty qty" id="qty_{$product.id_product}" name="service_product_qty_{$product.id_product}" data-id-product="{$product.id_product}" min="1" value="{if  isset($cartRoom['selected_products']) && $cartRoom['selected_products'] && ($product['id_product']|in_array:$cartRoom['selected_products'])}{$cartRoom['selected_products_info'][$product['id_product']]['quantity']}{else}1{/if}">
 																			</div>
 																		{/if}
 																	</div>
 																</div>
 															</div>
-															<div class="col-xs-6">
+															<div class="col-xs-3">
+																{if $product['auto_add_to_cart'] && $product['price_addition_type'] == Product::PRICE_ADDITION_TYPE_INDEPENDENT}
+																	<span class="badge badge-info label">{l s='Convenience fee'}</span>
+																{/if}
+																{if $product['auto_add_to_cart'] && $product['price_addition_type'] == Product::PRICE_ADDITION_TYPE_WITH_ROOM}
+																	<span class="badge badge-info label">{l s='Auto added'}</span>
+																{/if}
+															</div>
+															<div class="col-xs-4">
 																{if ($product.show_price && !isset($restricted_country_mode)) || isset($groups)}
 																	<span class="pull-right">{convertPrice price=$product.price_tax_exc}</span>
 																{/if}

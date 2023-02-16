@@ -526,7 +526,7 @@ class HotelCartBookingData extends ObjectModel
         }
     }
 
-    public function updateRoomCartBookingData(
+    public function updateCartBooking(
         $id_product,
         $occupancy,
         $operator,
@@ -923,7 +923,8 @@ class HotelCartBookingData extends ObjectModel
                     0,
                     $id_cart,
                     $value['id_guest'],
-                    $value['id_room']
+                    $value['id_room'],
+                    0
                 );
                 $feature_price_tax_excl = HotelRoomTypeFeaturePricing::getRoomTypeFeaturePricesPerDay(
                     $value['id_product'],
@@ -933,7 +934,8 @@ class HotelCartBookingData extends ObjectModel
                     0,
                     $id_cart,
                     $value['id_guest'],
-                    $value['id_room']
+                    $value['id_room'],
+                    0
                 );
                 $feature_price_diff = (float)($productPriceWithoutReduction - $feature_price);
                 $cart_detail_data[$key]['product_price'] = $unit_price;
@@ -986,6 +988,18 @@ class HotelCartBookingData extends ObjectModel
                     true,
                     false
                 );
+                $cart_detail_data[$key]['additional_services_auto_add_price'] = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
+                    $id_cart,
+                    0,
+                    0,
+                    $value['id_product'],
+                    $value['date_from'],
+                    $value['date_to'],
+                    $value['id'],
+                    true,
+                    false,
+                    1
+                );
                 // By webkul New way to calculate product prices with feature Prices
                 $roomTypeDateRangePrice = HotelRoomTypeFeaturePricing::getRoomTypeTotalPrice(
                     $value['id_product'],
@@ -1021,7 +1035,7 @@ class HotelCartBookingData extends ObjectModel
         $result = Db::getInstance()->executeS(
             'SELECT `id`
             FROM `'._DB_PREFIX_.'htl_cart_booking_data`
-            WHERE `id_cart` = '.(int) $idCart
+            WHERE `id_cart` = '.(int) $id_cart
         );
 
         if (is_array($result) && count($result)) {

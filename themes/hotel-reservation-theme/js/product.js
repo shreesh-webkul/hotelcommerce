@@ -1029,19 +1029,7 @@ function checkUrl() {
 /*#####################################################################*/
 
 $(document).ready(function() {
-    if (typeof id_hotels != 'undefined') {
-        if (!$('.max_avail_type_qty').length || $('.max_avail_type_qty').val() < 1) {
-            disableRoomTypeDemands(1);
-        } else {
-            disableRoomTypeDemands(0);
-        }
-    }
-
     BookingForm.init();
-
-    // $(document).on('focusout', '#quantity_wanted', function(e) {
-    //     BookingForm.refresh();
-    // });
 
     $(document).on('QloApps:updateRoomOccupancy', function(e) {
         BookingForm.refresh();
@@ -1213,8 +1201,7 @@ $(document).ready(function() {
         if (typeof(qty) == 'undefined') {
             qty = 1;
         }
-        abortRunningAjax();
-        ajax_check_var = $.ajax({
+        $.ajax({
             type: 'POST',
             headers: {
                 "cache-control": "no-cache"
@@ -1343,6 +1330,11 @@ var BookingForm = {
                     }
 
             });
+        }
+        if (!$('.max_avail_type_qty').length || $('.max_avail_type_qty').val() < 1) {
+            disableRoomTypeDemands(1);
+        } else {
+            disableRoomTypeDemands(0);
         }
     },
     initDatepicker: function(max_order_date, preparation_time, dateFrom, dateTo) {

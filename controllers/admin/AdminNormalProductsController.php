@@ -576,167 +576,6 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->content = $tpl->fetch();
     }
 
-    public function processDeleteVirtualProduct()
-    {
-        if (!($id_product_download = ProductDownload::getIdFromIdProduct((int)Tools::getValue('id_product')))) {
-            $this->errors[] = Tools::displayError('Cannot retrieve file');
-        } else {
-            $product_download = new ProductDownload((int)$id_product_download);
-
-            if (!$product_download->deleteFile((int)$id_product_download)) {
-                $this->errors[] = Tools::displayError('Cannot delete file');
-            } else {
-                $this->redirect_after = self::$currentIndex.'&id_product='.(int)Tools::getValue('id_product').'&updateproduct&key_tab=VirtualProduct&conf=1&token='.$this->token;
-            }
-        }
-
-        $this->display = 'edit';
-        $this->tab_display = 'VirtualProduct';
-    }
-
-    public function ajaxProcessAddAttachment()
-    {
-        if ($this->tabAccess['edit'] === '0') {
-            return die(json_encode(array('error' => $this->l('You do not have the right permission'))));
-        }
-        if (isset($_FILES['attachment_file'])) {
-            if ((int)$_FILES['attachment_file']['error'] === 1) {
-                $_FILES['attachment_file']['error'] = array();
-
-                $max_upload = (int)ini_get('upload_max_filesize');
-                $max_post = (int)ini_get('post_max_size');
-                $upload_mb = min($max_upload, $max_post);
-                $_FILES['attachment_file']['error'][] = sprintf(
-                    $this->l('File %1$s exceeds the size allowed by the server. The limit is set to %2$d MB.'),
-                    '<b>'.$_FILES['attachment_file']['name'].'</b> ',
-                    '<b>'.$upload_mb.'</b>'
-                );
-            }
-
-            $_FILES['attachment_file']['error'] = array();
-
-            $is_attachment_name_valid = false;
-            $attachment_names = Tools::getValue('attachment_name');
-            $attachment_descriptions = Tools::getValue('attachment_description');
-
-            if (!isset($attachment_names) || !$attachment_names) {
-                $attachment_names = array();
-            }
-
-            if (!isset($attachment_descriptions) || !$attachment_descriptions) {
-                $attachment_descriptions = array();
-            }
-
-            foreach ($attachment_names as $lang => $name) {
-                $language = Language::getLanguage((int)$lang);
-
-                if (Tools::strlen($name) > 0) {
-                    $is_attachment_name_valid = true;
-                }
-
-                if (!Validate::isGenericName($name)) {
-                    $_FILES['attachment_file']['error'][] = sprintf(Tools::displayError('Invalid name for %s language'), $language['name']);
-                } elseif (Tools::strlen($name) > 32) {
-                    $_FILES['attachment_file']['error'][] = sprintf(Tools::displayError('The name for %1s language is too long (%2d chars max).'), $language['name'], 32);
-                }
-            }
-
-            foreach ($attachment_descriptions as $lang => $description) {
-                $language = Language::getLanguage((int)$lang);
-
-                if (!Validate::isCleanHtml($description)) {
-                    $_FILES['attachment_file']['error'][] = sprintf(Tools::displayError('Invalid description for %s language'), $language['name']);
-                }
-            }
-
-            if (!$is_attachment_name_valid) {
-                $_FILES['attachment_file']['error'][] = Tools::displayError('An attachment name is required.');
-            }
-
-            if (empty($_FILES['attachment_file']['error'])) {
-                if (is_uploaded_file($_FILES['attachment_file']['tmp_name'])) {
-                    if ($_FILES['attachment_file']['size'] > (Configuration::get('PS_ATTACHMENT_MAXIMUM_SIZE') * 1024 * 1024)) {
-                        $_FILES['attachment_file']['error'][] = sprintf(
-                            $this->l('The file is too large. Maximum size allowed is: %1$d kB. The file you are trying to upload is %2$d kB.'),
-                            (Configuration::get('PS_ATTACHMENT_MAXIMUM_SIZE') * 1024),
-                            number_format(($_FILES['attachment_file']['size'] / 1024), 2, '.', '')
-                        );
-                    } else {
-                        do {
-                            $uniqid = sha1(microtime());
-                        } while (file_exists(_PS_DOWNLOAD_DIR_.$uniqid));
-                        if (!copy($_FILES['attachment_file']['tmp_name'], _PS_DOWNLOAD_DIR_.$uniqid)) {
-                            $_FILES['attachment_file']['error'][] = $this->l('File copy failed');
-                        }
-                        @unlink($_FILES['attachment_file']['tmp_name']);
-                    }
-                } else {
-                    $_FILES['attachment_file']['error'][] = Tools::displayError('The file is missing.');
-                }
-
-                if (empty($_FILES['attachment_file']['error']) && isset($uniqid)) {
-                    $attachment = new Attachment();
-
-                    foreach ($attachment_names as $lang => $name) {
-                        $attachment->name[(int)$lang] = $name;
-                    }
-
-                    foreach ($attachment_descriptions as $lang => $description) {
-                        $attachment->description[(int)$lang] = $description;
-                    }
-
-                    $attachment->file = $uniqid;
-                    $attachment->mime = $_FILES['attachment_file']['type'];
-                    $attachment->file_name = $_FILES['attachment_file']['name'];
-
-                    if (empty($attachment->mime) || Tools::strlen($attachment->mime) > 128) {
-                        $_FILES['attachment_file']['error'][] = Tools::displayError('Invalid file extension');
-                    }
-                    if (!Validate::isGenericName($attachment->file_name)) {
-                        $_FILES['attachment_file']['error'][] = Tools::displayError('Invalid file name');
-                    }
-                    if (Tools::strlen($attachment->file_name) > 128) {
-                        $_FILES['attachment_file']['error'][] = Tools::displayError('The file name is too long.');
-                    }
-                    if (empty($this->errors)) {
-                        $res = $attachment->add();
-                        if (!$res) {
-                            $_FILES['attachment_file']['error'][] = Tools::displayError('This attachment was unable to be loaded into the database.');
-                        } else {
-                            $_FILES['attachment_file']['id_attachment'] = $attachment->id;
-                            $_FILES['attachment_file']['filename'] = $attachment->name[$this->context->employee->id_lang];
-                            $id_product = (int)Tools::getValue($this->identifier);
-                            $res = $attachment->attachProduct($id_product);
-                            if (!$res) {
-                                $_FILES['attachment_file']['error'][] = Tools::displayError('We were unable to associate this attachment to a product.');
-                            }
-                        }
-                    } else {
-                        $_FILES['attachment_file']['error'][] = Tools::displayError('Invalid file');
-                    }
-                }
-            }
-
-            die(json_encode($_FILES));
-        }
-    }
-
-    /**
-     * Attach an existing attachment to the product
-     *
-     * @return void
-     */
-    public function processAttachments()
-    {
-        if ($id = (int)Tools::getValue($this->identifier)) {
-            $attachments = trim(Tools::getValue('arrayAttachments'), ',');
-            $attachments = explode(',', $attachments);
-            if (!Attachment::attachToProduct($id, $attachments)) {
-                $this->errors[] = Tools::displayError('An error occurred while saving room type attachments.');
-            }
-        }
-    }
-
     public function processDuplicate()
     {
         if (Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
@@ -756,15 +595,10 @@ class AdminNormalProductsControllerCore extends AdminController
             $product->active = 0;
             if ($product->add()
             && Category::duplicateProductCategories($id_product_old, $product->id)
-            && Product::duplicateSuppliers($id_product_old, $product->id)
             && ($combination_images = Product::duplicateAttributes($id_product_old, $product->id)) !== false
             && GroupReduction::duplicateReduction($id_product_old, $product->id)
-            && Product::duplicateAccessories($id_product_old, $product->id)
             // && Product::duplicateFeatures($id_product_old, $product->id)
-            && Pack::duplicate($id_product_old, $product->id)
-            && Product::duplicateCustomizationFields($id_product_old, $product->id)
-            && Product::duplicateTags($id_product_old, $product->id)
-            && Product::duplicateDownload($id_product_old, $product->id)) {
+            && Product::duplicateTags($id_product_old, $product->id)) {
                 if ($product->hasAttributes()) {
                     Product::updateDefaultAttribute($product->id);
                 } else {
@@ -1313,35 +1147,6 @@ class AdminNormalProductsControllerCore extends AdminController
         }
     }
 
-    public function processCustomizationConfiguration()
-    {
-        $product = $this->object;
-        // Get the number of existing customization fields ($product->text_fields is the updated value, not the existing value)
-        $current_customization = $product->getCustomizationFieldIds();
-        $files_count = 0;
-        $text_count = 0;
-        if (is_array($current_customization)) {
-            foreach ($current_customization as $field) {
-                if ($field['type'] == 1) {
-                    $text_count++;
-                } else {
-                    $files_count++;
-                }
-            }
-        }
-
-        if (!$product->createLabels((int)$product->uploadable_files - $files_count, (int)$product->text_fields - $text_count)) {
-            $this->errors[] = Tools::displayError('An error occurred while creating customization fields.');
-        }
-        if (!count($this->errors) && !$product->updateLabels()) {
-            $this->errors[] = Tools::displayError('An error occurred while updating customization fields.');
-        }
-        $product->customizable = ($product->uploadable_files > 0 || $product->text_fields > 0) ? 1 : 0;
-        if (($product->uploadable_files != $files_count || $product->text_fields != $text_count) && !count($this->errors) && !$product->update()) {
-            $this->errors[] = Tools::displayError('An error occurred while updating the custom configuration.');
-        }
-    }
-
     public function processProductCustomization()
     {
         if (Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
@@ -1397,14 +1202,6 @@ class AdminNormalProductsControllerCore extends AdminController
             }
         }
 
-        // Delete a product in the download folder
-        if (Tools::getValue('deleteVirtualProduct')) {
-            if ($this->tabAccess['delete'] === '1') {
-                $this->action = 'deleteVirtualProduct';
-            } else {
-                $this->errors[] = Tools::displayError('You do not have permission to delete this.');
-            }
-        }
         // Product preview
         elseif (Tools::isSubmit('submitAddProductAndPreview')) {
             $this->display = 'edit';
@@ -1412,13 +1209,6 @@ class AdminNormalProductsControllerCore extends AdminController
             if (Tools::getValue('id_product')) {
                 $this->id_object = Tools::getValue('id_product');
                 $this->object = new Product((int)Tools::getValue('id_product'));
-            }
-        } elseif (Tools::isSubmit('submitAttachments')) {
-            if ($this->tabAccess['edit'] === '1') {
-                $this->action = 'attachments';
-                $this->tab_display = 'attachments';
-            } else {
-                $this->errors[] = Tools::displayError('You do not have permission to edit this.');
             }
         }
         // Product duplication
@@ -1555,7 +1345,6 @@ class AdminNormalProductsControllerCore extends AdminController
 
             $this->addJS(array(
                 _PS_JS_DIR_.'admin/normal_products.js',
-                _PS_JS_DIR_.'admin/attributes.js',
                 _PS_JS_DIR_.'admin/price.js',
                 _PS_JS_DIR_.'tiny_mce/tiny_mce.js',
                 _PS_JS_DIR_.'admin/tinymce.inc.js',
@@ -1968,7 +1757,6 @@ class AdminNormalProductsControllerCore extends AdminController
             PrestaShopLogger::addLog(sprintf($this->l('%s addition', 'AdminTab', false, false), $this->className), 1, null, $this->className, (int)$this->object->id, true, (int)$this->context->employee->id);
             // $this->addCarriers($this->object);
             // $this->updateAccessories($this->object);
-            // $this->updatePackItems($this->object);
             // $this->updateDispalyPositions($this->object);
             $this->updateLinkedHotelsAndRooms($this->object);
             // $this->updateDownloadProduct($this->object);
@@ -2156,31 +1944,16 @@ class AdminNormalProductsControllerCore extends AdminController
 
                     PrestaShopLogger::addLog(sprintf($this->l('%s modification', 'AdminTab', false, false), $this->className), 1, null, $this->className, (int)$this->object->id, true, (int)$this->context->employee->id);
                     if (in_array($this->context->shop->getContext(), array(Shop::CONTEXT_SHOP, Shop::CONTEXT_ALL))) {
-                        if ($this->isTabSubmitted('Shipping')) {
-                            $this->addCarriers();
-                        }
                         if ($this->isTabSubmitted('Associations')) {
                             $this->updateAccessories($object);
-                        }
-                        if ($this->isTabSubmitted('Suppliers')) {
-                            $this->processSuppliers();
                         }
                         // if ($this->isTabSubmitted('Features')) {
                         //     $this->processFeatures();
                         // }
-                        if ($this->isTabSubmitted('Combinations')) {
-                            $this->processProductAttribute();
-                        }
                         if ($this->isTabSubmitted('Prices')) {
                             // $this->processAdvancedPayment();
                             $this->processPriceAddition();
                             // $this->processSpecificPricePriorities();
-                        }
-                        if ($this->isTabSubmitted('Customization')) {
-                            $this->processCustomizationConfiguration();
-                        }
-                        if ($this->isTabSubmitted('Attachments')) {
-                            $this->processAttachments();
                         }
                         if ($this->isTabSubmitted('Images')) {
                             $this->processImageLegends();
@@ -2188,16 +1961,9 @@ class AdminNormalProductsControllerCore extends AdminController
                         if ($this->isTabSubmitted('Occupancy')) {
                             $this->processOccupancy();
                         }
-                        if ($this->isTabSubmitted('Configuration')) {
-                            // $this->processConfiguration();
-                        }
-                        if ($this->isTabSubmitted('Booking')) {
-                            $this->processBooking();
-                        }
 
                         $this->updateDispalyPositions($this->object);
                         $this->updateLinkedHotelsAndRooms($this->object);
-                        // $this->updatePackItems($object);
                         // Disallow avanced stock management if the product become a pack
                         if ($product_type_before == Product::PTYPE_SIMPLE && $object->getType() == Product::PTYPE_PACK) {
                             StockAvailable::setProductDependsOnStock((int)$object->id, false);
@@ -2212,9 +1978,6 @@ class AdminNormalProductsControllerCore extends AdminController
                         }
                     }
 
-                    if ($this->isTabSubmitted('Warehouses')) {
-                        $this->processWarehouses();
-                    }
                     if (empty($this->errors)) {
                         if (in_array($object->visibility, array('both', 'search')) && Configuration::get('PS_SEARCH_INDEXATION')) {
                             Search::indexation(false, $object->id);
@@ -2839,12 +2602,6 @@ class AdminNormalProductsControllerCore extends AdminController
                 'desc' => $this->l('Save and stay'),
             );
 
-            // adding button for adding a new combination in Combination tab
-            $this->toolbar_btn['newCombination'] = array(
-                'short' => 'New combination',
-                'desc' => $this->l('New combination'),
-                'class' => 'toolbar-new'
-            );
         } elseif ($this->can_import) {
             $this->toolbar_btn['import'] = array(
                 'href' => $this->context->link->getAdminLink('AdminImport', true).'&import_type=products',
@@ -2986,7 +2743,6 @@ class AdminNormalProductsControllerCore extends AdminController
                 $this->copyFromPost($this->object, $this->table);
             }
 
-            $this->initPack($this->object);
             $this->{'initForm'.$this->tab_display}($this->object);
             $this->tpl_form_vars['product'] = $this->object;
 
@@ -3031,167 +2787,6 @@ class AdminNormalProductsControllerCore extends AdminController
         }
 
         return $preview_url;
-    }
-
-    /**
-    * Post treatment for suppliers
-    */
-    public function processSuppliers()
-    {
-        if ((int)Tools::getValue('supplier_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
-            // Get all id_product_attribute
-            $attributes = $product->getAttributesResume($this->context->language->id);
-            if (empty($attributes)) {
-                $attributes[] = array(
-                    'id_product_attribute' => 0,
-                    'attribute_designation' => ''
-                );
-            }
-
-            // Get all available suppliers
-            $suppliers = Supplier::getSuppliers();
-
-            // Get already associated suppliers
-            $associated_suppliers = ProductSupplier::getSupplierCollection($product->id);
-
-            $suppliers_to_associate = array();
-            $new_default_supplier = 0;
-
-            if (Tools::isSubmit('default_supplier')) {
-                $new_default_supplier = (int)Tools::getValue('default_supplier');
-            }
-
-            // Get new associations
-            foreach ($suppliers as $supplier) {
-                if (Tools::isSubmit('check_supplier_'.$supplier['id_supplier'])) {
-                    $suppliers_to_associate[] = $supplier['id_supplier'];
-                }
-            }
-
-            // Delete already associated suppliers if needed
-            foreach ($associated_suppliers as $key => $associated_supplier) {
-                /** @var ProductSupplier $associated_supplier */
-                if (!in_array($associated_supplier->id_supplier, $suppliers_to_associate)) {
-                    $associated_supplier->delete();
-                    unset($associated_suppliers[$key]);
-                }
-            }
-
-            // Associate suppliers
-            foreach ($suppliers_to_associate as $id) {
-                $to_add = true;
-                foreach ($associated_suppliers as $as) {
-                    /** @var ProductSupplier $as */
-                    if ($id == $as->id_supplier) {
-                        $to_add = false;
-                    }
-                }
-
-                if ($to_add) {
-                    $product_supplier = new ProductSupplier();
-                    $product_supplier->id_product = $product->id;
-                    $product_supplier->id_product_attribute = 0;
-                    $product_supplier->id_supplier = $id;
-                    if ($this->context->currency->id) {
-                        $product_supplier->id_currency = (int)$this->context->currency->id;
-                    } else {
-                        $product_supplier->id_currency = (int)Configuration::get('PS_CURRENCY_DEFAULT');
-                    }
-                    $product_supplier->save();
-
-                    $associated_suppliers[] = $product_supplier;
-                    foreach ($attributes as $attribute) {
-                        if ((int)$attribute['id_product_attribute'] > 0) {
-                            $product_supplier = new ProductSupplier();
-                            $product_supplier->id_product = $product->id;
-                            $product_supplier->id_product_attribute = (int)$attribute['id_product_attribute'];
-                            $product_supplier->id_supplier = $id;
-                            $product_supplier->save();
-                        }
-                    }
-                }
-            }
-
-            // Manage references and prices
-            foreach ($attributes as $attribute) {
-                foreach ($associated_suppliers as $supplier) {
-                    /** @var ProductSupplier $supplier */
-                    if (Tools::isSubmit('supplier_reference_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier) ||
-                        (Tools::isSubmit('product_price_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier) &&
-                         Tools::isSubmit('product_price_currency_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier))) {
-                        $reference = pSQL(
-                            Tools::getValue(
-                                'supplier_reference_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier,
-                                ''
-                            )
-                        );
-
-                        $price = (float)str_replace(
-                            array(' ', ','),
-                            array('', '.'),
-                            Tools::getValue(
-                                'product_price_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier,
-                                0
-                            )
-                        );
-
-                        $price = Tools::ps_round($price, 6);
-
-                        $id_currency = (int)Tools::getValue(
-                            'product_price_currency_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier,
-                            0
-                        );
-
-                        if ($id_currency <= 0 || (!($result = Currency::getCurrency($id_currency)) || empty($result))) {
-                            $this->errors[] = Tools::displayError('The selected currency is not valid');
-                        }
-
-                        // Save product-supplier data
-                        $product_supplier_id = (int)ProductSupplier::getIdByProductAndSupplier($product->id, $attribute['id_product_attribute'], $supplier->id_supplier);
-
-                        if (!$product_supplier_id) {
-                            $product->addSupplierReference($supplier->id_supplier, (int)$attribute['id_product_attribute'], $reference, (float)$price, (int)$id_currency);
-                            if ($product->id_supplier == $supplier->id_supplier) {
-                                if ((int)$attribute['id_product_attribute'] > 0) {
-                                    $data = array(
-                                        'supplier_reference' => pSQL($reference),
-                                        'wholesale_price' => (float)Tools::convertPrice($price, $id_currency)
-                                    );
-                                    $where = '
-										a.id_product = '.(int)$product->id.'
-										AND a.id_product_attribute = '.(int)$attribute['id_product_attribute'];
-                                    ObjectModel::updateMultishopTable('Combination', $data, $where);
-                                } else {
-                                    $product->wholesale_price = (float)Tools::convertPrice($price, $id_currency); //converted in the default currency
-                                    $product->supplier_reference = pSQL($reference);
-                                    $product->update();
-                                }
-                            }
-                        } else {
-                            $product_supplier = new ProductSupplier($product_supplier_id);
-                            $product_supplier->id_currency = (int)$id_currency;
-                            $product_supplier->product_supplier_price_te = (float)$price;
-                            $product_supplier->product_supplier_reference = pSQL($reference);
-                            $product_supplier->update();
-                        }
-                    } elseif (Tools::isSubmit('supplier_reference_'.$product->id.'_'.$attribute['id_product_attribute'].'_'.$supplier->id_supplier)) {
-                        //int attribute with default values if possible
-                        if ((int)$attribute['id_product_attribute'] > 0) {
-                            $product_supplier = new ProductSupplier();
-                            $product_supplier->id_product = $product->id;
-                            $product_supplier->id_product_attribute = (int)$attribute['id_product_attribute'];
-                            $product_supplier->id_supplier = $supplier->id_supplier;
-                            $product_supplier->save();
-                        }
-                    }
-                }
-            }
-            // Manage defaut supplier for product
-            if ($new_default_supplier != $product->id_supplier) {
-                $this->object->id_supplier = $new_default_supplier;
-                $this->object->update();
-            }
-        }
     }
 
     public function updateLinkedHotelsAndRooms($product)
@@ -3476,158 +3071,6 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
 
-    /**
-     * Get an array of pack items for display from the product object if specified, else from POST/GET values
-     *
-     * @param Product $product
-     * @return array of pack items
-     */
-    public function getPackItems($product = null)
-    {
-        $pack_items = array();
-
-        if (!$product) {
-            $names_input = Tools::getValue('namePackItems');
-            $ids_input = Tools::getValue('inputPackItems');
-            if (!$names_input || !$ids_input) {
-                return array();
-            }
-            // ids is an array of string with format : QTYxID
-            $ids = array_unique(explode('-', $ids_input));
-            $names = array_unique(explode('¤', $names_input));
-
-            if (!empty($ids)) {
-                $length = count($ids);
-                for ($i = 0; $i < $length; $i++) {
-                    if (!empty($ids[$i]) && !empty($names[$i])) {
-                        list($pack_items[$i]['pack_quantity'], $pack_items[$i]['id']) = explode('x', $ids[$i]);
-                        $exploded_name = explode('x', $names[$i]);
-                        $pack_items[$i]['name'] = $exploded_name[1];
-                    }
-                }
-            }
-        } else {
-            $i = 0;
-            foreach ($product->packItems as $pack_item) {
-                $pack_items[$i]['id'] = $pack_item->id;
-                $pack_items[$i]['pack_quantity'] = $pack_item->pack_quantity;
-                $pack_items[$i]['name']    = $pack_item->name;
-                $pack_items[$i]['reference'] = $pack_item->reference;
-                $pack_items[$i]['id_product_attribute'] = isset($pack_item->id_pack_product_attribute) && $pack_item->id_pack_product_attribute ? $pack_item->id_pack_product_attribute : 0;
-                $cover = $pack_item->id_pack_product_attribute ? Product::getCombinationImageById($pack_item->id_pack_product_attribute, Context::getContext()->language->id) : Product::getCover($pack_item->id);
-                $pack_items[$i]['image'] = Context::getContext()->link->getImageLink($pack_item->link_rewrite, $cover['id_image'], 'home_default');
-                // @todo: don't rely on 'home_default'
-                //$path_to_image = _PS_IMG_DIR_.'p/'.Image::getImgFolderStatic($cover['id_image']).(int)$cover['id_image'].'.jpg';
-                //$pack_items[$i]['image'] = ImageManager::thumbnail($path_to_image, 'pack_mini_'.$pack_item->id.'_'.$this->context->shop->id.'.jpg', 120);
-                $i++;
-            }
-        }
-        return $pack_items;
-    }
-
-    /**
-     * @param Product $product
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormPack($product)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-
-        // If pack items have been submitted, we want to display them instead of the actuel content of the pack
-        // in database. In case of a submit error, the posted data is not lost and can be sent again.
-        if (Tools::getValue('namePackItems')) {
-            $input_pack_items = Tools::getValue('inputPackItems');
-            $input_namepack_items = Tools::getValue('namePackItems');
-            $pack_items = $this->getPackItems();
-        } else {
-            $product->packItems = Pack::getItems($product->id, $this->context->language->id);
-            $pack_items = $this->getPackItems($product);
-            $input_namepack_items = '';
-            $input_pack_items = '';
-            foreach ($pack_items as $pack_item) {
-                $input_pack_items .= $pack_item['pack_quantity'].'x'.$pack_item['id'].'x'.$pack_item['id_product_attribute'].'-';
-                $input_namepack_items .= $pack_item['pack_quantity'].' x '.$pack_item['name'].'¤';
-            }
-        }
-
-        $data->assign(array(
-            'input_pack_items' => $input_pack_items,
-            'input_namepack_items' => $input_namepack_items,
-            'pack_items' => $pack_items,
-            'product_type' => (int)Tools::getValue('type_product', $product->getType())
-        ));
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    public function initFormVirtualProduct($product)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-
-        $currency = $this->context->currency;
-
-        /*
-        * Form for adding a virtual product like software, mp3, etc...
-        */
-        $product_download = new ProductDownload();
-        if ($id_product_download = $product_download->getIdFromIdProduct($this->getFieldValue($product, 'id'))) {
-            $product_download = new ProductDownload($id_product_download);
-        }
-        $product->{'productDownload'} = $product_download;
-
-        if ($product->productDownload->id && empty($product->productDownload->display_filename)) {
-            $this->errors[] = Tools::displayError('A file name is required in order to associate a file');
-            $this->tab_display = 'VirtualProduct';
-        }
-
-        // @todo handle is_virtual with the value of the product
-        $exists_file = realpath(_PS_DOWNLOAD_DIR_).'/'.$product->productDownload->filename;
-        $data->assign('product_downloaded', $product->productDownload->id);
-
-        if (!file_exists($exists_file)
-            && !empty($product->productDownload->display_filename)
-            && empty($product->cache_default_attribute)) {
-            $msg = sprintf(Tools::displayError('File "%s" is missing'),
-                $product->productDownload->display_filename);
-        } else {
-            $msg = '';
-        }
-
-        $virtual_product_file_uploader = new HelperUploader('virtual_product_file_uploader');
-        $virtual_product_file_uploader->setMultiple(false)->setUrl(
-            Context::getContext()->link->getAdminLink('AdminNormalProducts').'&ajax=1&id_product='.(int)$product->id
-            .'&action=AddVirtualProductFile')->setPostMaxSize(Tools::getOctets(ini_get('upload_max_filesize')))
-            ->setTemplate('virtual_product.tpl');
-
-        $data->assign(array(
-            'download_product_file_missing' => $msg,
-            'download_dir_writable' => ProductDownload::checkWritableDir(),
-            'up_filename' => strval(Tools::getValue('virtual_product_filename'))
-        ));
-
-        $product->productDownload->nb_downloadable = ($product->productDownload->id > 0) ? $product->productDownload->nb_downloadable : htmlentities(Tools::getValue('virtual_product_nb_downloable'), ENT_COMPAT, 'UTF-8');
-        $product->productDownload->date_expiration = ($product->productDownload->id > 0) ? ((!empty($product->productDownload->date_expiration) && $product->productDownload->date_expiration != '0000-00-00 00:00:00') ? date('Y-m-d', strtotime($product->productDownload->date_expiration)) : '') : htmlentities(Tools::getValue('virtual_product_expiration_date'), ENT_COMPAT, 'UTF-8');
-        $product->productDownload->nb_days_accessible = ($product->productDownload->id > 0) ? $product->productDownload->nb_days_accessible : htmlentities(Tools::getValue('virtual_product_nb_days'), ENT_COMPAT, 'UTF-8');
-        $product->productDownload->is_shareable = $product->productDownload->id > 0 && $product->productDownload->is_shareable;
-
-        $iso_tiny_mce = $this->context->language->iso_code;
-        $iso_tiny_mce = (file_exists(_PS_JS_DIR_.'tiny_mce/langs/'.$iso_tiny_mce.'.js') ? $iso_tiny_mce : 'en');
-        $data->assign(array(
-            'ad' => __PS_BASE_URI__.basename(_PS_ADMIN_DIR_),
-            'iso_tiny_mce' => $iso_tiny_mce,
-            'product' => $product,
-            'token' => $this->token,
-            'currency' => $currency,
-            'link' => $this->context->link,
-            'is_file' => $product->productDownload->checkFile(),
-            'virtual_product_file_uploader' => $virtual_product_file_uploader->render()
-        ));
-        $data->assign($this->tpl_form_vars);
-        $this->tpl_form_vars['product'] = $product;
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
     protected function _getFinalPrice($specific_price, $product_price, $tax_rate)
     {
         return $this->object->getPrice(false, $specific_price['id_product_attribute'], 2);
@@ -3849,162 +3292,6 @@ class AdminNormalProductsControllerCore extends AdminController
         return $content;
     }
 
-    protected function _getCustomizationFieldIds($labels, $alreadyGenerated, $obj)
-    {
-        $customizableFieldIds = array();
-        if (isset($labels[Product::CUSTOMIZE_FILE])) {
-            foreach ($labels[Product::CUSTOMIZE_FILE] as $id_customization_field => $label) {
-                $customizableFieldIds[] = 'label_'.Product::CUSTOMIZE_FILE.'_'.(int)($id_customization_field);
-            }
-        }
-        if (isset($labels[Product::CUSTOMIZE_TEXTFIELD])) {
-            foreach ($labels[Product::CUSTOMIZE_TEXTFIELD] as $id_customization_field => $label) {
-                $customizableFieldIds[] = 'label_'.Product::CUSTOMIZE_TEXTFIELD.'_'.(int)($id_customization_field);
-            }
-        }
-        $j = 0;
-        for ($i = $alreadyGenerated[Product::CUSTOMIZE_FILE]; $i < (int)($this->getFieldValue($obj, 'uploadable_files')); $i++) {
-            $customizableFieldIds[] = 'newLabel_'.Product::CUSTOMIZE_FILE.'_'.$j++;
-        }
-        $j = 0;
-        for ($i = $alreadyGenerated[Product::CUSTOMIZE_TEXTFIELD]; $i < (int)($this->getFieldValue($obj, 'text_fields')); $i++) {
-            $customizableFieldIds[] = 'newLabel_'.Product::CUSTOMIZE_TEXTFIELD.'_'.$j++;
-        }
-        return implode('¤', $customizableFieldIds);
-    }
-
-    protected function _displayLabelField(&$label, $languages, $default_language, $type, $fieldIds, $id_customization_field)
-    {
-        foreach ($languages as $language) {
-            $input_value[$language['id_lang']] = (isset($label[(int)($language['id_lang'])])) ? $label[(int)($language['id_lang'])]['name'] : '';
-        }
-
-        $required = (isset($label[(int)($language['id_lang'])])) ? $label[(int)($language['id_lang'])]['required'] : false;
-
-        $template = $this->context->smarty->createTemplate('controllers/products/input_text_lang.tpl',
-            $this->context->smarty);
-        return '<div class="form-group">'
-            .'<div class="col-lg-6">'
-            .$template->assign(array(
-                'languages' => $languages,
-                'input_name'  => 'label_'.$type.'_'.(int)($id_customization_field),
-                'input_value' => $input_value
-            ))->fetch()
-            .'</div>'
-            .'<div class="col-lg-6">'
-            .'<div class="checkbox">'
-            .'<label for="require_'.$type.'_'.(int)($id_customization_field).'">'
-            .'<input type="checkbox" name="require_'.$type.'_'.(int)($id_customization_field).'" id="require_'.$type.'_'.(int)($id_customization_field).'" value="1" '.($required ? 'checked="checked"' : '').'/>'
-            .$this->l('Required')
-            .'</label>'
-            .'</div>'
-            .'</div>'
-            .'</div>';
-    }
-
-    protected function _displayLabelFields(&$obj, &$labels, $languages, $default_language, $type)
-    {
-        $content = '';
-        $type = (int)($type);
-        $labelGenerated = array(Product::CUSTOMIZE_FILE => (isset($labels[Product::CUSTOMIZE_FILE]) ? count($labels[Product::CUSTOMIZE_FILE]) : 0), Product::CUSTOMIZE_TEXTFIELD => (isset($labels[Product::CUSTOMIZE_TEXTFIELD]) ? count($labels[Product::CUSTOMIZE_TEXTFIELD]) : 0));
-
-        $fieldIds = $this->_getCustomizationFieldIds($labels, $labelGenerated, $obj);
-        if (isset($labels[$type])) {
-            foreach ($labels[$type] as $id_customization_field => $label) {
-                $content .= $this->_displayLabelField($label, $languages, $default_language, $type, $fieldIds, (int)($id_customization_field));
-            }
-        }
-        return $content;
-    }
-
-    /**
-     * @param Product $obj
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormCustomization($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-
-        if ((bool)$obj->id) {
-            if ($this->product_exists_in_shop) {
-                $labels = $obj->getCustomizationFields();
-
-                $has_file_labels = (int)$this->getFieldValue($obj, 'uploadable_files');
-                $has_text_labels = (int)$this->getFieldValue($obj, 'text_fields');
-
-                $data->assign(array(
-                    'obj' => $obj,
-                    'table' => $this->table,
-                    'languages' => $this->_languages,
-                    'has_file_labels' => $has_file_labels,
-                    'display_file_labels' => $this->_displayLabelFields($obj, $labels, $this->_languages, Configuration::get('PS_LANG_DEFAULT'), Product::CUSTOMIZE_FILE),
-                    'has_text_labels' => $has_text_labels,
-                    'display_text_labels' => $this->_displayLabelFields($obj, $labels, $this->_languages, Configuration::get('PS_LANG_DEFAULT'), Product::CUSTOMIZE_TEXTFIELD),
-                    'uploadable_files' => (int)($this->getFieldValue($obj, 'uploadable_files') ? (int)$this->getFieldValue($obj, 'uploadable_files') : '0'),
-                    'text_fields' => (int)($this->getFieldValue($obj, 'text_fields') ? (int)$this->getFieldValue($obj, 'text_fields') : '0'),
-                ));
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before adding customization.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before adding customization.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    public function initFormAttachments($obj)
-    {
-        if (!$this->default_form_language) {
-            $this->getLanguages();
-        }
-
-        $data = $this->createTemplate($this->tpl_form);
-        $data->assign('default_form_language', $this->default_form_language);
-
-        if ((bool)$obj->id) {
-            if ($this->product_exists_in_shop) {
-                $attachment_name = array();
-                $attachment_description = array();
-                foreach ($this->_languages as $language) {
-                    $attachment_name[$language['id_lang']] = '';
-                    $attachment_description[$language['id_lang']] = '';
-                }
-
-                $iso_tiny_mce = $this->context->language->iso_code;
-                $iso_tiny_mce = (file_exists(_PS_JS_DIR_.'tiny_mce/langs/'.$iso_tiny_mce.'.js') ? $iso_tiny_mce : 'en');
-
-                $attachment_uploader = new HelperUploader('attachment_file');
-                $attachment_uploader->setMultiple(false)->setUseAjax(true)->setUrl(
-                    Context::getContext()->link->getAdminLink('AdminNormalProducts').'&ajax=1&id_product='.(int)$obj->id
-                    .'&action=AddAttachment')->setPostMaxSize((Configuration::get('PS_ATTACHMENT_MAXIMUM_SIZE') * 1024 * 1024))
-                    ->setTemplate('attachment_ajax.tpl');
-
-                $data->assign(array(
-                    'obj' => $obj,
-                    'table' => $this->table,
-                    'ad' => __PS_BASE_URI__.basename(_PS_ADMIN_DIR_),
-                    'iso_tiny_mce' => $iso_tiny_mce,
-                    'languages' => $this->_languages,
-                    'id_lang' => $this->context->language->id,
-                    'attach1' => Attachment::getAttachments($this->context->language->id, $obj->id, true),
-                    'attach2' => Attachment::getAttachments($this->context->language->id, $obj->id, false),
-                    'default_form_language' => (int)Configuration::get('PS_LANG_DEFAULT'),
-                    'attachment_name' => $attachment_name,
-                    'attachment_description' => $attachment_description,
-                    'attachment_uploader' => $attachment_uploader->render()
-                ));
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before adding attachements.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before adding attachements.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
     /**
      * @param Product $product
      * @throws Exception
@@ -4139,20 +3426,6 @@ class AdminNormalProductsControllerCore extends AdminController
         }
 
         $this->tpl_form_vars['product'] = $product;
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    public function initFormShipping($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-        $data->assign(array(
-                        'product' => $obj,
-                        'ps_dimension_unit' => Configuration::get('PS_DIMENSION_UNIT'),
-                        'ps_weight_unit' => Configuration::get('PS_WEIGHT_UNIT'),
-                        'carrier_list' => $this->getCarrierList(),
-                        'currency' => $this->context->currency,
-                        'country_display_tax_label' =>  $this->context->country->display_tax_label
-                    ));
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
 
@@ -4404,479 +3677,6 @@ class AdminNormalProductsControllerCore extends AdminController
         $this->tpl_form_vars['custom_form'] = $data->fetch();
     }
 
-    public function initFormCombinations($obj)
-    {
-        return $this->initFormAttributes($obj);
-    }
-
-    /**
-     * @param Product $product
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormAttributes($product)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-        if (!Combination::isFeatureActive()) {
-            $this->displayWarning($this->l('This feature has been disabled. ').
-                ' <a href="index.php?tab=AdminPerformance&token='.Tools::getAdminTokenLite('AdminPerformance').'#featuresDetachables">'.$this->l('Performances').'</a>');
-        } elseif (Validate::isLoadedObject($product)) {
-            if ($this->product_exists_in_shop) {
-                if ($product->is_virtual) {
-                    $data->assign('product', $product);
-                    $this->displayWarning($this->l('A virtual product cannot have combinations.'));
-                } else {
-                    $attribute_js = array();
-                    $attributes = Attribute::getAttributes($this->context->language->id, true);
-                    foreach ($attributes as $k => $attribute) {
-                        $attribute_js[$attribute['id_attribute_group']][$attribute['id_attribute']] = $attribute['name'];
-                        natsort($attribute_js[$attribute['id_attribute_group']]);
-                    }
-
-                    $currency = $this->context->currency;
-
-                    $data->assign('attributeJs', $attribute_js);
-                    $data->assign('attributes_groups', AttributeGroup::getAttributesGroups($this->context->language->id));
-
-                    $data->assign('currency', $currency);
-
-                    $images = Image::getImages($this->context->language->id, $product->id);
-
-                    $data->assign('tax_exclude_option', Tax::excludeTaxeOption());
-                    $data->assign('ps_weight_unit', Configuration::get('PS_WEIGHT_UNIT'));
-
-                    $data->assign('ps_use_ecotax', Configuration::get('PS_USE_ECOTAX'));
-                    $data->assign('field_value_unity', $this->getFieldValue($product, 'unity'));
-
-                    $data->assign('reasons', $reasons = StockMvtReason::getStockMvtReasons($this->context->language->id));
-                    $data->assign('ps_stock_mvt_reason_default', $ps_stock_mvt_reason_default = Configuration::get('PS_STOCK_MVT_REASON_DEFAULT'));
-                    $data->assign('minimal_quantity', $this->getFieldValue($product, 'minimal_quantity') ? $this->getFieldValue($product, 'minimal_quantity') : 1);
-                    $data->assign('available_date', ($this->getFieldValue($product, 'available_date') != 0) ? stripslashes(htmlentities($this->getFieldValue($product, 'available_date'), $this->context->language->id)) : '0000-00-00');
-
-                    $i = 0;
-                    $type = ImageType::getByNameNType('%', 'products', 'height');
-                    if (isset($type['name'])) {
-                        $data->assign('imageType', $type['name']);
-                    } else {
-                        $data->assign('imageType', ImageType::getFormatedName('small'));
-                    }
-                    $data->assign('imageWidth', (isset($image_type['width']) ? (int)($image_type['width']) : 64) + 25);
-                    foreach ($images as $k => $image) {
-                        $images[$k]['obj'] = new Image($image['id_image']);
-                        ++$i;
-                    }
-                    $data->assign('images', $images);
-
-                    $data->assign($this->tpl_form_vars);
-                    $data->assign(array(
-                        'list' => $this->renderListAttributes($product, $currency),
-                        'product' => $product,
-                        'id_category' => $product->getDefaultCategory(),
-                        'token_generator' => Tools::getAdminTokenLite('AdminAttributeGenerator'),
-                        'combination_exists' => (Shop::isFeatureActive() && (Shop::getContextShopGroup()->share_stock) && count(AttributeGroup::getAttributesGroups($this->context->language->id)) > 0 && $product->hasAttributes())
-                    ));
-                }
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before adding combinations.'));
-            }
-        } else {
-            $data->assign('product', $product);
-            $this->displayWarning($this->l('You must save this room type before adding combinations.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    /**
-     * @param Product $product
-     * @param Currency|array|int $currency
-     * @return string
-     */
-    public function renderListAttributes($product, $currency)
-    {
-        $this->bulk_actions = array('delete' => array('text' => $this->l('Delete selected'), 'confirm' => $this->l('Delete selected items?')));
-        $this->addRowAction('edit');
-        $this->addRowAction('default');
-        $this->addRowAction('delete');
-
-        $default_class = 'highlighted';
-
-        $this->fields_list = array(
-            'attributes' => array('title' => $this->l('Attribute - value pair'), 'align' => 'left'),
-            'price' => array('title' => $this->l('Impact on price'), 'type' => 'price', 'align' => 'left'),
-            'weight' => array('title' => $this->l('Impact on weight'), 'align' => 'left'),
-            'reference' => array('title' => $this->l('Reference'), 'align' => 'left'),
-            'ean13' => array('title' => $this->l('EAN-13'), 'align' => 'left'),
-            'upc' => array('title' => $this->l('UPC'), 'align' => 'left')
-        );
-
-        if ($product->id) {
-            /* Build attributes combinations */
-            $combinations = $product->getAttributeCombinations($this->context->language->id);
-            $groups = array();
-            $comb_array = array();
-            if (is_array($combinations)) {
-                $combination_images = $product->getCombinationImages($this->context->language->id);
-                foreach ($combinations as $k => $combination) {
-                    $price_to_convert = Tools::convertPrice($combination['price'], $currency);
-                    $price = Tools::displayPrice($price_to_convert, $currency);
-
-                    $comb_array[$combination['id_product_attribute']]['id_product_attribute'] = $combination['id_product_attribute'];
-                    $comb_array[$combination['id_product_attribute']]['attributes'][] = array($combination['group_name'], $combination['attribute_name'], $combination['id_attribute']);
-                    $comb_array[$combination['id_product_attribute']]['wholesale_price'] = $combination['wholesale_price'];
-                    $comb_array[$combination['id_product_attribute']]['price'] = $price;
-                    $comb_array[$combination['id_product_attribute']]['weight'] = $combination['weight'].Configuration::get('PS_WEIGHT_UNIT');
-                    $comb_array[$combination['id_product_attribute']]['unit_impact'] = $combination['unit_price_impact'];
-                    $comb_array[$combination['id_product_attribute']]['reference'] = $combination['reference'];
-                    $comb_array[$combination['id_product_attribute']]['ean13'] = $combination['ean13'];
-                    $comb_array[$combination['id_product_attribute']]['upc'] = $combination['upc'];
-                    $comb_array[$combination['id_product_attribute']]['id_image'] = isset($combination_images[$combination['id_product_attribute']][0]['id_image']) ? $combination_images[$combination['id_product_attribute']][0]['id_image'] : 0;
-                    $comb_array[$combination['id_product_attribute']]['available_date'] = strftime($combination['available_date']);
-                    $comb_array[$combination['id_product_attribute']]['default_on'] = $combination['default_on'];
-                    if ($combination['is_color_group']) {
-                        $groups[$combination['id_attribute_group']] = $combination['group_name'];
-                    }
-                }
-            }
-
-            if (isset($comb_array)) {
-                foreach ($comb_array as $id_product_attribute => $product_attribute) {
-                    $list = '';
-
-                    /* In order to keep the same attributes order */
-                    asort($product_attribute['attributes']);
-
-                    foreach ($product_attribute['attributes'] as $attribute) {
-                        $list .= $attribute[0].' - '.$attribute[1].', ';
-                    }
-
-                    $list = rtrim($list, ', ');
-                    $comb_array[$id_product_attribute]['image'] = $product_attribute['id_image'] ? new Image($product_attribute['id_image']) : false;
-                    $comb_array[$id_product_attribute]['available_date'] = $product_attribute['available_date'] != 0 ? date('Y-m-d', strtotime($product_attribute['available_date'])) : '0000-00-00';
-                    $comb_array[$id_product_attribute]['attributes'] = $list;
-                    $comb_array[$id_product_attribute]['name'] = $list;
-
-                    if ($product_attribute['default_on']) {
-                        $comb_array[$id_product_attribute]['class'] = $default_class;
-                    }
-                }
-            }
-        }
-
-        foreach ($this->actions_available as $action) {
-            if (!in_array($action, $this->actions) && isset($this->$action) && $this->$action) {
-                $this->actions[] = $action;
-            }
-        }
-
-        $helper = new HelperList();
-        $helper->identifier = 'id_product_attribute';
-        $helper->table_id = 'combinations-list';
-        $helper->token = $this->token;
-        $helper->currentIndex = self::$currentIndex;
-        $helper->no_link = true;
-        $helper->simple_header = true;
-        $helper->show_toolbar = false;
-        $helper->shopLinkType = $this->shopLinkType;
-        $helper->actions = $this->actions;
-        $helper->list_skip_actions = $this->list_skip_actions;
-        $helper->colorOnBackground = true;
-        $helper->override_folder = $this->tpl_folder.'combination/';
-
-        return $helper->generateList($comb_array, $this->fields_list);
-    }
-
-    /**
-     * @param Product $obj
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormQuantities($obj)
-    {
-        if (!$this->default_form_language) {
-            $this->getLanguages();
-        }
-
-        $data = $this->createTemplate($this->tpl_form);
-        $data->assign('default_form_language', $this->default_form_language);
-
-        if ($obj->id) {
-            if ($this->product_exists_in_shop) {
-                // Get all id_product_attribute
-                $attributes = $obj->getAttributesResume($this->context->language->id);
-                if (empty($attributes)) {
-                    $attributes[] = array(
-                        'id_product_attribute' => 0,
-                        'attribute_designation' => ''
-                    );
-                }
-
-                // Get available quantities
-                $available_quantity = array();
-                $product_designation = array();
-
-                foreach ($attributes as $attribute) {
-                    // Get available quantity for the current product attribute in the current shop
-                    $available_quantity[$attribute['id_product_attribute']] = isset($attribute['id_product_attribute']) && $attribute['id_product_attribute'] ? (int)$attribute['quantity'] : (int)$obj->quantity;
-                    // Get all product designation
-                    $product_designation[$attribute['id_product_attribute']] = rtrim(
-                        $obj->name[$this->context->language->id].' - '.$attribute['attribute_designation'],
-                        ' - '
-                    );
-                }
-
-                $show_quantities = true;
-                $shop_context = Shop::getContext();
-                $shop_group = new ShopGroup((int)Shop::getContextShopGroupID());
-
-                // if we are in all shops context, it's not possible to manage quantities at this level
-                if (Shop::isFeatureActive() && $shop_context == Shop::CONTEXT_ALL) {
-                    $show_quantities = false;
-                }
-                // if we are in group shop context
-                elseif (Shop::isFeatureActive() && $shop_context == Shop::CONTEXT_GROUP) {
-                    // if quantities are not shared between shops of the group, it's not possible to manage them at group level
-                    if (!$shop_group->share_stock) {
-                        $show_quantities = false;
-                    }
-                }
-                // if we are in shop context
-                elseif (Shop::isFeatureActive()) {
-                    // if quantities are shared between shops of the group, it's not possible to manage them for a given shop
-                    if ($shop_group->share_stock) {
-                        $show_quantities = false;
-                    }
-                }
-
-                $data->assign('ps_stock_management', Configuration::get('PS_STOCK_MANAGEMENT'));
-                $data->assign('has_attribute', $obj->hasAttributes());
-                // Check if product has combination, to display the available date only for the product or for each combination
-                if (Combination::isFeatureActive()) {
-                    $data->assign('countAttributes', (int)Db::getInstance()->getValue('SELECT COUNT(id_product) FROM '._DB_PREFIX_.'product_attribute WHERE id_product = '.(int)$obj->id));
-                } else {
-                    $data->assign('countAttributes', false);
-                }
-                // if advanced stock management is active, checks associations
-                $advanced_stock_management_warning = false;
-                if (Configuration::get('PS_ADVANCED_STOCK_MANAGEMENT') && $obj->advanced_stock_management) {
-                    $p_attributes = Product::getProductAttributesIds($obj->id);
-                    $warehouses = array();
-
-                    if (!$p_attributes) {
-                        $warehouses[] = Warehouse::getProductWarehouseList($obj->id, 0);
-                    }
-
-                    foreach ($p_attributes as $p_attribute) {
-                        $ws = Warehouse::getProductWarehouseList($obj->id, $p_attribute['id_product_attribute']);
-                        if ($ws) {
-                            $warehouses[] = $ws;
-                        }
-                    }
-                    $warehouses = Tools::arrayUnique($warehouses);
-
-                    if (empty($warehouses)) {
-                        $advanced_stock_management_warning = true;
-                    }
-                }
-                if ($advanced_stock_management_warning) {
-                    $this->displayWarning($this->l('If you wish to use the advanced stock management, you must:'));
-                    $this->displayWarning('- '.$this->l('associate your room types with warehouses.'));
-                    $this->displayWarning('- '.$this->l('associate your warehouses with carriers.'));
-                    $this->displayWarning('- '.$this->l('associate your warehouses with the appropriate shops.'));
-                }
-
-                $pack_quantity = null;
-                // if product is a pack
-                if (Pack::isPack($obj->id)) {
-                    $items = Pack::getItems((int)$obj->id, Configuration::get('PS_LANG_DEFAULT'));
-
-                    // gets an array of quantities (quantity for the product / quantity in pack)
-                    $pack_quantities = array();
-                    foreach ($items as $item) {
-                        /** @var Product $item */
-                        if (!$item->isAvailableWhenOutOfStock((int)$item->out_of_stock)) {
-                            $pack_id_product_attribute = Product::getDefaultAttribute($item->id, 1);
-                            $pack_quantities[] = Product::getQuantity($item->id, $pack_id_product_attribute) / ($item->pack_quantity !== 0 ? $item->pack_quantity : 1);
-                        }
-                    }
-
-                    // gets the minimum
-                    if (count($pack_quantities)) {
-                        $pack_quantity = $pack_quantities[0];
-                        foreach ($pack_quantities as $value) {
-                            if ($pack_quantity > $value) {
-                                $pack_quantity = $value;
-                            }
-                        }
-                    }
-
-                    if (Configuration::get('PS_ADVANCED_STOCK_MANAGEMENT') && !Warehouse::getPackWarehouses((int)$obj->id)) {
-                        $this->displayWarning($this->l('You must have a common warehouse between this pack and its room type.'));
-                    }
-                }
-
-                $data->assign(array(
-                    'attributes' => $attributes,
-                    'available_quantity' => $available_quantity,
-                    'pack_quantity' => $pack_quantity,
-                    'stock_management_active' => Configuration::get('PS_ADVANCED_STOCK_MANAGEMENT'),
-                    'product_designation' => $product_designation,
-                    'product' => $obj,
-                    'show_quantities' => $show_quantities,
-                    'order_out_of_stock' => Configuration::get('PS_ORDER_OUT_OF_STOCK'),
-                    'pack_stock_type' => Configuration::get('PS_PACK_STOCK_TYPE'),
-                    'token_preferences' => Tools::getAdminTokenLite('AdminPPreferences'),
-                    'token' => $this->token,
-                    'languages' => $this->_languages,
-                    'id_lang' => $this->context->language->id
-                ));
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing quantities.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before managing quantities.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    /**
-     * @param Product $obj
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormSuppliers($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-
-        if ($obj->id) {
-            if ($this->product_exists_in_shop) {
-                // Get all id_product_attribute
-                $attributes = $obj->getAttributesResume($this->context->language->id);
-                if (empty($attributes)) {
-                    $attributes[] = array(
-                        'id_product' => $obj->id,
-                        'id_product_attribute' => 0,
-                        'attribute_designation' => ''
-                    );
-                }
-
-                $product_designation = array();
-
-                foreach ($attributes as $attribute) {
-                    $product_designation[$attribute['id_product_attribute']] = rtrim(
-                        $obj->name[$this->context->language->id].' - '.$attribute['attribute_designation'],
-                        ' - '
-                    );
-                }
-
-                // Get all available suppliers
-                $suppliers = Supplier::getSuppliers();
-
-                // Get already associated suppliers
-                $associated_suppliers = ProductSupplier::getSupplierCollection($obj->id);
-
-                // Get already associated suppliers and force to retreive product declinaisons
-                $product_supplier_collection = ProductSupplier::getSupplierCollection($obj->id, false);
-
-                $default_supplier = 0;
-
-                foreach ($suppliers as &$supplier) {
-                    $supplier['is_selected'] = false;
-                    $supplier['is_default'] = false;
-
-                    foreach ($associated_suppliers as $associated_supplier) {
-                        /** @var ProductSupplier $associated_supplier */
-                        if ($associated_supplier->id_supplier == $supplier['id_supplier']) {
-                            $associated_supplier->name = $supplier['name'];
-                            $supplier['is_selected'] = true;
-
-                            if ($obj->id_supplier == $supplier['id_supplier']) {
-                                $supplier['is_default'] = true;
-                                $default_supplier = $supplier['id_supplier'];
-                            }
-                        }
-                    }
-                }
-
-                $data->assign(array(
-                    'attributes' => $attributes,
-                    'suppliers' => $suppliers,
-                    'default_supplier' => $default_supplier,
-                    'associated_suppliers' => $associated_suppliers,
-                    'associated_suppliers_collection' => $product_supplier_collection,
-                    'product_designation' => $product_designation,
-                    'currencies' => Currency::getCurrencies(),
-                    'product' => $obj,
-                    'link' => $this->context->link,
-                    'token' => $this->token,
-                    'id_default_currency' => Configuration::get('PS_CURRENCY_DEFAULT'),
-                ));
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing suppliers.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before managing suppliers.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
-    /**
-     * @param Product $obj
-     * @throws Exception
-     * @throws SmartyException
-     */
-    public function initFormWarehouses($obj)
-    {
-        $data = $this->createTemplate($this->tpl_form);
-
-        if ($obj->id) {
-            if ($this->product_exists_in_shop) {
-                // Get all id_product_attribute
-                $attributes = $obj->getAttributesResume($this->context->language->id);
-                if (empty($attributes)) {
-                    $attributes[] = array(
-                        'id_product' => $obj->id,
-                        'id_product_attribute' => 0,
-                        'attribute_designation' => ''
-                    );
-                }
-
-                $product_designation = array();
-
-                foreach ($attributes as $attribute) {
-                    $product_designation[$attribute['id_product_attribute']] = rtrim(
-                        $obj->name[$this->context->language->id].' - '.$attribute['attribute_designation'],
-                        ' - '
-                    );
-                }
-
-                // Get all available warehouses
-                $warehouses = Warehouse::getWarehouses(true);
-
-                // Get already associated warehouses
-                $associated_warehouses_collection = WarehouseProductLocation::getCollection($obj->id);
-
-                $data->assign(array(
-                    'attributes' => $attributes,
-                    'warehouses' => $warehouses,
-                    'associated_warehouses' => $associated_warehouses_collection,
-                    'product_designation' => $product_designation,
-                    'product' => $obj,
-                    'link' => $this->context->link,
-                    'token' => $this->token
-                ));
-            } else {
-                $this->displayWarning($this->l('You must save the room type in this shop before managing warehouses.'));
-            }
-        } else {
-            $this->displayWarning($this->l('You must save this room type before managing warehouses.'));
-        }
-
-        $this->tpl_form_vars['custom_form'] = $data->fetch();
-    }
-
     /**
      * @param Product $obj
      * @throws Exception
@@ -5073,32 +3873,6 @@ class AdminNormalProductsControllerCore extends AdminController
         return false;
     }
 
-    protected function initPack(Product $product)
-    {
-        $this->tpl_form_vars['is_pack'] = ($product->id && Pack::isPack($product->id)) || Tools::getValue('type_product') == Product::PTYPE_PACK;
-        $product->packItems = Pack::getItems($product->id, $this->context->language->id);
-
-        $input_pack_items = '';
-        if (Tools::getValue('inputPackItems')) {
-            $input_pack_items = Tools::getValue('inputPackItems');
-        } else {
-            foreach ($product->packItems as $pack_item) {
-                $input_pack_items .= $pack_item->pack_quantity.'x'.$pack_item->id.'-';
-            }
-        }
-        $this->tpl_form_vars['input_pack_items'] = $input_pack_items;
-
-        $input_namepack_items = '';
-        if (Tools::getValue('namePackItems')) {
-            $input_namepack_items = Tools::getValue('namePackItems');
-        } else {
-            foreach ($product->packItems as $pack_item) {
-                $input_namepack_items .= $pack_item->pack_quantity.' x '.$pack_item->name.'¤';
-            }
-        }
-        $this->tpl_form_vars['input_namepack_items'] = $input_namepack_items;
-    }
-
     /**
      * AdminProducts display hook
      *
@@ -5110,41 +3884,6 @@ class AdminNormalProductsControllerCore extends AdminController
     {
         $id_module = Db::getInstance()->getValue('SELECT `id_module` FROM `'._DB_PREFIX_.'module` WHERE `name` = \''.pSQL($this->tab_display_module).'\'');
         $this->tpl_form_vars['custom_form'] = Hook::exec('displayAdminNormalProductsExtra', array(), (int)$id_module);
-    }
-
-    /**
-     * delete all items in pack, then check if type_product value is 2.
-     * if yes, add the pack items from input "inputPackItems"
-     *
-     * @param Product $product
-     * @return bool
-     */
-    public function updatePackItems($product)
-    {
-        Pack::deleteItems($product->id);
-        // lines format: QTY x ID-QTY x ID
-        if (Tools::getValue('type_product') == Product::PTYPE_PACK) {
-            $product->setDefaultAttribute(0);//reset cache_default_attribute
-            $items = Tools::getValue('inputPackItems');
-            $lines = array_unique(explode('-', $items));
-
-            // lines is an array of string with format : QTYxIDxID_PRODUCT_ATTRIBUTE
-            if (count($lines)) {
-                foreach ($lines as $line) {
-                    if (!empty($line)) {
-                        $item_id_attribute = 0;
-                        count($array = explode('x', $line)) == 3 ? list($qty, $item_id, $item_id_attribute) = $array : list($qty, $item_id) = $array;
-                        if ($qty > 0 && isset($item_id)) {
-                            if (Pack::isPack((int)$item_id || $product->id == (int)$item_id)) {
-                                $this->errors[] = Tools::displayError('You can\'t add room type packs into a pack');
-                            } elseif (!Pack::addItem((int)$product->id, (int)$item_id, (int)$qty, (int)$item_id_attribute)) {
-                                $this->errors[] = Tools::displayError('An error occurred while attempting to add room types to the pack.');
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public function getL($key)

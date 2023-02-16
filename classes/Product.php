@@ -3354,13 +3354,6 @@ class ProductCore extends ObjectModel
             return Tools::ps_round($specific_price_reduction, $decimals);
         }
 
-        // add auto added room price
-        if ($services = RoomTypeServiceProduct::getAutoAddServices($id_product, Product::PRICE_ADDITION_TYPE_WITH_ROOM, $use_tax)) {
-            foreach($services as $service) {
-                $price += $service['price'];
-            }
-        }
-
         $price = Tools::ps_round($price, $decimals);
 
         if ($price < 0) {

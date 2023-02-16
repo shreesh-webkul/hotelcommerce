@@ -183,7 +183,8 @@ class CartCore extends ObjectModel
 
     const ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE = 14;
     const ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD = 16;
-    const ONLY_CONVENIENCE_FEE = 17;
+    const ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE = 17;
+    const ONLY_CONVENIENCE_FEE = 18;
 
     public function __construct($id = null, $id_lang = null)
     {
@@ -765,7 +766,8 @@ class CartCore extends ObjectModel
                         Group::getCurrent()->id,
                         $cartRoomInfo['id_cart'],
                         $cartRoomInfo['id_guest'],
-                        $cartRoomInfo['id_room']
+                        $cartRoomInfo['id_room'],
+                        0
                     );
                         $totalPriceByProductTaxIncl += $roomTotalPrice['total_price_tax_incl'];
                         $totalPriceByProductTaxExcl += $roomTotalPrice['total_price_tax_excl'];
@@ -789,10 +791,9 @@ class CartCore extends ObjectModel
                     }
                 }
             } else if  (Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $row['service_product_type']) {
-
                 $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
-                $totalPriceByProductTaxIncl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, true);
-                $totalPriceByProductTaxExcl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, false);
+                $totalPriceByProductTaxIncl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, true, null);
+                $totalPriceByProductTaxExcl = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart($this->id, (int)$row['id_product'], 0, 0, 0, 0, 0, 1, false, null);
 
                 switch (Configuration::get('PS_ROUND_TYPE')) {
                     case Order::ROUND_TOTAL:
@@ -1132,7 +1133,7 @@ class CartCore extends ObjectModel
 
         if ((int)$quantity <= 0) {
             return $this->deleteProduct($id_product, $id_product_attribute, (int)$id_customization, 0, $auto_add_cart_rule);
-        } elseif (!$product->available_for_order || (Configuration::get('PS_CATALOG_MODE') && !defined('_PS_ADMIN_DIR_'))) {
+        } elseif (Configuration::get('PS_CATALOG_MODE') && !defined('_PS_ADMIN_DIR_')) {
             return false;
         } else {
             /* Check if the product is already in the cart */
@@ -1604,6 +1605,7 @@ class CartCore extends ObjectModel
             Cart::ONLY_ROOM_SERVICES,
             Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE,
             Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD,
+            Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE,
             Cart::ONLY_CONVENIENCE_FEE,
             Cart::ONLY_SERVICE_PRODUCTS,
             Cart::ONLY_DISCOUNTS,
@@ -1692,6 +1694,7 @@ class CartCore extends ObjectModel
                     || $type == Cart::ONLY_CONVENIENCE_FEE
                     || $type == Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD
                     || $type == Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE
+                    || $type == Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE
                 ) {
                     continue;
                 }
@@ -1710,17 +1713,20 @@ class CartCore extends ObjectModel
                         }
 
                         if (Product::PRICE_ADDITION_TYPE_WITH_ROOM == $product['price_addition_type']) {
-                            if ($type == Cart::ONLY_CONVENIENCE_FEE || $type == Cart::BOTH_WITHOUT_SHIPPING) {
+                            if ($type == Cart::ONLY_CONVENIENCE_FEE) {
                                 continue;
                             }
                         } else {
-                            if ($type == Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE) {
+                            if ($type == Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE
+                                || $type == Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE
+                            ) {
                                 continue;
                             }
                         }
+
                     } else {
                         if ($type == Cart::ONLY_CONVENIENCE_FEE
-                            // || $type == Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITH_ROOM_PRICE
+                            || $type == Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE
                         ) {
                             continue;
                         }
@@ -1731,7 +1737,6 @@ class CartCore extends ObjectModel
                     }
                 }
             }
-
             // products refer to the cart details
             if ($virtual_context->shop->id != $product['id_shop']) {
                 $virtual_context->shop = new Shop((int)$product['id_shop']);
@@ -1742,11 +1747,6 @@ class CartCore extends ObjectModel
             if (!$address_factory->addressExists($id_address)) {
                 $id_address = null;
             }
-
-            // if product is normal product, find related room if available
-            $id_roomtype = false;
-
-
 
             // The $null variable below is not used,
             // but it is necessary to pass it to getProductPrice because
@@ -1769,7 +1769,7 @@ class CartCore extends ObjectModel
                 $ps_use_ecotax,
                 true,
                 $virtual_context,
-                $id_roomtype
+                false
             );
 
             $address = $address_factory->findOrCreate($id_address, true);
@@ -1793,6 +1793,7 @@ class CartCore extends ObjectModel
                 $objHotelServiceProductCartDetail = new HotelServiceProductCartDetail();
                 $price = $objHotelServiceProductCartDetail->getHotelProductUnitPrice($this->id, (int)$product['id_product'], 0, $with_taxes);
             } else if (!$product['booking_product'] && Product::SERVICE_PRODUCT_WITH_ROOMTYPE == $product['service_product_type']) {
+
                 $objRoomTypeServiceProductCartDetail = new RoomTypeServiceProductCartDetail();
                 $totalPriceByProduct = $objRoomTypeServiceProductCartDetail->getServiceProductsInCart(
                     $this->id,
@@ -1820,7 +1821,8 @@ class CartCore extends ObjectModel
                         Group::getCurrent()->id,
                         $cartRoomInfo['id_cart'],
                         $cartRoomInfo['id_guest'],
-                        $cartRoomInfo['id_room']
+                        $cartRoomInfo['id_room'],
+                        0
                     );
                     if ($with_taxes) {
                         $totalPriceByProduct += $roomTotalPrice['total_price_tax_incl'];
@@ -1924,7 +1926,8 @@ class CartCore extends ObjectModel
             Cart::ONLY_SERVICE_PRODUCTS,
             Cart::ONLY_CONVENIENCE_FEE,
             Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD,
-            Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE)
+            Cart::ONLY_ROOM_SERVICES_WITHOUT_CONVENIENCE_FEE,
+            Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE)
             ) && CartRule::isFeatureActive()
         ) {
             // First, retrieve the cart rules associated to this "getOrderTotal"
@@ -3682,6 +3685,8 @@ class CartCore extends ObjectModel
         $total_rooms = $this->getOrderTotal(false, Cart::ONLY_ROOMS);
         $total_additional_services_wt = $this->getOrderTotal(true, Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD);
         $total_additional_services = $this->getOrderTotal(false, Cart::ONLY_ROOM_SERVICES_WITHOUT_AUTO_ADD);
+        $total_additional_services_auto_add_wt = $this->getOrderTotal(true, Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE);
+        $total_additional_services_auto_add = $this->getOrderTotal(false, Cart::ONLY_ROOM_SERVICES_WITH_AUTO_ADD_WITHOUT_CONVENIENCE_FEE);
         $convenience_fee_wt = $this->getOrderTotal(true, Cart::ONLY_CONVENIENCE_FEE);
         $convenience_fee = $this->getOrderTotal(false, Cart::ONLY_CONVENIENCE_FEE);
         $convenience_fee_tax = $convenience_fee_wt - $convenience_fee;
@@ -3808,6 +3813,8 @@ class CartCore extends ObjectModel
             'total_rooms' => $total_rooms,
             'total_additional_services_wt' => $total_additional_services_wt,
             'total_additional_services' => $total_additional_services,
+            'total_additional_services_auto_add_wt' => $total_additional_services_auto_add_wt,
+            'total_additional_services_auto_add' => $total_additional_services_auto_add,
             'convenience_fee_wt' => $convenience_fee_wt,
             'convenience_fee' => $convenience_fee,
             'convenience_fee_tax' => $convenience_fee_tax,

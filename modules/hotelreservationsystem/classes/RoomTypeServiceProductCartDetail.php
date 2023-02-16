@@ -121,7 +121,7 @@ class RoomTypeServiceProductCartDetail extends ObjectModel
         if (!is_null($autoAddToCart)) {
             $sql .= ' AND p.`auto_add_to_cart` = '. (int)$autoAddToCart;
             if ($autoAddToCart == 1 && !is_null($priceAdditionType)) {
-                $sql .= ' AND AND p.`price_addition_type` = '.$priceAdditionType;
+                $sql .= ' AND p.`price_addition_type` = '.$priceAdditionType;
             }
         }
         if ($idCart) {

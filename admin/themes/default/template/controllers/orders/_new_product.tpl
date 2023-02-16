@@ -23,7 +23,7 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 <tr id="new_product" style="display:none">
-	<td style="display:none;" colspan="2" class="text-center">
+	<td style="display:none;" colspan="3" class="text-center">
 		<input type="hidden" id="add_product_product_id" name="add_product[product_id]" value="0" />
 
 		<div class="form-group">
@@ -64,27 +64,7 @@
 			</div>
 		</center>
 	</td>
-	<td style="display:none;" class="text-center">
-		<center>
-			<div class="row">
-				<div class="input-group fixed-width-xl">
-					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
-					<input type="text" name="add_product[product_price_tax_excl]" id="add_product_product_price_tax_excl" value="" />
-					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
-				</div>
-			</div>
-			<br/>
-			<div class="row">
-				<div class="input-group fixed-width-xl">
-					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
-					<input type="text" name="add_product[product_price_tax_incl]" id="add_product_product_price_tax_incl" value="" />
-					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
-				</div>
-			</div>
-		</center>
-	</td>
-
-	<td style="display:none;" class="productQuantity text-center" colspan="2">
+	<td style="display:none;" class="productQuantity text-center" colspan="1">
 		{if $order->with_occupancy}
 			<div class="booking_occupancy">
 				<div class="dropdown">
@@ -137,6 +117,27 @@
 		{/if}
 
 	</td>
+	<td style="display:none;" class="text-center" colspan="2">
+		<center>
+			<div class="row">
+				<div class="input-group fixed-width-xl">
+					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
+					<input type="text" name="add_product[product_price_tax_excl]" id="add_product_product_price_tax_excl" value="" />
+					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax excl.'}</div>{/if}
+				</div>
+			</div>
+			<br/>
+			<div class="row">
+				<div class="input-group fixed-width-xl">
+					{if $currency->format % 2}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
+					<input type="text" name="add_product[product_price_tax_incl]" id="add_product_product_price_tax_incl" value="" />
+					{if !($currency->format % 2)}<div class="input-group-addon">{$currency->sign} {l s='tax incl.'}</div>{/if}
+				</div>
+			</div>
+		</center>
+	</td>
+
+
 	{*{if ($order->hasBeenPaid())}<td style="display:none;" class="productQuantity"></td>{/if}
 	{if $display_warehouse}<td></td>{/if}
 	{if ($order->hasBeenDelivered())}<td style="display:none;" class="productQuantity"></td>{/if}

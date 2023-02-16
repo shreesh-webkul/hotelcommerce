@@ -121,9 +121,9 @@
 										<td class="cart_total text-left">
 											<p class="text-left">
 												{if $group_use_tax}
-													{displayWtPriceWithCurrency price=($rm_v['amount_tax_incl'] + $rm_v['extra_demands_price_ti'] + $rm_v['additional_services_price_ti']) currency=$currency}
+													{displayWtPriceWithCurrency price=($rm_v['amount_tax_incl'] + $rm_v['extra_demands_price_ti'] + $rm_v['additional_services_price_ti'] + $rm_v['additional_services_price_auto_add_ti']) currency=$currency}
 												{else}
-													{displayWtPriceWithCurrency price=($rm_v['amount_tax_excl'] + $rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te']) currency=$currency}
+													{displayWtPriceWithCurrency price=($rm_v['amount_tax_excl'] + $rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te'] +  $rm_v['additional_services_price_auto_add_te']) currency=$currency}
 												{/if}
 												{if (isset($rm_v['extra_demands']) && $rm_v['extra_demands']) || isset($rm_v['additional_services']) && $rm_v['additional_services']}
 													<span class="order-price-info">
@@ -138,9 +138,9 @@
 																<div class="text-right">
 																	<p>
 																		{if $group_use_tax}
-																			{displayWtPriceWithCurrency price=$rm_v['amount_tax_incl'] currency=$currency}
+																			{displayWtPriceWithCurrency price=($rm_v['amount_tax_incl'] + $rm_v['additional_services_price_auto_add_ti']) currency=$currency}
 																		{else}
-																			{displayWtPriceWithCurrency price=$rm_v['amount_tax_excl'] currency=$currency}
+																			{displayWtPriceWithCurrency price=($rm_v['amount_tax_excl'] +  $rm_v['additional_services_price_auto_add_te']) currency=$currency}
 																		{/if}
 																	</p>
 																</div>
@@ -154,7 +154,7 @@
 																		{if $group_use_tax}
 																			{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_ti'] + $rm_v['additional_services_price_ti'])  currency=$currency}
 																		{else}
-																			{displayWtPriceWithCurrency price=($rm_v['amount_tax_excl'] + $rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te']) currency=$currency}
+																			{displayWtPriceWithCurrency price=($rm_v['extra_demands_price_te'] + $rm_v['additional_services_price_te']) currency=$currency}
 																		{/if}
 																	</p>
 																</div>
@@ -241,7 +241,7 @@
 										<strong>{l s='Total Rooms Cost (tax excl.)'}</strong>
 									</td>
 									<td colspan="2">
-										<span>{displayWtPriceWithCurrency price=($orderTotalInfo['total_rooms_te'] + $orderTotalInfo['total_services_te']) currency=$currency}</span>
+										<span>{displayWtPriceWithCurrency price=($orderTotalInfo['total_rooms_te'] + $orderTotalInfo['total_services_te'] - $orderTotalInfo['total_convenience_fee_te']) currency=$currency}</span>
 									</td>
 								</tr>
 							{else}
@@ -251,7 +251,7 @@
 										<strong>{l s='Total Rooms Cost'} {if $use_tax}{l s='(tax incl.)'}{/if} </strong>
 									</td>
 									<td colspan="2">
-										<span>{displayWtPriceWithCurrency price=($orderTotalInfo['total_rooms_ti'] + $orderTotalInfo['total_services_ti']) currency=$currency}</span>
+										<span>{displayWtPriceWithCurrency price=($orderTotalInfo['total_rooms_ti'] + $orderTotalInfo['total_services_ti'] - $orderTotalInfo['total_convenience_fee_ti']) currency=$currency}</span>
 									</td>
 								</tr>
 							{/if}

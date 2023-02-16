@@ -595,6 +595,7 @@ class AdminCartsControllerCore extends AdminController
             $cart_detail_data = $cart_detail_data_obj->getCartFormatedBookinInfoByIdCart((int) $id_cart);
             $this->context->smarty->assign(array(
                 'cart_detail_data' => $cart_detail_data,
+                'currency' => new Currency((int)$this->context->cart->id_currency),
             ));
 
             $tpl_path = 'default/template/controllers/orders/_current_cart_details_data.tpl';
@@ -938,7 +939,7 @@ class AdminCartsControllerCore extends AdminController
                 if ($bookingInfo['id'] == $id_booking_data) {
                     $amt_with_qty = $bookingInfo['amt_with_qty'];
                     $bookingInfo['amt_with_qty'] = Tools::displayPrice($amt_with_qty);
-                    $bookingInfo['total_price'] = Tools::displayPrice($amt_with_qty + $bookingInfo['demand_price']);
+                    $bookingInfo['total_price'] = Tools::displayPrice($amt_with_qty + $bookingInfo['demand_price'] + $bookingInfo['additional_service_price']);
                     $response = array(
                         'curr_booking_info' => $bookingInfo,
                         'cart_info' => $this->ajaxReturnVars(),
@@ -1088,14 +1089,15 @@ class AdminCartsControllerCore extends AdminController
                     null
                 )) {
                     $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
-                    $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct);
-                        foreach ($selectedRoomServiceProduct as $key => $selectedProducts) {
-                            $objRoom = new HotelRoomInformation($selectedProducts['id_room']);
-                            $selectedRoomServiceProduct[$key]['room_num'] = $objRoom->room_num;
-                            foreach ($selectedProducts['selected_products_info'] as $product) {
-                                $selectedRoomServiceProduct[$key]['selected_products'][] = $product['id_product'];
-                            }
+                    $roomTypeServiceProducts = $objRoomTypeServiceProduct->getServiceProductsData($idProduct, 1, 0, false, 2, null);
+                    foreach ($selectedRoomServiceProduct as $key => $selectedProducts) {
+                        $objRoom = new HotelRoomInformation($selectedProducts['id_room']);
+                        $selectedRoomServiceProduct[$key]['room_num'] = $objRoom->room_num;
+                        foreach ($selectedProducts['selected_products_info'] as $product) {
+                            $selectedRoomServiceProduct[$key]['selected_products'][] = $product['id_product'];
                         }
+                    }
+
                     $this->context->smarty->assign(array(
                         'roomTypeServiceProducts' => $roomTypeServiceProducts,
                         'selectedRoomServiceProduct' => $selectedRoomServiceProduct

@@ -642,7 +642,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             $roomTypeInfo = $objRoomType->getRoomTypeInfoByIdProduct($id_product);
 
             $objHotelCartBookingData = new HotelCartBookingData();
-            if ($idHotelCartBooking = $objHotelCartBookingData->updateRoomCartBookingData(
+            if ($idHotelCartBooking = $objHotelCartBookingData->updateCartBooking(
                 $id_product,
                 $occupancy,
                 $direction,

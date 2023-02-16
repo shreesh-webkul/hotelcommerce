@@ -270,6 +270,7 @@ class AdminOrdersControllerCore extends AdminController
             'toolbar_scroll' => $this->toolbar_scroll,
             'PS_CATALOG_MODE' => Configuration::get('PS_CATALOG_MODE'),
             'title' => array($this->l('Orders'), $this->l('Create order')),
+            'currency' => new Currency((int)$cart->id_currency),
             'max_child_in_room' => Configuration::get('WK_GLOBAL_MAX_CHILD_IN_ROOM'),
             'max_child_age' => Configuration::get('WK_GLOBAL_CHILD_MAX_AGE'),
             'occupancy_required_for_booking' => $occupancyRequiredForBooking,
@@ -1491,6 +1492,9 @@ class AdminOrdersControllerCore extends AdminController
             $objBookingDemand = new HotelBookingDemands();
             $objHotelRoomType = new HotelRoomType();
             foreach ($order_detail_data as $key => $value) {
+                $order_detail_data[$key]['total_room_price_te'] = $value['total_price_tax_excl'];
+                $order_detail_data[$key]['total_room_price_ti'] = $value['total_price_tax_incl'];
+
                 $order_detail_data[$key]['extra_demands'] = $objBookingDemand->getRoomTypeBookingExtraDemands(
                     $order->id,
                     $value['id_product'],
@@ -1498,7 +1502,7 @@ class AdminOrdersControllerCore extends AdminController
                     $value['date_from'],
                     $value['date_to']
                 );
-                $order_detail_data[$key]['extra_demands_price_ti'] = $objBookingDemand->getRoomTypeBookingExtraDemands(
+                $order_detail_data[$key]['total_room_price_ti'] += $order_detail_data[$key]['extra_demands_price_ti'] = $objBookingDemand->getRoomTypeBookingExtraDemands(
                     $order->id,
                     $value['id_product'],
                     $value['id_room'],
@@ -1509,7 +1513,7 @@ class AdminOrdersControllerCore extends AdminController
                     1
                 );
                 $totalDemandsPriceTI += $order_detail_data[$key]['extra_demands_price_ti'];
-                $order_detail_data[$key]['extra_demands_price_te'] = $objBookingDemand->getRoomTypeBookingExtraDemands(
+                $order_detail_data[$key]['total_room_price_te'] += $order_detail_data[$key]['extra_demands_price_te'] = $objBookingDemand->getRoomTypeBookingExtraDemands(
                     $order->id,
                     $value['id_product'],
                     $value['id_room'],
@@ -1520,6 +1524,7 @@ class AdminOrdersControllerCore extends AdminController
                     0
                 );
                 $totalDemandsPriceTE += $order_detail_data[$key]['extra_demands_price_te'];
+
                 $order_detail_data[$key]['additional_services'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $order->id,
                     0,
@@ -1529,7 +1534,7 @@ class AdminOrdersControllerCore extends AdminController
                     $value['date_to'],
                     $value['id_room']
                 );
-                $order_detail_data[$key]['additional_services_price_ti'] = $extraDemandPriceTI = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                $order_detail_data[$key]['total_room_price_ti'] += $order_detail_data[$key]['additional_services_price_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $order->id,
                     0,
                     0,
@@ -1540,7 +1545,7 @@ class AdminOrdersControllerCore extends AdminController
                     1,
                     1
                 );
-                $order_detail_data[$key]['additional_services_price_te'] = $extraDemandPriceTI = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                $order_detail_data[$key]['total_room_price_te'] += $order_detail_data[$key]['additional_services_price_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $order->id,
                     0,
                     0,
@@ -1551,7 +1556,7 @@ class AdminOrdersControllerCore extends AdminController
                     1,
                     0
                 );
-                $totalConvenienceFeeTI += $order_detail_data[$key]['convenience_fee_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                $order_detail_data[$key]['total_room_price_ti'] += $totalConvenienceFeeTI += $order_detail_data[$key]['convenience_fee_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $order->id,
                     0,
                     0,
@@ -1564,7 +1569,7 @@ class AdminOrdersControllerCore extends AdminController
                     1,
                     Product::PRICE_ADDITION_TYPE_INDEPENDENT
                 );
-                $totalConvenienceFeeTE += $order_detail_data[$key]['convenience_fee_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                $order_detail_data[$key]['total_room_price_te'] += $totalConvenienceFeeTE += $order_detail_data[$key]['convenience_fee_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
                     $order->id,
                     0,
                     0,
@@ -1576,6 +1581,32 @@ class AdminOrdersControllerCore extends AdminController
                     0,
                     1,
                     Product::PRICE_ADDITION_TYPE_INDEPENDENT
+                );
+                $order_detail_data[$key]['total_room_price_ti'] += $order_detail_data[$key]['additional_services_price_auto_add_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                    $order->id,
+                    0,
+                    0,
+                    $value['id_product'],
+                    $value['date_from'],
+                    $value['date_to'],
+                    $value['id_room'],
+                    1,
+                    1,
+                    1,
+                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                );
+                $order_detail_data[$key]['total_room_price_te'] += $order_detail_data[$key]['additional_services_price_auto_add_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                    $order->id,
+                    0,
+                    0,
+                    $value['id_product'],
+                    $value['date_from'],
+                    $value['date_to'],
+                    $value['id_room'],
+                    1,
+                    0,
+                    1,
+                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
                 );
                 $cust_obj = new Customer($value['id_customer']);
                 if ($cust_obj->firstname) {
@@ -1601,6 +1632,7 @@ class AdminOrdersControllerCore extends AdminController
                 $order_detail_data[$key]['amt_with_qty_tax_excl'] = $value['total_price_tax_excl'];
                 $order_detail_data[$key]['amt_with_qty_tax_incl'] = $value['total_price_tax_incl'];
                 $order_detail_data[$key]['room_type_info'] = $objHotelRoomType->getRoomTypeInfoByIdProduct($value['id_product']);
+                $order_detail_data[$key]['total_room_tax'] = $order_detail_data[$key]['total_room_price_ti'] - $order_detail_data[$key]['total_room_price_te'];
             }
         }
 
@@ -1609,7 +1641,6 @@ class AdminOrdersControllerCore extends AdminController
         if ($refundReqBookings = $objOrderReturn->getOrderRefundRequestedBookings($order->id, 0, 1)) {
             $refundedAmount = $objOrderReturn->getRefundedAmount($order->id);
         }
-
 
         // get booking information by order
         $bookingOrderInfo = $objBookingDetail->getBookingDataByOrderId($order->id);
@@ -3035,6 +3066,7 @@ class AdminOrdersControllerCore extends AdminController
         $new_date_to = trim(date('Y-m-d', strtotime($product_informations['date_to'])));
         $old_date_from = trim(Tools::getValue('date_from'));
         $old_date_to = trim(Tools::getValue('date_to'));
+        $id_hotel = trim(Tools::getValue('id_hotel'));
         $id_room = trim(Tools::getValue('id_room'));
         $id_product = trim(Tools::getValue('id_product'));
         $room_unit_price = trim(Tools::getValue('room_unit_price'));
@@ -3150,7 +3182,7 @@ class AdminOrdersControllerCore extends AdminController
         $totalProductPriceAfterTI = 0;
         $totalRoomPriceAfterTE = 0;
         $totalRoomPriceAfterTI = 0;
-        $bookedRooms = $obj_booking_detail->getBookedRoomsByIdOrderDetail((int) Tools::getValue('order_detail_id'), $id_product);
+        $bookedRooms = $obj_booking_detail->getBookedRoomsByIdOrderDetail((int) Tools::getValue('id_order_detail'), $id_product);
         if ($bookedRooms) {
             $params = array(
                 'id_cart' => $cart->id,
@@ -3174,7 +3206,8 @@ class AdminOrdersControllerCore extends AdminController
                         Group::getCurrent()->id,
                         $cart->id,
                         $cart->id_guest,
-                        $roomInfo['id_room']
+                        $roomInfo['id_room'],
+                        0
                     );
 
                     $totalProductPriceAfterTE += (float) $roomTotalPrice['total_price_tax_excl'];
@@ -4002,7 +4035,7 @@ class AdminOrdersControllerCore extends AdminController
             )));
         }
 
-        $product_informations = Tools::getValue('add_product');
+        $product_informations = Tools::getValue('edit_product');
         $new_date_from = trim(date('Y-m-d', strtotime($product_informations['date_from'])));
         $new_date_to = trim(date('Y-m-d', strtotime($product_informations['date_to'])));
         $obj_booking_detail = new HotelBookingDetail();
@@ -5054,13 +5087,16 @@ class AdminOrdersControllerCore extends AdminController
                 $objRoomTypeServiceProduct = new RoomTypeServiceProduct();
                 if ($objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idServiceProduct)) {
                     // validate quanitity
-                    $objProduct = new Product($objHotelCartBookingData->id_product);
-                    if ($objProduct->allow_multiple_quantity) {
-                        if (!Validate::isUnsignedInt($qty)) {
-                            $this->errors[] = Tools::displayError('The quantity code you\'ve entered is invalid.');
+                    if (Validate::isLoadedObject($objProduct = new Product($idServiceProduct))) {
+                        if ($objProduct->allow_multiple_quantity) {
+                            if (!Validate::isUnsignedInt($qty)) {
+                                $this->errors[] = Tools::displayError('The quantity code you\'ve entered is invalid.');
+                            }
+                        } else {
+                            $qty = 1;
                         }
                     } else {
-                        $qty = 1;
+                        $this->errors[] = Tools::displayError('This Service is not available.');
                     }
                 } else {
                     $this->errors[] = Tools::displayError('This Service is not available with selected room.');

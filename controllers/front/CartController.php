@@ -507,7 +507,7 @@ class CartControllerCore extends FrontController
                     $roomDemand = json_decode(Tools::getValue('roomDemands'), true);
                     $roomDemand = json_encode($roomDemand);
                     $this->availQty = $total_available_rooms;
-                    $update_quantity = $objHotelCartBookingData->updateRoomCartBookingData(
+                    $update_quantity = $objHotelCartBookingData->updateCartBooking(
                         $this->id_product,
                         $occupancy,
                         $operator,
@@ -617,15 +617,19 @@ class CartControllerCore extends FrontController
                 if ($objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($objHotelCartBookingData->id_product, $idServiceProduct)) {
                     // validate quanitity
                     if (Validate::isLoadedObject($objProduct = new Product($idServiceProduct))) {
-                        if ($objProduct->allow_multiple_quantity) {
-                            if (!Validate::isUnsignedInt($qty)) {
-                                $this->errors[] = Tools::displayError('The quantity you\'ve entered is invalid.');
+                        if ($objProduct->available_for_order) {
+                            if ($objProduct->allow_multiple_quantity) {
+                                if (!Validate::isUnsignedInt($qty)) {
+                                    $this->errors[] = Tools::displayError('The quantity you\'ve entered is invalid.');
+                                }
+                            } else {
+                                $qty = 1;
                             }
                         } else {
-                            $qty = 1;
+                            $this->errors[] = Tools::displayError('This Service is not available.');
                         }
                     } else {
-                        $this->errors[] = Tools::displayError('This Service product is not available.');
+                        $this->errors[] = Tools::displayError('This Service is not available.');
                     }
                 } else {
                     $this->errors[] = Tools::displayError('This Service is not available with selected room.');

@@ -324,6 +324,8 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                 $room_extra_demands = array();
                 $room_additinal_services = array();
 
+                $totalConvenienceFeeTE = 0;
+                $totalConvenienceFeeTI = 0;
                 $totalDemandsPriceTE = 0;
                 $totalDemandsPriceTI = 0;
                 foreach ($order_details as $type_key => $type_value) {
@@ -401,6 +403,32 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                                     1,
                                     1
                                 );
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    1,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                                );
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    0,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                                );
 
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['num_rm'] += 1;
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['adults'] += $data_v['adults'];
@@ -411,9 +439,9 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'] = $data_v['total_price_tax_excl']/$num_days;
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_incl'] = $data_v['total_price_tax_excl']/$num_days;
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['avg_paid_unit_price_tax_excl'] += $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'];
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['avg_paid_unit_price_tax_excl'] += ($cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'] + $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te']);
 
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['amount'] += $data_v['total_price_tax_excl'];
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['amount'] += ($data_v['total_price_tax_excl'] + $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te']);
 
                                 // For order refund
                                     $cart_htl_data[$type_key]['date_diff'][$date_join]['id_room'] = $data_v['id_room'];
@@ -452,7 +480,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                                     $data_v['id_product'],
                                     $data_v['date_from'],
                                     $data_v['date_to'],
-                                    $data_v['id_room']
+                                    0
                                 );
 
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
@@ -462,7 +490,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                                     $data_v['id_product'],
                                     $data_v['date_from'],
                                     $data_v['date_to'],
-                                    $data_v['id_room'],
+                                    0,
                                     1,
                                     1
                                 );
@@ -473,9 +501,61 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                                     $data_v['id_product'],
                                     $data_v['date_from'],
                                     $data_v['date_to'],
-                                    $data_v['id_room'],
+                                    0,
                                     1,
                                     0
+                                );
+                                $totalConvenienceFeeTI += $cart_htl_data[$type_key]['date_diff'][$date_join]['convenience_fee_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    1,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_INDEPENDENT
+                                );
+                                $totalConvenienceFeeTE += $cart_htl_data[$type_key]['date_diff'][$date_join]['convenience_fee_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    0,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_INDEPENDENT
+                                );
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_ti'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    1,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
+                                );
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'] = $objRoomTypeServiceProductOrderDetail->getroomTypeServiceProducts(
+                                    $order_obj->id,
+                                    0,
+                                    0,
+                                    $data_v['id_product'],
+                                    $data_v['date_from'],
+                                    $data_v['date_to'],
+                                    $data_v['id_room'],
+                                    1,
+                                    0,
+                                    1,
+                                    Product::PRICE_ADDITION_TYPE_WITH_ROOM
                                 );
 
                                 $num_days = $obj_htl_bk_dtl->getNumberOfDays($data_v['date_from'], $data_v['date_to']);
@@ -490,12 +570,12 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'] = $data_v['total_price_tax_excl']/$num_days;
                                 $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_incl'] = $data_v['total_price_tax_excl']/$num_days;
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['avg_paid_unit_price_tax_excl'] = $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'];
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['avg_paid_unit_price_tax_excl'] = $cart_htl_data[$type_key]['date_diff'][$date_join]['paid_unit_price_tax_excl'] + $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te'];
 
-                                $cart_htl_data[$type_key]['date_diff'][$date_join]['amount'] = $data_v['total_price_tax_excl'];
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['amount'] = ($data_v['total_price_tax_excl'] + $cart_htl_data[$type_key]['date_diff'][$date_join]['additional_services_price_auto_add_te']);
 
                                 // For order refund
-                                    $cart_htl_data[$type_key]['date_diff'][$date_join]['id_room'] = $data_v['id_room'];
+                                $cart_htl_data[$type_key]['date_diff'][$date_join]['id_room'] = $data_v['id_room'];
                                 $totalDemandsPriceTE += $cart_htl_data[$type_key]['date_diff'][$date_join]['extra_demands_price_te'];
                                 $totalDemandsPriceTI += $cart_htl_data[$type_key]['date_diff'][$date_join]['extra_demands_price_ti'];
                             }
@@ -552,12 +632,13 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                         $service_product_data[$type_key] = $type_value;
                     }
                 }
-
                 unset($tax_temp);
 
                 // enter extra demands price to the footer total details
                 $footer['total_extra_demands_ti'] = $totalDemandsPriceTI;
                 $footer['total_extra_demands_te'] = $totalDemandsPriceTE;
+                $footer['total_convenience_fee_ti'] = $totalConvenienceFeeTI;
+                $footer['total_convenience_fee_te'] = $totalConvenienceFeeTE;
             }
         }
         $footer['room_price_tax_excl'] = $this->order->getTotalProductsWithoutTaxes(false, true);
@@ -645,6 +726,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
                 }
             }
         }
+
         $data = array(
             'showTaxName' => $showTaxName,
             'use_one_after_another_method' => $this->order_invoice->useOneAfterAnotherTaxComputationMethod(),
@@ -678,6 +760,7 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
         $breakdowns = array(
             'room_tax' => $this->order_invoice->getRoomsTaxesBreakdown($this->order),
             'additional_services_tax' => $this->order_invoice->getAdditionalServicesTaxesBreakdown($this->order),
+            'convenience_fee_tax' => $this->order_invoice->getConvenienceFeeTaxesBreakdown($this->order),
             'extra_demands_tax' => $this->order_invoice->getExtraDemandTaxesBreakdown($this->order),
             'service_products_tax' => $this->order_invoice->getServiceProductsTaxesBreakdown($this->order),
             'shipping_tax' => $this->order_invoice->getShippingTaxesBreakdown($this->order),
@@ -720,6 +803,12 @@ class HTMLTemplateInvoiceCore extends HTMLTemplate
 
         if (isset($breakdowns['service_products_tax'])) {
             foreach ($breakdowns['service_products_tax'] as &$bd) {
+                $bd['total_tax_excl'] = $bd['total_price_tax_excl'];
+            }
+        }
+
+        if (isset($breakdowns['convenience_fee_tax'])) {
+            foreach ($breakdowns['convenience_fee_tax'] as &$bd) {
                 $bd['total_tax_excl'] = $bd['total_price_tax_excl'];
             }
         }

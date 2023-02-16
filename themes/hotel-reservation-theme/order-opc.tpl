@@ -246,9 +246,9 @@
 									</span>
 									<span class="cart_total_values">
 										{if $use_taxes && $priceDisplay == 0}
-											{assign var='total_rooms_cost' value=($total_rooms_wt + $total_extra_demands_wt + $total_additional_services_wt)}
+											{assign var='total_rooms_cost' value=($total_rooms_wt + $total_extra_demands_wt + $total_additional_services_wt + $total_additional_services_auto_add_wt)}
 										{else}
-											{assign var='total_rooms_cost' value=($total_rooms + $total_extra_demands + $total_additional_services)}
+											{assign var='total_rooms_cost' value=($total_rooms + $total_extra_demands + $total_additional_services + $total_additional_services_auto_add)}
 										{/if}
 										{displayPrice price=$total_rooms_cost}
 									</span>

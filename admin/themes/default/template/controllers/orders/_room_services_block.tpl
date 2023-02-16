@@ -42,11 +42,14 @@
 											{/if}
 									</td>
 									<td>
-										{if $service['product_auto_add']}
-											<span class="badge badge-info">{l s='Auto added'}</span>
+										{if $service['product_auto_add'] && $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_INDEPENDENT}
+											<span class="badge badge-info label">{l s='Convenience fee'}</span>
+										{/if}
+										{if $service['product_auto_add'] && $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_WITH_ROOM}
+											<span class="badge badge-info label">{l s='Auto added'}</span>
 										{/if}
 									</td>
-									<td>{displayPrice price=$service['total_price_tax_incl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
+									<td>{displayPrice price=$service['total_price_tax_excl']|escape:'html':'UTF-8' currency=$orderCurrency}</td>
 									<td><a class="btn btn-danger pull-right del_room_additional_service" data-id_room_type_service_product_order_detail="{$service['id_room_type_service_product_order_detail']}" href="#"><i class="icon-trash"></i></a></td>
 								</tr>
 							{/foreach}
@@ -102,11 +105,11 @@
 						<div class="row">
 							<div class="col-xs-8">
 								<span class="pull-right">
-									{if $service['product_auto_add']}
-										<span class="badge badge-sm badge-info">{l s='Auto added'}</span>
-										{if $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_WITH_ROOM}
-											<span class="badge badge-info">{l s='Included in room price'}</span>
-										{/if}
+									{if $service['product_auto_add'] && $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_INDEPENDENT}
+										<span class="badge badge-info label">{l s='Convenience fee'}</span>
+									{/if}
+									{if $service['product_auto_add'] && $service['product_price_addition_type'] == Product::PRICE_ADDITION_TYPE_WITH_ROOM}
+										<span class="badge badge-info label">{l s='Auto added'}</span>
 									{/if}
 								</span>
 								<div>{$service['name']|escape:'html':'UTF-8'}</div>
@@ -116,7 +119,7 @@
 
 							</div>
 							<div class="col-xs-4">
-								<span class="pull-right">{displayPrice price=$service['total_price_tax_incl'] currency=$orderCurrency}</span>
+								<span class="pull-right">{displayPrice price=$service['total_price_tax_excl'] currency=$orderCurrency}</span>
 							</div>
 						</div>
 					</div>

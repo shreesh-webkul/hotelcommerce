@@ -1166,6 +1166,15 @@ function initRoomEvents()
 		else
 		{
 			$('tr#new_product input, tr#new_product select, tr#new_product button').removeAttr('disabled');
+			$('tr#new_product .booking_guest_occupancy').removeClass('disabled');
+			if (data.room_type_info) {
+				$('tr#new_product .max_adults').val(data.room_type_info.max_adults);
+				$('tr#new_product .max_children').val(data.room_type_info.max_children);
+				$('tr#new_product .max_guests').val(data.room_type_info.max_guests);
+				$('tr#new_product .num_adults').attr('max', data.room_type_info.max_adults);
+				$('tr#new_product .num_children').attr('max', data.room_type_info.max_children);
+			}
+
 			// Keep product variable
 			current_product = data;
 			$('#add_product_product_id').val(data.id_product);
@@ -1358,6 +1367,7 @@ function initRoomEvents()
 					{
 						element_list = element.parents('.product-line-row');
 					}
+
 					element_list.find('td .room_unit_price_show').hide();
 					element_list.find('td .room_unit_price_edit').show();
 					element_list.find('td .booking_duration_show').hide();
@@ -1366,6 +1376,8 @@ function initRoomEvents()
 					element_list.find('td .booking_occupancy_edit').show();
 					//element_list.find('td .product_price_show').hide();
 					//element_list.find('td .product_price_edit').show();
+					element_list.find('td .extra_service_show').hide();
+					element_list.find('td .extra_service_edit').show();
 					element_list.find('td.cancelCheck').hide();
 					element_list.find('td.cancelQuantity').hide();
 					//element_list.find('td.product_invoice').show();
@@ -1410,6 +1422,8 @@ function initRoomEvents()
 		element_list.find('td.product_invoice').hide();
 		element_list.find('td.cancelCheck').show();
 		element_list.find('td.cancelQuantity').show();
+		element_list.find('td .extra_service_show').show();
+		element_list.find('td .extra_service_edit').hide();
 		element_list.find('.edit_room_change_link').parent().show();
 		element_list.find('button.submitRoomChange').hide();
 		element_list.find('.cancel_room_change_link').hide();

@@ -1279,7 +1279,7 @@
 											<tr id="total_products">
 												<td class="text-right"><strong>{l s='Total Extra services (tax excl.)'}</strong></td>
 												<td class="amount text-right nowrap">
-													<strong>{displayPrice price=$additional_service_price_tax_excl currency=$currency->id}</strong>
+													<strong>{displayPrice price=($additional_service_price_tax_excl - $totalConvenienceFeeTE) currency=$currency->id}</strong>
 												</td>
 												<td class="partial_refund_fields current-edit" style="display:none;"></td>
 											</tr>
