@@ -307,10 +307,6 @@ class ProductControllerCore extends FrontController
                     $htl_features = array();
                 $obj_hotel_room_type = new HotelRoomType();
                 $room_info_by_product_id = $obj_hotel_room_type->getRoomTypeInfoByIdProduct($this->product->id);
-                $productCapacity = array();
-                $productCapacity['adults'] = $room_info_by_product_id['adults'];
-                $productCapacity['children'] = $room_info_by_product_id['children'];
-                $this->product->capacity = $productCapacity;
                 if ($hotel_id = $room_info_by_product_id['id_hotel']) {
                     $obj_hotel_branch = new HotelBranchInformation();
                     $hotel_info_by_id = $obj_hotel_branch->hotelBranchesInfo(false, 2, 1, $hotel_id);
@@ -591,7 +587,7 @@ class ProductControllerCore extends FrontController
             'id_cart' => $idCart,
             'id_guest' => $idGuest,
         );
-        if (Configuration::get('PS_FRONT_ROOM_UNIT_SELECTION_TYPE') == HotelBookingDetail::PS_FRONT_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY) {
+        if (Configuration::get('PS_FRONT_ROOM_UNIT_SELECTION_TYPE') == HotelBookingDetail::PS_ROOM_UNIT_SELECTION_TYPE_OCCUPANCY) {
             $bookingParams['occupancy'] = $occupancy;
             $quantity = count($occupancy);
         } else {
@@ -1318,12 +1314,13 @@ class ProductControllerCore extends FrontController
     public function displayAjaxCheckServiceProductWithRoomType()
     {
         $response = array(
-            'status' => false
+            'success' => false
         );
 
         if ($this->isTokenValid()) {
             $idProduct = Tools::getValue('id_product');
             $idServiceProduct = Tools::getValue('service_product');
+            $addedServiceProduct = Tools::getValue('added_service_product');
             if (Validate::isLoadedObject($objProduct = new Product($idProduct))) {
                 if (!Product::isBookingProduct($idProduct)) {
                     $response['error'] = Tools::displayError('Room Type info not Found');
@@ -1334,7 +1331,22 @@ class ProductControllerCore extends FrontController
                 if (!$objRoomTypeServiceProduct->isRoomTypeLinkedWithProduct($idProduct, $idServiceProduct)) {
                     $response['error'] = Tools::displayError('Selected product is not available with current room type');
                 } else {
-                    $response['status'] = true;
+                    if (Validate::isLoadedObject($objServiceProduct = new Product($idServiceProduct))) {
+                        $response['success'] = true;
+                        if (!$objServiceProduct->allow_multiple_quantity && !empty($addedServiceProduct)) {
+                            if (!in_array($idServiceProduct, array_column($addedServiceProduct, 'id_product'))) {
+                                $response['add'] = true;
+                                $response['msg'] = 'Service is added to cart.';
+                            } else {
+                                $response['msg'] = 'Service already added.';
+                            }
+                        } else {
+                            $response['add'] = true;
+                            $response['msg'] = 'Service is added to cart.';
+                        }
+                    } else {
+                        $response['error'] = Tools::displayError('Service not Found');
+                    }
                 }
             } else {
                 $response['error'] = Tools::displayError('Room Type not Found');

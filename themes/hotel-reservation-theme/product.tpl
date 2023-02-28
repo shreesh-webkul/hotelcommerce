@@ -199,13 +199,13 @@
 											{$product->description}
 										</div>
 									</div>
-									{if isset($product->capacity['adults']) && isset($product->capacity['children']) }
+									{if isset($room_type_info['adults']) && isset($room_type_info['children']) }
 										<div class="info_margin_div">
 											<div class="room_info_heading">
 												<span>{l s='Max Capacity'}</span>
 											</div>
 											<div class="room_info_content">
-												<p> {$product->capacity['adults']} {l s='Adults'}, {$product->capacity['children']} {l s='child'}</p>
+									<p> {$room_type_info['adults']} {l s='Adults'}, {$room_type_info['children']} {if $room_type_info['children'] > 1}{l s='Children'}{else}{l s='Child'}{/if} ({l s='Max guests'}: {$room_type_info['max_guests']|escape:'htmlall':'UTF-8'})</p>
 											</div>
 										</div>
 									{/if}
@@ -783,7 +783,5 @@
 	{addJsDefL name=wrong_qty_cond}{l s='you are trying for a invalid quantity.' js=1}{/addJsDefL}
 	{addJsDefL name=select_txt}{l s='Select' js=1}{/addJsDefL}
 	{addJsDefL name=remove_txt}{l s='Remove' js=1}{/addJsDefL}
-    {addJsDefL name=cart_extra_service_add}{l s='Service is added to cart' js=1}{/addJsDefL}
-
 	{/strip}
 {/if}

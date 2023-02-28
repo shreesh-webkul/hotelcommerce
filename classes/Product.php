@@ -992,7 +992,7 @@ class ProductCore extends ObjectModel
     public function deleteServiceInfo()
     {
         if (!RoomTypeServiceProduct::deleteRoomProductLink($this->id)
-            ||RoomTypeServiceProductPrice::deleteRoomProductPrices($this->id)
+            || !RoomTypeServiceProductPrice::deleteRoomProductPrices($this->id)
         ) {
             return false;
         }
