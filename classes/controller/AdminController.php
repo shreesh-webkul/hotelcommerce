@@ -915,6 +915,15 @@ class AdminControllerCore extends Controller
         }
     }
 
+    public function processListVisibility()
+    {
+        $listFieldsVisibility = Tools::getValue('list_fields_visibility');
+        $controller = 'list_visibility_'.$this->context->controller->className;
+        $this->context->cookie->$controller = json_encode($listFieldsVisibility);
+
+        return true;
+    }
+
     /**
      * @TODO uses redirectAdmin only if !$this->ajax
      * @return bool
@@ -3920,6 +3929,22 @@ class AdminControllerCore extends Controller
     {
         $this->context->cookie->{Tools::getValue('tab').'_closed'} = true;
         $response = array('success' => true);
+        $this->ajaxDie(json_encode($response));
+    }
+
+    /**
+     * Save list visibil columns
+     *
+     * @return json as response
+     */
+    public function ajaxProcessUpdateListVisivility()
+    {
+        $response = array(
+            'success' => false
+        );
+
+        $response['success'] = $this->processListVisibility();
+
         $this->ajaxDie(json_encode($response));
     }
 
