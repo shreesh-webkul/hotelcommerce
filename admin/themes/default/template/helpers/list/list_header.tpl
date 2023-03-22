@@ -146,10 +146,10 @@
 								<ul id="optional-list-toggle" class="dropdown-menu">
 									{foreach $fields_optional as $key => $field}
 										<li>
-											<p>
+											<label>
 												<input type="checkbox" name="list_fields_visibility" value="{$key}" {if isset($field['selected']) && $field['selected']}checked="checked"{/if}>
 												{$field['title']}
-											</p>
+											</label>
 										</li>
 									{/foreach}
 								</ul>
@@ -378,7 +378,12 @@
 								{if isset($params.search) && !$params.search}
 									--
 								{else}
-									{if $params.type == 'bool'}
+									{if $params.type == 'range'}
+										<div class="input_range">
+											<input type="text" class="filter form-control" name="{$list_id}Filter_{if isset($params.filter_key)}{$params.filter_key}{else}{$key}{/if}[0]" placeholder="{l s='From'}" value="{if isset($params.value.0)}{$params.value.0}{/if}">
+											<input type="text" class="filter form-control" name="{$list_id}Filter_{if isset($params.filter_key)}{$params.filter_key}{else}{$key}{/if}[1]" placeholder="{l s='To'}" value="{if isset($params.value.1)}{$params.value.1}{/if}">
+										</div>
+									{else if $params.type == 'bool'}
 										<select class="filter fixed-width-sm center" name="{$list_id}Filter_{if isset($params.filter_key)}{$params.filter_key}{else}{$key}{/if}">
 											<option value="">-</option>
 											<option value="1" {if $params.value == 1} selected="selected" {/if}>{l s='Yes'}</option>

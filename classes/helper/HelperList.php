@@ -644,6 +644,12 @@ class HelperListCore extends Helper
                     $this->context->controller->addJqueryUI('ui.datepicker');
                     break;
 
+                case 'range':
+                    if (is_string($value)) {
+                        $value = json_decode($value, true);
+                    }
+                    break;
+
                 case 'select':
                     foreach ($params['list'] as $option_value => $option_display) {
                         if (isset(Context::getContext()->cookie->{$prefix.$this->list_id.'Filter_'.$params['filter_key']})
@@ -667,8 +673,6 @@ class HelperListCore extends Helper
         $has_value = false;
         $has_search_field = false;
 
-        // get selected fields to display
-        $list_visibility = json_decode($this->context->cookie->{'list_visibility_'.$this->context->controller->className});
         foreach ($this->fields_list as $key => $field) {
             if (isset($field['value']) && $field['value'] !== false && $field['value'] !== '') {
                 if (is_array($field['value']) && trim(implode('', $field['value'])) == '') {
@@ -678,12 +682,17 @@ class HelperListCore extends Helper
                 $has_value = true;
                 break;
             }
+        }
+
+        // get selected fields to display
+        $list_visibility = json_decode($this->context->cookie->{'list_visibility_'.$this->context->controller->className});
+        foreach ($this->fields_list as $key => $field) {
             if (!(isset($field['search']) && $field['search'] === false)) {
                 $has_search_field = true;
             }
             if (isset($field['optional']) && $field['optional']) {
                 $this->fields_optional[$key] = $field;
-                if ((empty($list_visibility))
+                if ((empty($list_visibility) && isset($field['visible_default']) && $field['visible_default'])
                     || $list_visibility && in_array($key , $list_visibility)
                 ) {
                     $this->fields_optional[$key]['selected'] = true;

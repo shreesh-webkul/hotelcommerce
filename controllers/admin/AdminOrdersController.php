@@ -64,14 +64,15 @@ class AdminOrdersControllerCore extends AdminController
         osl.`name` AS `osname`, os.`color`,
         IF((SELECT so.id_order FROM `'._DB_PREFIX_.'orders` so WHERE so.id_customer = a.id_customer AND so.id_order < a.id_order LIMIT 1) > 0, 0, 1) as new,
         IF(a.valid, 1, 0) badge_success,
-        hbil.`hotel_name`, COUNT(hbd.`id`) as `num_rooms`, SUM(hbd.`adults`) as `total_adults`, SUM(hbd.`children`) as `total_children`,
+        hbil.`hotel_name`, COUNT(hbd.`id`) as `num_rooms`, SUM(hbd.`adults`) + SUM(hbd.`children`) as `total_guests`,
         CONCAT(
             SUM(hbd.`adults`),
             \' '.$this->l('Adult(s)').' \',
             IF(SUM(hbd.`children`), CONCAT(SUM(hbd.`children`), \' '.$this->l('Children').'\'), \'\')
         ) as `guest_text`,
         SUM(DATEDIFF(hbd.`date_to`, hbd.`date_from`)) as los,
-        GROUP_CONCAT(hbd.`date_from`) as `all_date_from`, GROUP_CONCAT(hbd.`date_to`) as `all_date_to`';
+        GROUP_CONCAT(hbd.`date_from`) as `all_date_from`, GROUP_CONCAT(hbd.`date_to`) as `all_date_to`,
+        GROUP_CONCAT(hbd.`room_type_name`) as `all_room_types`';
 
         $this->_join = '
         LEFT JOIN `'._DB_PREFIX_.'customer` c ON (c.`id_customer` = a.`id_customer`)
@@ -90,6 +91,10 @@ class AdminOrdersControllerCore extends AdminController
         foreach ($statuses as $status) {
             $this->statuses_array[$status['id_order_state']] = $status['name'];
         }
+        $all_order_sources = Db::getInstance()->executeS('SELECT DISTINCT(`source`) FROM  `'._DB_PREFIX_.'orders`');
+        foreach ($all_order_sources as $source) {
+            $this->all_order_sources[$source['source']] = $source['source'];
+        }
 
         $this->fields_list = array(
             'id_order' => array(
@@ -104,43 +109,60 @@ class AdminOrdersControllerCore extends AdminController
                 'title' => $this->l('Customer'),
                 'havingFilter' => true,
                 'optional' => true,
+                'visible_default' => true
             ),
             'order_source' => array(
                 'title' => $this->l('Order Source'),
-                'havingFilter' => true,
+                'type' => 'select',
+                'filter_key' => 'a!source',
+                'list' => $this->all_order_sources,
                 'optional' => true,
+                'visible_default' => true
             ),
             'hotel_name' => array(
                 'title' => $this->l('Hotel'),
                 'filter_key' => 'hbil!hotel_name',
                 'optional' => true,
+                'visible_default' => true
             ),
             'all_date_from' => array(
-                'title' => $this->l('Date from'),
+                'title' => $this->l('Check-in'),
                 'filter_key' => 'hbd!date_from',
                 'type'=>'date',
                 'displayed' => false,
             ),
             'all_date_to' => array(
-                'title' => $this->l('Date from'),
+                'title' => $this->l('Check-out'),
                 'filter_key' => 'hbd!date_to',
                 'type'=>'date',
                 'displayed' => false,
             ),
+            'all_room_types' => array(
+                'title' => $this->l('Room type'),
+                'filter_key' => 'hbd!room_type_name',
+                'type'=>'text',
+                'displayed' => false,
+            ),
             'guest_text' => array(
                 'title' => $this->l('Guests'),
+                'type' => 'range',
+                'filter_key' => 'total_guests',
                 'optional' => true,
                 'havingFilter' => true,
             ),
             'num_rooms' => array(
                 'title' => $this->l('No. of rooms'),
                 'align' => 'text-center',
+                'type' => 'range',
                 'optional' => true,
                 'havingFilter' => true,
+                'visible_default' => true
             ),
             'los' => array(
                 'title' => $this->l('Stay period'),
                 'align' => 'text-center',
+                'type' => 'range',
+                'havingFilter' => true,
                 'optional' => true,
             ),
         );
@@ -172,6 +194,7 @@ class AdminOrdersControllerCore extends AdminController
                 'callback' => 'setOrderCurrency',
                 'badge_success' => true,
                 'optional' => true,
+                'visible_default' => true
             ),
             'payment' => array(
                 'title' => $this->l('Payment')
@@ -185,13 +208,15 @@ class AdminOrdersControllerCore extends AdminController
                 'filter_type' => 'int',
                 'order_key' => 'osname',
                 'optional' => true,
+                'visible_default' => true
             ),
             'date_add' => array(
-                'title' => $this->l('Date'),
+                'title' => $this->l('Order date'),
                 'align' => 'text-right',
                 'type' => 'datetime',
                 'filter_key' => 'a!date_add',
                 'optional' => true,
+                'visible_default' => true
             ),
             'id_pdf' => array(
                 'title' => $this->l('PDF'),
