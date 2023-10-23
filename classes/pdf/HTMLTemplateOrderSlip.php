@@ -200,8 +200,8 @@ class HTMLTemplateOrderSlipCore extends HTMLTemplateInvoice
     {
         $address = new Address((int)$this->order->id_address_tax);
         $this->smarty->assign(array(
-            'product_tax_breakdown' => $this->getProductTaxesBreakdown(),
-            'shipping_tax_breakdown' => $this->getShippingTaxesBreakdown(),
+            // 'product_tax_breakdown' => $this->getProductTaxesBreakdown(),
+            // 'shipping_tax_breakdown' => $this->getShippingTaxesBreakdown(),
             'order' => $this->order,
             'ecotax_tax_breakdown' => $this->order_slip->getEcoTaxTaxesBreakdown(),
             'is_order_slip' => true,
