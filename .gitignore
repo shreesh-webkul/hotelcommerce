@@ -126,19 +126,19 @@ img/**
 !/upload/.htaccess
 !/upload/index.php
 
-/admin/backups/*
-!/admin/backups/.htaccess
-!/admin/backups/index.php
+/admin-dev/backups/*
+!/admin-dev/backups/.htaccess
+!/admin-dev/backups/index.php
 
-/admin/import/*
-!/admin/import/.htaccess
-!/admin/import/index.php
+/admin-dev/import/*
+!/admin-dev/import/.htaccess
+!/admin-dev/import/index.php
 
 /themes/*/cache/*
 !/themes/*/cache/index.php
 
-/admin/themes/*/cache/*
-!/admin/themes/*/cache/index.php
+/admin-dev/themes/*/cache/*
+!/admin-dev/themes/*/cache/index.php
 
 # Config
 
@@ -158,6 +158,7 @@ img/**
 # modules/*
 /modules/*/config.xml
 /modules/*/translations/*
+!/modules/*/translations/index.php
 
 /override/*
 !/override/.htaccess
@@ -211,13 +212,13 @@ img/**
 !/override/modules/index.php
 
 
-admin/themes/default/sass/ie.sass
-admin/themes/default/sass/print.sass
-admin/themes/default/sass/screen.sass
+admin-dev/themes/default/sass/ie.sass
+admin-dev/themes/default/sass/print.sass
+admin-dev/themes/default/sass/screen.sass
 
-admin/themes/default/css/ie.css
-admin/themes/default/css/print.css
-admin/themes/default/css/screen.css
+admin-dev/themes/default/css/ie.css
+admin-dev/themes/default/css/print.css
+admin-dev/themes/default/css/screen.css
 
 # Translations and emails templates
 
