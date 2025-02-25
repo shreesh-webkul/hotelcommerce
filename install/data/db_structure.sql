@@ -1350,11 +1350,13 @@ CREATE TABLE `PREFIX_order_return_detail` (
   `id_order_return_detail` int(10) unsigned NOT NULL auto_increment,
   `id_order_return` int(10) unsigned NOT NULL,
 	`id_htl_booking` int(11) NOT NULL,
+	`id_room_type_service_product_order_detail` int(11) NOT NULL,
   `refunded_amount` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `id_order_detail` int(10) unsigned NOT NULL DEFAULT '0',
   `id_customization` int(10) unsigned NOT NULL DEFAULT '0',
   `product_quantity` int(10) unsigned NOT NULL DEFAULT '0',
   KEY `id_htl_booking` (`id_htl_booking`),
+  KEY `id_room_type_service_product_order_detail` (`id_room_type_service_product_order_detail`),
   PRIMARY KEY (`id_order_return_detail`)
 ) ENGINE=ENGINE_TYPE DEFAULT CHARSET=utf8 COLLATION;
 

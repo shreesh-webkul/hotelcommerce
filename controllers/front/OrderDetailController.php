@@ -61,6 +61,7 @@ class OrderDetailControllerCore extends FrontController
                 $carrier = new Carrier((int)$order->id_carrier, (int)$order->id_lang);
                 $addressInvoice = new Address((int)$order->id_address_invoice);
                 $addressDelivery = new Address((int)$order->id_address_delivery);
+                $addressTax = new Address((int)$order->id_address_tax);
 
                 $inv_adr_fields = AddressFormat::getOrderedAddressFields($addressInvoice->id_country);
                 $dlv_adr_fields = AddressFormat::getOrderedAddressFields($addressDelivery->id_country);
@@ -92,6 +93,9 @@ class OrderDetailControllerCore extends FrontController
                 $processedProducts = array();
                 $cartHotelData = array();
                 $cartServiceProducts = array();
+                $hotelServiceProducts = array();
+                $standaloneServiceProducts = array();
+                $serviceProductsFormatted = array();
                 $total_demands_price_te = 0;
                 $total_demands_price_ti = 0;
                 $total_convenience_fee_te = 0;
@@ -99,26 +103,25 @@ class OrderDetailControllerCore extends FrontController
                 $roomTypes = array();
                 $objOrderReturn = new OrderReturn();
                 $refundedAmount = 0;
-                if ($refundReqBookings = $objOrderReturn->getOrderRefundRequestedBookings($order->id, 0, 1)) {
-                    $refundedAmount = $objOrderReturn->getRefundedAmount($order->id);
-                }
+                $refundedAmount = $objOrderReturn->getRefundedAmount($order->id);
+                $refundReqBookings = $objOrderReturn->getOrderRefundRequestedBookings($order->id, 0, 1);
+                $refundReqProducts = $objOrderReturn->getOrderRefundRequestedProducts($order->id, 0, 1);
 
                 if (!empty($products)) {
                     foreach ($products as $type_key => $type_value) {
                         if (in_array($type_value['product_id'], $processedProducts)) {
                             continue;
                         }
+                        $product = new Product($type_value['product_id'], false, $this->context->language->id);
+                        $cover_image_arr = $product->getCover($type_value['product_id']);
+
+                        if (!empty($cover_image_arr)) {
+                            $type_value['cover_img'] = $this->context->link->getImageLink($product->link_rewrite, $product->id.'-'.$cover_image_arr['id_image'], 'home_default');
+                        } else {
+                            $type_value['cover_img'] = $this->context->link->getImageLink($product->link_rewrite, $this->context->language->iso_code.'-default', 'home_default');
+                        }
                         if ($type_value['is_booking_product']) {
                             $processedProducts[] = $type_value['product_id'];
-
-                            $product = new Product($type_value['product_id'], false, $this->context->language->id);
-                            $cover_image_arr = $product->getCover($type_value['product_id']);
-
-                            if (!empty($cover_image_arr)) {
-                                $cover_img = $this->context->link->getImageLink($product->link_rewrite, $product->id.'-'.$cover_image_arr['id_image'], 'home_default');
-                            } else {
-                                $cover_img = $this->context->link->getImageLink($product->link_rewrite, $this->context->language->iso_code.'-default', 'home_default');
-                            }
 
                             if (isset($customer->id)) {
                                 $obj_cart = new Cart($order->id_cart);
@@ -127,7 +130,7 @@ class OrderDetailControllerCore extends FrontController
                                 $order_bk_data = $objBookingDetail->getOnlyOrderBookingData($order->id, $customer->id_guest, $type_value['product_id']);
                             }
                             $cartHotelData[$type_key]['id_product'] = $type_value['product_id'];
-                            $cartHotelData[$type_key]['cover_img'] = $cover_img;
+                            $cartHotelData[$type_key]['cover_img'] = $type_value['cover_img'];
 
 
                             $objBookingDemand = new HotelBookingDemands();
@@ -359,7 +362,7 @@ class OrderDetailControllerCore extends FrontController
                                     0,
                                     0,
                                     0,
-                                    1,
+                                       1,
                                     1,
                                     1
                                 );
@@ -376,18 +379,31 @@ class OrderDetailControllerCore extends FrontController
                                     1
                                 );
                             }
-                        } else {
-                            // get all products that are independent.
-                            if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_WITHOUT_ROOMTYPE) {
-                                $product = new Product($type_value['product_id'], false, $this->context->language->id);
-                                $cover_image_arr = $product->getCover($type_value['product_id']);
-
-                                if (!empty($cover_image_arr)) {
-                                    $type_value['cover_img'] = $this->context->link->getImageLink($product->link_rewrite, $product->id.'-'.$cover_image_arr['id_image'], 'small_default');
-                                } else {
-                                    $type_value['cover_img'] = $this->context->link->getImageLink($product->link_rewrite, $this->context->language->iso_code.'-default', 'small_default');
+                        } else if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_lINKED_WITH_HOTEL) {
+                            $hotelProducts = $objRoomTypeServiceProductOrderDetail->getProducts($id_order, $type_value['id_order_detail'], $type_value['product_id']);
+                            foreach ($hotelProducts as $hotelProduct) {
+                                $hotelServiceProducts[] = array_merge($type_value, $hotelProduct);
+                                if (!isset($serviceProductsFormatted[$hotelProduct['id_product']])) {
+                                    $serviceProductsFormatted[$hotelProduct['id_product']] = array(
+                                        'id_product' => $hotelProduct['id_product'],
+                                        'name' => $hotelProduct['name'],
+                                        'options' => array()
+                                    );
                                 }
-                                $cartServiceProducts[] = $type_value;
+                                $serviceProductsFormatted[$hotelProduct['id_product']]['options'][] = $hotelProduct;
+                            }
+                        } else if ($type_value['product_service_type'] == Product::SERVICE_PRODUCT_STANDALONE) {
+                            $standaloneProducts = $objRoomTypeServiceProductOrderDetail->getProducts($id_order, $type_value['id_order_detail'], $type_value['product_id']);
+                            foreach ($standaloneProducts as $standaloneProduct) {
+                                $standaloneServiceProducts[] = array_merge($type_value, $standaloneProduct);
+                                if (!isset($serviceProductsFormatted[$standaloneServiceProducts['id_product']])) {
+                                    $serviceProductsFormatted[$standaloneServiceProducts['id_product']] = array(
+                                        'id_product' => $standaloneServiceProducts['id_product'],
+                                        'name' => $standaloneServiceProducts['name'],
+                                        'options' => array()
+                                    );
+                                }
+                                $serviceProductsFormatted[$standaloneServiceProducts['id_product']]['options'][] = $standaloneServiceProducts;
                             }
                         }
 
@@ -399,12 +415,6 @@ class OrderDetailControllerCore extends FrontController
 
                 $objHotelBookingDetail = new HotelBookingDetail();
                 $htlBookingDetail = $objHotelBookingDetail->getOrderCurrentDataByOrderId($order->id);
-                $idHotel = HotelBookingDetail::getIdHotelByIdOrder($order->id);
-                $objHotelBranchInformation = new HotelBranchInformation($idHotel, $this->context->language->id);
-                $hotelAddressInfo = HotelBranchInformation::getAddress($idHotel);
-
-                $objHotelBranchRefundRules = new HotelBranchRefundRules();
-                $hotelRefundRules = $objHotelBranchRefundRules->getHotelRefundRules($idHotel, 0, 1);
 
                 $this->context->smarty->assign(
                     array(
@@ -420,12 +430,25 @@ class OrderDetailControllerCore extends FrontController
                         'order_has_invoice' => $order->hasInvoice(),
                         'cart_htl_data' => $cartHotelData,
                         'cart_service_products' => $cartServiceProducts,
-                        'obj_hotel_branch_information' => $objHotelBranchInformation,
-                        'hotel_address_info' => $hotelAddressInfo,
-                        'hotel_refund_rules' => $hotelRefundRules,
+                        'hotel_service_products' => $hotelServiceProducts,
+                        'standalone_service_products' => $standaloneServiceProducts,
+                        'service_products_formatted' => $serviceProductsFormatted,
                         'view_on_map' => Configuration::get('WK_GOOGLE_ACTIVE_MAP'),
                     )
                 );
+
+                if ($idHotel = $addressTax->id_hotel) {
+                    $objHotelBranchInformation = new HotelBranchInformation($idHotel, $this->context->language->id);
+                    $hotelAddressInfo = HotelBranchInformation::getAddress($idHotel);
+                    $objHotelBranchRefundRules = new HotelBranchRefundRules();
+                    $hotelRefundRules = $objHotelBranchRefundRules->getHotelRefundRules($idHotel, 0, 1);
+                    $this->context->smarty->assign(array(
+                        'obj_hotel_branch_information' => $objHotelBranchInformation,
+                        'hotel_address_info' => $hotelAddressInfo,
+                        'hotel_refund_rules' => $hotelRefundRules,
+                    ));
+
+                }
 
                 $this->context->smarty->assign(
                     array(
@@ -434,6 +457,7 @@ class OrderDetailControllerCore extends FrontController
                         'refund_allowed' => (int) $order->isReturnable(),
                         'returns' => OrderReturn::getOrdersReturn($order->id_customer, $order->id),
                         'refundReqBookings' => $refundReqBookings,
+                        'refundReqProducts' => $refundReqProducts,
                         'completeRefundRequestOrCancel' => $order->hasCompletelyRefunded(0, 1),
                         'refundedAmount' => $refundedAmount,
                         'shop_name' => strval(Configuration::get('PS_SHOP_NAME')),
